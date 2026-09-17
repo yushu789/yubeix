@@ -21,7 +21,7 @@ repositories {
 ```
 
 2. Check the latest version on Maven Central:
-   [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
+   [![Maven Central](https://img.shields.io/maven-central/v/site.unclefish.yubeix/miuix)](https://search.maven.org/search?q=g:site.unclefish.yubeix)
 
 3. Add dependencies to your project's `build.gradle.kts`:
 
@@ -31,9 +31,9 @@ repositories {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix:<version>")
+            implementation("site.unclefish.yubeix:miuix:<version>")
             // Optional: Add miuix-icons for more icons
-            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+            implementation("site.unclefish.yubeix:miuix-icons:<version>")
         }
     }
 }
@@ -43,28 +43,28 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
+    implementation("site.unclefish.yubeix:miuix-android:<version>")
     // Optional: Add miuix-icons for more icons
-    implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
+    implementation("site.unclefish.yubeix:miuix-icons-android:<version>")
 }
 ```
 
 - For other projects, add platform-specific dependencies as needed:
 
 ```kotlin
-implementation("top.yukonga.miuix.kmp:miuix-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
+implementation("site.unclefish.yubeix:miuix-iosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-iossimulatorarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-macosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-desktop:<version>")
+implementation("site.unclefish.yubeix:miuix-wasmjs:<version>")
+implementation("site.unclefish.yubeix:miuix-js:<version>")
 // Optional: Add miuix-icons
-implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-iosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-iossimulatorarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-macosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-desktop:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-wasmjs:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-js:<version>")
 ```
 
 ## Basic Usage

@@ -51,10 +51,9 @@ kotlin {
         commonMain {
             kotlin.srcDir(generatedSrcDir.map { it.dir("kotlin") })
             dependencies {
-                api(projects.miuix)
+                api(projects.yubeix)
                 api(libs.jetbrains.compose.components.resources)
-                implementation(projects.miuixIcons)
-                implementation(projects.miuixNavigation3Ui)
+                implementation(projects.yubeixIcons)
                 implementation(libs.androidx.navigation3.runtime)
                 implementation(libs.aboutlibraries.core)
                 implementation(libs.jetbrains.androidx.navigationevent)

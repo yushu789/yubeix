@@ -9,7 +9,7 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperArrow
 ```
 
 ## Basic Usage

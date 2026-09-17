@@ -11,7 +11,7 @@ with haptic feedback and real-time color preview.
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.ColorPicker
+import site.unclefish.yubeix.basic.ColorPicker
 ```
 
 ## Basic Usage

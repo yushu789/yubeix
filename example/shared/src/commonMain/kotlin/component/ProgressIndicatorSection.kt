@@ -17,10 +17,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
-import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
-import top.yukonga.miuix.kmp.basic.SmallTitle
+import site.unclefish.yubeix.basic.CircularProgressIndicator
+import site.unclefish.yubeix.basic.InfiniteProgressIndicator
+import site.unclefish.yubeix.basic.LinearProgressIndicator
+import site.unclefish.yubeix.basic.SmallTitle
 
 fun LazyListScope.progressIndicatorSection() {
     item(key = "progressIndicator") {

@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.WindowDialog
-import top.yukonga.miuix.kmp.theme.LocalDismissState
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.extra.WindowDialog
+import site.unclefish.yubeix.theme.LocalDismissState
 
 @Composable
 fun WindowDialogDemo() {
@@ -48,7 +48,7 @@ fun WindowDialogDemo() {
                 )
                 WindowDialog(
                     title = "WindowDialog Title",
-                    summary = "This is a window-level dialog that does not require MiuixPopupHost.",
+                    summary = "This is a window-level dialog that does not require YubeixPopupHost.",
                     show = showDialog,
                     onDismissRequest = { showDialog = false },
                 ) {

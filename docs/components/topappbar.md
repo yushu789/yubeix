@@ -11,10 +11,10 @@ This component is typically used in conjunction with the `Scaffold` component to
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
+import site.unclefish.yubeix.basic.TopAppBar
+import site.unclefish.yubeix.basic.SmallTopAppBar
+import site.unclefish.yubeix.basic.MiuixScrollBehavior
+import site.unclefish.yubeix.basic.rememberTopAppBarState
 ```
 
 ## Basic Usage

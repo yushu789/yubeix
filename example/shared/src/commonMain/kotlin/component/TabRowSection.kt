@@ -17,11 +17,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TabRow
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
-import top.yukonga.miuix.kmp.basic.Text
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.TabRow
+import site.unclefish.yubeix.basic.TabRowWithContour
+import site.unclefish.yubeix.basic.Text
 
 fun LazyListScope.tabRowSection() {
     item(key = "tabRow") {

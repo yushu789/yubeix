@@ -9,8 +9,8 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperCheckbox
-import top.yukonga.miuix.kmp.extra.CheckboxLocation
+import site.unclefish.yubeix.extra.SuperCheckbox
+import site.unclefish.yubeix.extra.CheckboxLocation
 ```
 
 ## 基本用法

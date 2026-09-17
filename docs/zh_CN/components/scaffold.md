@@ -21,7 +21,7 @@ Scaffold 组件为跨平台提供了一个合适的弹出窗口的容器。`Supe
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Scaffold
+import site.unclefish.yubeix.basic.Scaffold
 ```
 
 ## 基本用法

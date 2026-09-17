@@ -22,16 +22,16 @@ val javadocJar by tasks.registering(Jar::class) {
 
 val githubUrl = "https://github.com"
 val githubPkgUrl = "https://maven.pkg.github.com"
-val owner = "compose-miuix-ui"
-val repository = "miuix"
+val owner = "unclefish"
+val repository = "yubeix"
 val projectUrl = "$githubUrl/$owner/$repository"
 val githubPackagesUrl = "$githubPkgUrl/$owner/$repository"
 val sonatypePackageUrl = layout.buildDirectory.dir("publishing/mavenCentral")
 val localPackageUrl = layout.buildDirectory.dir("repository/local")
 
-val miuixDescription = "A UI library for Compose Multiplatform"
-val miuixIconsDescription = "An extended icon library for Miuix"
-val miuixNavigation3UiDescription = "A navigation3 UI library for Miuix"
+val yubeixDescription = "A UI library for Compose Multiplatform"
+val yubeixIconsDescription = "An extended icon library for Yubeix"
+
 
 val localPropertiesFile: File = project.rootProject.file("local.properties")
 val localProperties = Properties()
@@ -68,9 +68,8 @@ publishing {
             name.set(project.name)
             description.set(
                 when (project.name) {
-                    "miuix-icons" -> miuixIconsDescription
-                    "miuix-navigation3-ui" -> miuixNavigation3UiDescription
-                    else -> miuixDescription
+                    "yubeix-icons" -> yubeixIconsDescription
+                    else -> yubeixDescription
                 }
             )
             url.set(projectUrl)

@@ -11,9 +11,9 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.FloatingToolbar
-import top.yukonga.miuix.kmp.basic.FloatingToolbarDefaults
-import top.yukonga.miuix.kmp.basic.ToolbarPosition // 用于 Scaffold
+import site.unclefish.yubeix.basic.FloatingToolbar
+import site.unclefish.yubeix.basic.FloatingToolbarDefaults
+import site.unclefish.yubeix.basic.ToolbarPosition // 用于 Scaffold
 ```
 
 ## 基本用法

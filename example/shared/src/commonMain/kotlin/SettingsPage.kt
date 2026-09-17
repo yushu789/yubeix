@@ -18,18 +18,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import navigation3.Route
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.theme.ThemeColorSpec
-import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.ScrollBehavior
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperSwitch
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.theme.ThemeColorSpec
+import site.unclefish.yubeix.theme.ThemePaletteStyle
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -54,7 +54,7 @@ fun SettingsPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
 
     Scaffold(
         topBar = {

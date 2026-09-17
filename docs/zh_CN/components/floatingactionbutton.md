@@ -11,7 +11,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import site.unclefish.yubeix.basic.FloatingActionButton
 ```
 
 ## 基本用法

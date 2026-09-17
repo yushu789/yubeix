@@ -21,13 +21,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.utils.scrollEndHaptic
 import utils.AdaptiveTopAppBar
 
 @Composable
@@ -36,7 +36,7 @@ fun MultiScaffoldTestPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
     val navigator = LocalNavigator.current
 
     Scaffold(
@@ -86,7 +86,7 @@ fun MultiScaffoldTestPage(
                 Scaffold(
                     modifier = Modifier
                         .weight(1f)
-                        .background(MiuixTheme.colorScheme.surfaceVariant),
+                        .background(YubeixTheme.colorScheme.surfaceVariant),
                 ) {
                     Column {
                         SmallTitle(text = "Top Left")
@@ -106,7 +106,7 @@ fun MultiScaffoldTestPage(
                 Scaffold(
                     modifier = Modifier
                         .weight(1f)
-                        .background(MiuixTheme.colorScheme.surfaceVariant),
+                        .background(YubeixTheme.colorScheme.surfaceVariant),
                 ) {
                     Column {
                         SmallTitle(text = "Top Right")
@@ -131,7 +131,7 @@ fun MultiScaffoldTestPage(
                 Scaffold(
                     modifier = Modifier
                         .weight(1f)
-                        .background(MiuixTheme.colorScheme.surfaceVariant),
+                        .background(YubeixTheme.colorScheme.surfaceVariant),
                 ) {
                     Column {
                         SmallTitle(text = "Bottom Left")
@@ -151,7 +151,7 @@ fun MultiScaffoldTestPage(
                 Scaffold(
                     modifier = Modifier
                         .weight(1f)
-                        .background(MiuixTheme.colorScheme.surfaceVariant),
+                        .background(YubeixTheme.colorScheme.surfaceVariant),
                 ) {
                     Column {
                         SmallTitle(text = "Bottom Right")

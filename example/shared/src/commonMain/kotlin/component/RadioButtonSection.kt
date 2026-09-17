@@ -12,9 +12,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.extra.SuperRadioButton
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.extra.SuperRadioButton
 
 fun LazyListScope.radioButtonSection() {
     item(key = "radioButton") {

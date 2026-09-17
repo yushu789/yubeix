@@ -16,12 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.DropdownImpl
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
-import top.yukonga.miuix.kmp.basic.PopupPositionProvider
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.LocalWindowListPopupState
-import top.yukonga.miuix.kmp.extra.WindowListPopup
+import site.unclefish.yubeix.basic.DropdownImpl
+import site.unclefish.yubeix.basic.ListPopupColumn
+import site.unclefish.yubeix.basic.PopupPositionProvider
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.extra.LocalWindowListPopupState
+import site.unclefish.yubeix.extra.WindowListPopup
 
 @Composable
 fun WindowListPopupDemo() {

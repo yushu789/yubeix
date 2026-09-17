@@ -24,8 +24,8 @@ popupHost: MiuixPopupHost
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperListPopup
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import site.unclefish.yubeix.extra.SuperListPopup
+import site.unclefish.yubeix.basic.ListPopupColumn
 ```
 
 ## 基本用法

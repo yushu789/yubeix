@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.ColorPicker
+import site.unclefish.yubeix.basic.ColorPicker
 ```
 
 ## 基本用法

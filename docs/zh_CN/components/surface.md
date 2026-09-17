@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Surface
+import site.unclefish.yubeix.basic.Surface
 ```
 
 ## 基本用法

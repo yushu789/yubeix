@@ -9,9 +9,9 @@ The basic `miuix` library includes only a small set of essential icons. To acces
 ```kotlin
 // build.gradle.kts
 commonMain.dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix:<version>")
+    implementation("site.unclefish.yubeix:miuix:<version>")
     // Add the extended icon library
-    implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+    implementation("site.unclefish.yubeix:miuix-icons:<version>")
 }
 ```
 
@@ -24,10 +24,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.Ok
-import top.yukonga.miuix.kmp.icon.icons.Settings
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.icon.MiuixIcons
+import site.unclefish.yubeix.icon.icons.Ok
+import site.unclefish.yubeix.icon.icons.Settings
 ```
 
 Then, you can use the icons as follows:

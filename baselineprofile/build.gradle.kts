@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "top.yukonga.baselineprofile"
+    namespace = "site.unclefish.yubeix.baselineprofile"
 
     buildToolsVersion = BuildConfig.BUILD_TOOLS_VERSION
     compileSdk = BuildConfig.COMPILE_SDK

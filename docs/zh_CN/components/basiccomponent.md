@@ -11,7 +11,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.BasicComponent
+import site.unclefish.yubeix.basic.BasicComponent
 ```
 
 ## 基本用法

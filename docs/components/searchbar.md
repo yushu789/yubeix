@@ -11,8 +11,8 @@ suggestions display.
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.SearchBar
-import top.yukonga.miuix.kmp.basic.InputField
+import site.unclefish.yubeix.basic.SearchBar
+import site.unclefish.yubeix.basic.InputField
 ```
 
 ## Basic Usage

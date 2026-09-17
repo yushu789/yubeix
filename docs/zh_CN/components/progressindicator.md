@@ -9,9 +9,9 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator // 线性进度条
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator // 环形进度条
-import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator // 无限旋转指示器
+import site.unclefish.yubeix.basic.LinearProgressIndicator // 线性进度条
+import site.unclefish.yubeix.basic.CircularProgressIndicator // 环形进度条
+import site.unclefish.yubeix.basic.InfiniteProgressIndicator // 无限旋转指示器
 ```
 
 ## 基本用法

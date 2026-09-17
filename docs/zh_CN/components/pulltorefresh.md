@@ -11,8 +11,8 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.PullToRefresh
-import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import site.unclefish.yubeix.basic.PullToRefresh
+import site.unclefish.yubeix.basic.rememberPullToRefreshState
 ```
 
 ## 基本用法

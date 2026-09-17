@@ -24,11 +24,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.PullToRefresh
-import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
-import top.yukonga.miuix.kmp.utils.overScrollVertical
+import site.unclefish.yubeix.basic.BasicComponent
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.PullToRefresh
+import site.unclefish.yubeix.basic.rememberPullToRefreshState
+import site.unclefish.yubeix.utils.overScrollVertical
 
 @Composable
 fun PullToRefreshDemo() {

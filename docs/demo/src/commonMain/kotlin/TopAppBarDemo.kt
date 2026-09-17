@@ -21,17 +21,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.icon.extended.More
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.IconButton
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SmallTopAppBar
+import site.unclefish.yubeix.basic.TopAppBar
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Back
+import site.unclefish.yubeix.icon.extended.More
 
 @Composable
 fun TopAppBarDemo() {
@@ -55,7 +55,7 @@ fun TopAppBarDemo() {
                 Card(
                     modifier = Modifier.weight(0.5f),
                 ) {
-                    val scrollBehavior = MiuixScrollBehavior()
+                    val scrollBehavior = YubeixScrollBehavior()
                     Scaffold(
                         topBar = {
                             TopAppBar(
@@ -68,7 +68,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(start = 16.dp),
                                     ) {
                                         Icon(
-                                            MiuixIcons.Back,
+                                            YubeixIcons.Back,
                                             contentDescription = "Back",
                                         )
                                     }
@@ -79,7 +79,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(end = 16.dp),
                                     ) {
                                         Icon(
-                                            MiuixIcons.More,
+                                            YubeixIcons.More,
                                             contentDescription = "More",
                                         )
                                     }
@@ -121,7 +121,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(start = 16.dp),
                                     ) {
                                         Icon(
-                                            MiuixIcons.Back,
+                                            YubeixIcons.Back,
                                             contentDescription = "Back",
                                         )
                                     }
@@ -132,7 +132,7 @@ fun TopAppBarDemo() {
                                         modifier = Modifier.padding(end = 16.dp),
                                     ) {
                                         Icon(
-                                            MiuixIcons.More,
+                                            YubeixIcons.More,
                                             contentDescription = "More",
                                         )
                                     }

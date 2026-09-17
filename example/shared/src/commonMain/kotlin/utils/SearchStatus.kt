@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import site.unclefish.yubeix.theme.YubeixTheme.colorScheme
 
 @Stable
 data class SearchStatus(

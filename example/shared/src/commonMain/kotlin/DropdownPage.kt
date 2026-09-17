@@ -31,16 +31,16 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.delay
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.PullToRefresh
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.WindowDropdown
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.PullToRefresh
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberPullToRefreshState
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.extra.WindowDropdown
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.theme.YubeixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -56,7 +56,7 @@ fun DropdownPage(
     val isWideScreen = LocalIsWideScreen.current
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
 
     val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
     var dropdownSelectedOption by remember { mutableIntStateOf(0) }

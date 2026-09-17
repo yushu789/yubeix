@@ -1,4 +1,4 @@
-# Miuix
+# Yubeix
 
 Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM), macOS, Web (Wasm/JS).
 
@@ -14,7 +14,7 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 | Action              | Command                                                 |
 | :------------------ | :------------------------------------------------------ |
 | Build (full)        | `./gradlew assemble`                                    |
-| Build (quick check) | `./gradlew :miuix:compileKotlinDesktop`                 |
+| Build (quick check) | `./gradlew :yubeix:compileKotlinDesktop`                |
 | Test                | `./gradlew check`                                       |
 | Check formatting    | `./gradlew spotlessCheck`                               |
 | **Fix formatting**  | `./gradlew spotlessApply`                               |
@@ -30,9 +30,8 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 
 | Directory                | Purpose                                           |
 | :----------------------- | :------------------------------------------------ |
-| `miuix/`                 | Core library — all UI components                  |
-| `miuix-icons/`           | Extended icon resources                           |
-| `miuix-navigation3-ui/`  | Navigation 3 UI implementation                    |
+| `yubeix/`                | Core library — all UI components                  |
+| `yubeix-icons/`          | Extended icon resources                           |
 | `example/`               | Demo app — showcases and tests all components     |
 | `docs/`                  | VitePress documentation site                      |
 | `build-plugins/`         | Custom Gradle plugins for build logic reuse       |
@@ -41,10 +40,10 @@ Compose Multiplatform UI component library. Targets Android, iOS, Desktop (JVM),
 ### Component Source Layout
 
 ```
-miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/
+yubeix/src/commonMain/kotlin/site/unclefish/yubeix/
 ├── basic/       # Fundamental components (Button, Switch, TextField, Surface, etc.)
 ├── extra/       # Composite components (SuperArrow, SuperCheckbox, SuperDropdown, etc.)
-├── theme/       # MiuixTheme, Colors, TextStyles, ThemeController
+├── theme/       # YubeixTheme, Colors, TextStyles, ThemeController
 ├── color/       # Color utilities, Material Color
 ├── anim/        # Animation utilities
 ├── utils/       # General utilities
@@ -74,7 +73,7 @@ commonMain
 - **License header** (required on all `.kt` and `.kts` files):
 
   ```
-  // Copyright 2026, compose-miuix-ui contributors
+  // Copyright 2026, yubeix contributors
   // SPDX-License-Identifier: Apache-2.0
   ```
 
@@ -119,8 +118,8 @@ object ButtonDefaults {
 
     @Composable
     fun buttonColors(                       // Color factories must be @Composable
-        color: Color = MiuixTheme.colorScheme.secondaryVariant,
-        disabledColor: Color = MiuixTheme.colorScheme.disabledSecondaryVariant,
+        color: Color = YubeixTheme.colorScheme.secondaryVariant,
+        disabledColor: Color = YubeixTheme.colorScheme.disabledSecondaryVariant,
     ): ButtonColors = remember(color, disabledColor) {
         ButtonColors(color = color, disabledColor = disabledColor)
     }
@@ -144,8 +143,8 @@ data class ComponentColors(
 - **`@NonRestartableComposable`** on thin wrapper composables that fully delegate to other composables and read no state themselves; avoid on composables with multiple internal state reads (they benefit from smart recomposition)
 - **`@Immutable`** on color/style data classes
 - **Shapes**: Use `com.kyant.shapes.RoundedRectangle` / `Capsule`, not Compose's built-in shapes
-- **Theme colors**: Always use `MiuixTheme.colorScheme.*`, never hardcode colors
-- **Text styles**: Always use `MiuixTheme.textStyles.*` (e.g., `MiuixTheme.textStyles.button`)
+- **Theme colors**: Always use `YubeixTheme.colorScheme.*`, never hardcode colors
+- **Text styles**: Always use `YubeixTheme.textStyles.*` (e.g., `YubeixTheme.textStyles.button`)
 
 ## Critical Constraints
 
@@ -164,7 +163,7 @@ data class ComponentColors(
 
 ### Adding a New Component
 
-1. Create the `@Composable` function in `miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/basic/` (or `extra/` for composite components)
+1. Create the `@Composable` function in `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/` (or `extra/` for composite components)
 2. Follow API conventions above (parameter ordering, Defaults object, Colors data class)
 3. Add a demo section in `example/shared/src/commonMain/kotlin/component/`
 4. Register the demo in the example app
@@ -183,7 +182,7 @@ When changing a component's API, defaults, or behavior, check and update all rel
 ### Fixing Bugs
 
 1. Reproduce in the `example` app
-2. Fix in `miuix/`
+2. Fix in `yubeix/`
 3. If platform-specific, verify the fix across affected platforms
 
 ## Git Commit Style

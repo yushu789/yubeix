@@ -10,7 +10,7 @@ ColorPalette 是一个 HSV 带有透明度滑条的网格调色盘组件，可�
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.ColorPalette
+import site.unclefish.yubeix.basic.ColorPalette
 ```
 
 ## 基本用法

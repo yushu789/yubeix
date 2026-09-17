@@ -20,13 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.RangeSlider
-import top.yukonga.miuix.kmp.basic.Slider
-import top.yukonga.miuix.kmp.basic.SliderDefaults
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.VerticalSlider
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.RangeSlider
+import site.unclefish.yubeix.basic.Slider
+import site.unclefish.yubeix.basic.SliderDefaults
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.VerticalSlider
 
 fun LazyListScope.sliderSection() {
     item(key = "slider") {

@@ -35,19 +35,19 @@ import component.BackNavigationIcon
 import misc.VersionInfo
 import navigation3.Route
 import org.jetbrains.compose.resources.painterResource
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
-import top.yukonga.miuix.kmp.shared.generated.resources.ic_launcher
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.ScrollBehavior
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.shared.generated.resources.Res
+import site.unclefish.yubeix.shared.generated.resources.ic_launcher
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.YubeixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -58,7 +58,7 @@ fun AboutPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
     val navigator = LocalNavigator.current
     Scaffold(
         topBar = {
@@ -156,7 +156,7 @@ private fun AboutContent(
                         endActions = {
                             Text(
                                 text = "GitHub",
-                                fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                fontSize = YubeixTheme.textStyles.body2.fontSize,
                                 color = colorScheme.onSurfaceVariantActions,
                             )
                         },
@@ -167,7 +167,7 @@ private fun AboutContent(
                         endActions = {
                             Text(
                                 text = "Telegram",
-                                fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                fontSize = YubeixTheme.textStyles.body2.fontSize,
                                 color = colorScheme.onSurfaceVariantActions,
                             )
                         },
@@ -184,7 +184,7 @@ private fun AboutContent(
                         endActions = {
                             Text(
                                 text = "Apache-2.0",
-                                fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                fontSize = YubeixTheme.textStyles.body2.fontSize,
                                 color = colorScheme.onSurfaceVariantActions,
                             )
                         },

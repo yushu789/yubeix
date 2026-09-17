@@ -11,7 +11,7 @@ color preview.
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.ColorPalette
+import site.unclefish.yubeix.basic.ColorPalette
 ```
 
 ## Basic Usage

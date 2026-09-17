@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.TabRow
-import top.yukonga.miuix.kmp.basic.TabRowWithContour
+import site.unclefish.yubeix.basic.TabRow
+import site.unclefish.yubeix.basic.TabRowWithContour
 
 @Composable
 fun TabRowDemo() {

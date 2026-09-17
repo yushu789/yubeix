@@ -11,9 +11,9 @@ This component is usually used in conjunction with `Scaffold`, placed in a speci
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.FloatingToolbar
-import top.yukonga.miuix.kmp.basic.FloatingToolbarDefaults
-import top.yukonga.miuix.kmp.basic.ToolbarPosition // Used for Scaffold
+import site.unclefish.yubeix.basic.FloatingToolbar
+import site.unclefish.yubeix.basic.FloatingToolbarDefaults
+import site.unclefish.yubeix.basic.ToolbarPosition // Used for Scaffold
 ```
 
 ## Basic Usage

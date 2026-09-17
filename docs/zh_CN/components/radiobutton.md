@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.RadioButton
+import site.unclefish.yubeix.basic.RadioButton
 ```
 
 ## 基本用法

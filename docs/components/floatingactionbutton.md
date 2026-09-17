@@ -11,7 +11,7 @@ This component is typically used in conjunction with the `Scaffold` component to
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.FloatingActionButton
+import site.unclefish.yubeix.basic.FloatingActionButton
 ```
 
 ## Basic Usage

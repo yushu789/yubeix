@@ -21,7 +21,7 @@ repositories {
 ```
 
 2. 检查 Maven Central 当前最新版本：
-   [![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
+   [![Maven Central](https://img.shields.io/maven-central/v/site.unclefish.yubeix/miuix)](https://search.maven.org/search?q=g:site.unclefish.yubeix)
 
 3. 在项目的 build.gradle.kts 中添加依赖：
 
@@ -31,9 +31,9 @@ repositories {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix:<version>")
+            implementation("site.unclefish.yubeix:miuix:<version>")
             // 可选：添加 miuix-icons 以获取更多图标
-            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
+            implementation("site.unclefish.yubeix:miuix-icons:<version>")
         }
     }
 }
@@ -44,28 +44,28 @@ kotlin {
 
 ```kotlin
 dependencies {
-    implementation("top.yukonga.miuix.kmp:miuix-android:<version>")
+    implementation("site.unclefish.yubeix:miuix-android:<version>")
     // 可选：添加 miuix-icons 以获取更多图标
-    implementation("top.yukonga.miuix.kmp:miuix-icons-android:<version>")
+    implementation("site.unclefish.yubeix:miuix-icons-android:<version>")
 }
 ```
 
 - 在其他常规项目中使用，则只需要根据需要添加对应平台后缀的依赖即可：
 
 ```kotlin
-implementation("top.yukonga.miuix.kmp:miuix-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-js:<version>")
+implementation("site.unclefish.yubeix:miuix-iosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-iossimulatorarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-macosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-desktop:<version>")
+implementation("site.unclefish.yubeix:miuix-wasmjs:<version>")
+implementation("site.unclefish.yubeix:miuix-js:<version>")
 // 可选：添加 miuix-icons
-implementation("top.yukonga.miuix.kmp:miuix-icons-iosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-iossimulatorarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-macosarm64:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-desktop:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-wasmjs:<version>")
-implementation("top.yukonga.miuix.kmp:miuix-icons-js:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-iosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-iossimulatorarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-macosarm64:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-desktop:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-wasmjs:<version>")
+implementation("site.unclefish.yubeix:miuix-icons-js:<version>")
 ```
 
 ## 基本用法

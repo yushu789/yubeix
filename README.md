@@ -1,15 +1,21 @@
-## Miuix
+# Yubeix
 
-A UI library for Compose Multiplatform.
+A Compose Multiplatform UI library, forked from [Miuix](https://github.com/compose-miuix-ui/miuix) v0.8.8 and heavily customized ("鱼背化") for the Yubeix design language — iOS-flavored controls, collapsing large-title chrome, scene-based navigation, and blur-backed surfaces.
 
 > This library is experimental. APIs may change without notice.
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-7F52FF)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/compose-1.10.3-4285F4)](https://www.jetbrains.com/compose-multiplatform)
-[![Maven Central](https://img.shields.io/maven-central/v/top.yukonga.miuix.kmp/miuix)](https://search.maven.org/search?q=g:top.yukonga.miuix.kmp)
-[![License](https://img.shields.io/github/license/compose-miuix-ui/miuix)](LICENSE)
+[![License](https://img.shields.io/github/license/unclefish/yubeix)](LICENSE)
 
-### Supported Platforms
+## Attribution
+
+Yubeix is a fork of [miuix](https://github.com/compose-miuix-ui/miuix) (Apache-2.0, © compose-miuix-ui contributors).
+Portions of the Cupertino-style controls are adapted from [RobinPcrd/compose-cupertino](https://github.com/RobinPcrd/compose-cupertino) (Apache-2.0).
+Portions of the overscroll effect are adapted from the Android Open Source Project.
+See [LICENSE](LICENSE) for the full license text.
+
+## Supported Platforms
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white)
 ![iOS](https://img.shields.io/badge/iOS-Native-white?logo=apple)
@@ -18,34 +24,23 @@ A UI library for Compose Multiplatform.
 ![JsCanvas](https://img.shields.io/badge/Web-JsCanvas-F7DF1E?logo=javascript&logoColor=white)
 ![WasmJs](https://img.shields.io/badge/Web-WasmJs-654FF0?logo=webassembly&logoColor=white)
 
-### Demos
+## Getting Started
 
-[![JsCanvas](https://img.shields.io/badge/Demo-JsCanvas-F7DF1E?logo=javascript&logoColor=white)](https://compose-miuix-ui.github.io/miuix-jsCanvas/)
-[![WasmJs](https://img.shields.io/badge/Demo-WasmJs-654FF0?logo=webassembly&logoColor=white)](https://compose-miuix-ui.github.io/miuix-wasmJs/)
-[![Other](https://img.shields.io/badge/Demo-Other-white?logo=githubactions&logoColor=white)](https://github.com/compose-miuix-ui/miuix/actions/workflows/example.yml)
-
-### Getting Started
-
-```diff
+```kotlin
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("top.yukonga.miuix.kmp:miuix:<version>")
-            // Optional: Add miuix-icons for more icons
-            implementation("top.yukonga.miuix.kmp:miuix-icons:<version>")
-            // Optional: Add miuix-navigation3-ui for navigation3 support
-            implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
-            // Other dependencies...
+            implementation("site.unclefish.yubeix:yubeix:<version>")
+            // Optional: more icons
+            implementation("site.unclefish.yubeix:yubeix-icons:<version>")
         }
-        // Other sourceSets...
     }
-    // Other configurations...
 }
 ```
 
 ### Usage
 
-- Provide a color scheme via `MiuixTheme(colors = ...)`, e.g., `lightColorScheme()` or `darkColorScheme()`.
+- Provide a color scheme via `YubeixTheme(colors = ...)`, e.g., `lightColorScheme()` or `darkColorScheme()`.
 
 ```kotlin
 @Composable
@@ -53,7 +48,7 @@ fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    return MiuixTheme(
+    return YubeixTheme(
         colors = colors,
         content = content
     )
@@ -73,24 +68,22 @@ fun AppTheme(
             keyColor = Color(0xFF3482FF)
         )
     }
-    return MiuixTheme(
+    return YubeixTheme(
         controller = controller,
         content = content
     )
 }
 ```
 
-### Screenshots
+- Declare scenes and navigate with the built-in scene navigation:
 
-<table>
-  <tr>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/001.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/001.webp?raw=true" width="300" alt="Screenshot 001"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/002.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/002.webp?raw=true" width="300" alt="Screenshot 002"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/003.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/003.webp?raw=true" width="300" alt="Screenshot 003"/></a></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/004.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/004.webp?raw=true" width="300" alt="Screenshot 004"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/005.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/005.webp?raw=true" width="300" alt="Screenshot 005"/></a></td>
-    <td><a href="https://github.com/compose-miuix-ui/miuix/blob/main/assets/006.webp?raw=true"><img src="https://github.com/compose-miuix-ui/miuix/blob/main/assets/006.webp?raw=true" width="300" alt="Screenshot 006"/></a></td>
-  </tr>
-</table>
+```kotlin
+val navigationPath = rememberNavigationPath(initialRoute = Route.Main)
+SceneDisplay(
+    navigationPath = navigationPath,
+    entryProvider = entryProvider {
+        entry<Route.Main> { MainPage(onNavigate = navigationPath::push) }
+        entry<Route.Detail> { route -> DetailPage(route) }
+    }
+)
+```

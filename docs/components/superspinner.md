@@ -24,8 +24,8 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperSpinner
-import top.yukonga.miuix.kmp.extra.SpinnerEntry
+import site.unclefish.yubeix.extra.SuperSpinner
+import site.unclefish.yubeix.extra.SpinnerEntry
 ```
 
 ## Basic Usage

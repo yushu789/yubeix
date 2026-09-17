@@ -9,8 +9,8 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.HorizontalDivider // 水平分割线
-import top.yukonga.miuix.kmp.basic.VerticalDivider  // 垂直分割线
+import site.unclefish.yubeix.basic.HorizontalDivider // 水平分割线
+import site.unclefish.yubeix.basic.VerticalDivider  // 垂直分割线
 ```
 
 ## 基本用法

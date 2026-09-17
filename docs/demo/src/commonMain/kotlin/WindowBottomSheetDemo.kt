@@ -20,11 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.WindowBottomSheet
-import top.yukonga.miuix.kmp.theme.LocalDismissState
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.extra.WindowBottomSheet
+import site.unclefish.yubeix.theme.LocalDismissState
 
 @Composable
 fun WindowBottomSheetDemo() {
@@ -73,7 +73,7 @@ fun WindowBottomSheetDemo() {
                             .padding(bottom = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text("This is a window-level bottom sheet that does not require MiuixPopupHost.")
+                        Text("This is a window-level bottom sheet that does not require YubeixPopupHost.")
                         Box(modifier = Modifier.height(16.dp))
                         val dismiss = LocalDismissState.current
                         TextButton(

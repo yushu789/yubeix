@@ -17,14 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.Rename
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Contacts
+import site.unclefish.yubeix.icon.extended.Edit
+import site.unclefish.yubeix.icon.extended.Rename
+import site.unclefish.yubeix.icon.extended.Settings
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun IconDemo() {
@@ -49,22 +49,22 @@ fun IconDemo() {
                     horizontalArrangement = Arrangement.spacedBy(32.dp),
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Contacts,
+                        imageVector = YubeixIcons.Contacts,
                         contentDescription = "Personal",
-                        tint = MiuixTheme.colorScheme.onBackground,
+                        tint = YubeixTheme.colorScheme.onBackground,
                     )
                     Icon(
-                        imageVector = MiuixIcons.Settings,
+                        imageVector = YubeixIcons.Settings,
                         contentDescription = "Settings",
-                        tint = MiuixTheme.colorScheme.onBackground,
+                        tint = YubeixTheme.colorScheme.onBackground,
                     )
                     Icon(
-                        imageVector = MiuixIcons.Edit,
+                        imageVector = YubeixIcons.Edit,
                         contentDescription = "Blue Edit",
                         tint = Color.Blue,
                     )
                     Icon(
-                        imageVector = MiuixIcons.Rename,
+                        imageVector = YubeixIcons.Rename,
                         contentDescription = "Green Rename",
                         tint = Color.Green,
                     )

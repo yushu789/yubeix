@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Button
+import site.unclefish.yubeix.basic.Button
 ```
 
 ## 基本用法

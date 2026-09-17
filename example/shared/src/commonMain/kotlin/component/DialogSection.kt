@@ -16,14 +16,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDialog
-import top.yukonga.miuix.kmp.extra.WindowDialog
-import top.yukonga.miuix.kmp.theme.LocalDismissState
+import site.unclefish.yubeix.basic.ButtonDefaults
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperDialog
+import site.unclefish.yubeix.extra.WindowDialog
+import site.unclefish.yubeix.theme.LocalDismissState
 
 fun LazyListScope.dialogSection() {
     item(key = "dialog") {
@@ -80,7 +80,7 @@ private fun SuperDialogDemo(
     SuperDialog(
         show = show,
         title = "SuperDialog",
-        summary = "A dialog component inside MiuixPopupHost.",
+        summary = "A dialog component inside YubeixPopupHost.",
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         content = {
@@ -113,7 +113,7 @@ private fun WindowDialogDemo(
     WindowDialog(
         show = show,
         title = "WindowDialog",
-        summary = "A window-level dialog, no MiuixPopupHost required.",
+        summary = "A window-level dialog, no YubeixPopupHost required.",
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         content = {

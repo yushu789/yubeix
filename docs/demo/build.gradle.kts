@@ -23,10 +23,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.miuix)
-            implementation(projects.miuixIcons)
+            api(projects.yubeix)
+            implementation(projects.yubeixIcons)
             implementation(libs.androidx.navigation3.runtime)
-            implementation(projects.miuixNavigation3Ui)
         }
     }
 }

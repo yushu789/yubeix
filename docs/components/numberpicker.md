@@ -9,7 +9,7 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.NumberPicker
+import site.unclefish.yubeix.basic.NumberPicker
 ```
 
 ## Basic Usage

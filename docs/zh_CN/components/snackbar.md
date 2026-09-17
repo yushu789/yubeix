@@ -11,11 +11,11 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Snackbar
-import top.yukonga.miuix.kmp.basic.SnackbarHost
-import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.SnackbarDuration
-import top.yukonga.miuix.kmp.basic.SnackbarResult
+import site.unclefish.yubeix.basic.Snackbar
+import site.unclefish.yubeix.basic.SnackbarHost
+import site.unclefish.yubeix.basic.SnackbarHostState
+import site.unclefish.yubeix.basic.SnackbarDuration
+import site.unclefish.yubeix.basic.SnackbarResult
 ```
 
 ## 基本用法

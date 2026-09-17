@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperArrow
 ```
 
 ## 基本用法

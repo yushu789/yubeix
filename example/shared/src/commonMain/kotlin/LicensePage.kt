@@ -24,14 +24,14 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.shared.generated.resources.Res
 import utils.AdaptiveTopAppBar
 import utils.Library
 import utils.SimpleJsonParser
@@ -44,7 +44,7 @@ fun LicensePage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
     val navigator = LocalNavigator.current
 
     val libraries by produceState<List<Library>?>(initialValue = null) {

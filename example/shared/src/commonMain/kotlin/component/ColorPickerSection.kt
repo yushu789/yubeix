@@ -19,14 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.ColorPalette
-import top.yukonga.miuix.kmp.basic.ColorPicker
-import top.yukonga.miuix.kmp.basic.ColorSpace
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.ColorPalette
+import site.unclefish.yubeix.basic.ColorPicker
+import site.unclefish.yubeix.basic.ColorSpace
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.TextField
+import site.unclefish.yubeix.theme.YubeixTheme
 import kotlin.math.round
 
 fun LazyListScope.colorPickerSection() {
@@ -52,8 +52,8 @@ fun LazyListScope.colorPickerSection() {
 
     item(key = "colorPalette") {
         SmallTitle(text = "ColorPalette")
-        val miuixColor = MiuixTheme.colorScheme.primary
-        var selectedColor by remember { mutableStateOf(miuixColor) }
+        val yubeixColor = YubeixTheme.colorScheme.primary
+        var selectedColor by remember { mutableStateOf(yubeixColor) }
         var colorHex by remember(selectedColor) {
             mutableStateOf(
                 selectedColor.toArgb().toHexString(HexFormat.UpperCase),
@@ -94,8 +94,8 @@ fun LazyListScope.colorPickerSection() {
 
 @Composable
 private fun ColorPickerCard(colorSpace: ColorSpace) {
-    val miuixColor = MiuixTheme.colorScheme.primary
-    var selectedColor by remember { mutableStateOf(miuixColor) }
+    val yubeixColor = YubeixTheme.colorScheme.primary
+    var selectedColor by remember { mutableStateOf(yubeixColor) }
     var colorHex by remember(selectedColor) {
         mutableStateOf(
             selectedColor.toArgb().toHexString(HexFormat.UpperCase),

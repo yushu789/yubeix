@@ -17,10 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.NumberPicker
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.NumberPicker
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Text
 
 fun LazyListScope.numberPickerSection() {
     item(key = "numberPicker") {

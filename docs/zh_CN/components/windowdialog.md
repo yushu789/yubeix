@@ -23,8 +23,8 @@ popupHost: None
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowDialog
-import top.yukonga.miuix.kmp.extra.LocalDismissState
+import site.unclefish.yubeix.extra.WindowDialog
+import site.unclefish.yubeix.extra.LocalDismissState
 ```
 
 ## 基本用法

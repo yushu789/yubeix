@@ -17,12 +17,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Switch
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Switch
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.extra.SuperSwitch
+import site.unclefish.yubeix.theme.YubeixTheme
 
 fun LazyListScope.switchSection() {
     item(key = "switch") {
@@ -86,7 +86,7 @@ fun LazyListScope.switchSection() {
                     endActions = {
                         Text(
                             text = superSwitch.value,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                            color = YubeixTheme.colorScheme.onSurfaceVariantActions,
                         )
                     },
                     onCheckedChange = {

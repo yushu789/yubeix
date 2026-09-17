@@ -6,11 +6,11 @@ package ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeColorSpec
-import top.yukonga.miuix.kmp.theme.ThemeController
-import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
+import site.unclefish.yubeix.theme.ColorSchemeMode
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.ThemeColorSpec
+import site.unclefish.yubeix.theme.ThemeController
+import site.unclefish.yubeix.theme.ThemePaletteStyle
 
 @Composable
 fun AppTheme(
@@ -33,7 +33,7 @@ fun AppTheme(
             else -> ThemeController(ColorSchemeMode.System)
         }
     }
-    return MiuixTheme(
+    return YubeixTheme(
         controller = controller,
         smoothRounding = smoothRounding,
         content = content,

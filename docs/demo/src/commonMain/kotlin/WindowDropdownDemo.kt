@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.extra.WindowDropdown
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.extra.WindowDropdown
 
 @Composable
 fun WindowDropdownDemo() {

@@ -15,12 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.BasicComponent
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Contacts
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun BasicComponentDemo() {
@@ -54,9 +54,9 @@ fun BasicComponentDemo() {
                     startAction = {
                         Icon(
                             modifier = Modifier.padding(end = 16.dp),
-                            imageVector = MiuixIcons.Contacts,
+                            imageVector = YubeixIcons.Contacts,
                             contentDescription = "Avatar Icon",
-                            tint = MiuixTheme.colorScheme.onBackground,
+                            tint = YubeixTheme.colorScheme.onBackground,
                         )
                     },
                     onClick = { /* Handle click event */ },

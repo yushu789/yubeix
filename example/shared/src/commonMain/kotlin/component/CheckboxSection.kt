@@ -16,13 +16,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Checkbox
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.extra.CheckboxLocation
-import top.yukonga.miuix.kmp.extra.SuperCheckbox
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Checkbox
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.extra.CheckboxLocation
+import site.unclefish.yubeix.extra.SuperCheckbox
+import site.unclefish.yubeix.theme.YubeixTheme
 
 fun LazyListScope.checkboxSection() {
     item(key = "checkbox") {
@@ -109,8 +109,8 @@ private fun SuperEndCheckboxDemo() {
         endActions = {
             Text(
                 text = "$checked",
-                fontSize = MiuixTheme.textStyles.body2.fontSize,
-                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                fontSize = YubeixTheme.textStyles.body2.fontSize,
+                color = YubeixTheme.colorScheme.onSurfaceVariantActions,
             )
         },
         onCheckedChange = { checked = it },

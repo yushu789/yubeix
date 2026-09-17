@@ -21,16 +21,16 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.ui.NavDisplay
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import site.unclefish.yubeix.basic.ButtonDefaults
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.theme.ColorSchemeMode
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.ThemeController
 
 @Composable
 fun Demo(demoId: String? = null) {
     val controller = remember { ThemeController(ColorSchemeMode.System) }
-    MiuixTheme(controller = controller) {
+    YubeixTheme(controller = controller) {
         if (demoId == null) {
             DemoSelection()
         } else {
@@ -95,7 +95,7 @@ private fun DemoSelection() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MiuixTheme.colorScheme.background),
+                        .background(YubeixTheme.colorScheme.background),
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(

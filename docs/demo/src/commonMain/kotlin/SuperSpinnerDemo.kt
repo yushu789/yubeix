@@ -24,11 +24,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SpinnerEntry
-import top.yukonga.miuix.kmp.extra.SuperSpinner
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SpinnerEntry
+import site.unclefish.yubeix.extra.SuperSpinner
 
 @Composable
 fun SuperSpinnerDemo() {

@@ -72,14 +72,14 @@ import androidx.compose.ui.zIndex
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.basic.Search
-import top.yukonga.miuix.kmp.icon.basic.SearchCleanup
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.InputField
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.basic.Search
+import site.unclefish.yubeix.icon.basic.SearchCleanup
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.utils.overScrollVertical
 import utils.SearchStatus
 
 // Search Box Composable
@@ -129,7 +129,7 @@ fun SearchStatus.SearchBox(
                     Modifier
                 },
             )
-            .background(MiuixTheme.colorScheme.surface),
+            .background(YubeixTheme.colorScheme.surface),
     ) {
         collapseBar(searchStatus, searchBarTopPadding, contentPadding)
     }
@@ -197,7 +197,7 @@ fun SearchStatus.SearchPager(
         label = "SearchPagerSurfaceAlpha",
     )
 
-    val surfaceColor = MiuixTheme.colorScheme.surface
+    val surfaceColor = YubeixTheme.colorScheme.surface
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -220,7 +220,7 @@ fun SearchStatus.SearchPager(
                 }
                 .then(
                     if (!searchStatus.isCollapsed()) {
-                        Modifier.background(MiuixTheme.colorScheme.surface)
+                        Modifier.background(YubeixTheme.colorScheme.surface)
                     } else {
                         Modifier
                     },
@@ -232,7 +232,7 @@ fun SearchStatus.SearchPager(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .background(MiuixTheme.colorScheme.surface),
+                        .background(YubeixTheme.colorScheme.surface),
                 ) {
                     expandBar(searchStatus, onSearchStatusChange, searchBarTopPadding)
                 }
@@ -245,7 +245,7 @@ fun SearchStatus.SearchPager(
                 Text(
                     text = "Cancel",
                     fontWeight = FontWeight.Bold,
-                    color = MiuixTheme.colorScheme.primary,
+                    color = YubeixTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(end = 16.dp, top = searchBarTopPadding)
                         .clickable(
@@ -317,12 +317,12 @@ fun SearchBar(
         label = searchStatus.label,
         leadingIcon = {
             Icon(
-                imageVector = MiuixIcons.Basic.Search,
+                imageVector = YubeixIcons.Basic.Search,
                 contentDescription = "back",
                 modifier = Modifier
                     .size(44.dp)
                     .padding(start = 16.dp, end = 8.dp),
-                tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
+                tint = YubeixTheme.colorScheme.onSurfaceContainerHigh,
             )
         },
         trailingIcon = {
@@ -332,8 +332,8 @@ fun SearchBar(
                 exit = fadeOut() + scaleOut(),
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Basic.SearchCleanup,
-                    tint = MiuixTheme.colorScheme.onSurface,
+                    imageVector = YubeixIcons.Basic.SearchCleanup,
+                    tint = YubeixTheme.colorScheme.onSurface,
                     contentDescription = "Clean",
                     modifier = Modifier
                         .size(44.dp)
@@ -382,16 +382,16 @@ fun SearchBarFake(
         label = label,
         leadingIcon = {
             Icon(
-                imageVector = MiuixIcons.Basic.Search,
+                imageVector = YubeixIcons.Basic.Search,
                 contentDescription = "Search",
                 modifier = Modifier
                     .size(44.dp)
                     .padding(start = 16.dp, end = 8.dp),
-                tint = MiuixTheme.colorScheme.onSurfaceContainerHigh,
+                tint = YubeixTheme.colorScheme.onSurfaceContainerHigh,
             )
         },
         modifier = Modifier
-            .background(MiuixTheme.colorScheme.surface)
+            .background(YubeixTheme.colorScheme.surface)
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
             .padding(

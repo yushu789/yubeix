@@ -9,9 +9,9 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
+import site.unclefish.yubeix.basic.NavigationRail
+import site.unclefish.yubeix.basic.NavigationRailItem
+import site.unclefish.yubeix.basic.NavigationRailDisplayMode
 ```
 
 ## Basic Usage

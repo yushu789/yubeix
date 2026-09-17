@@ -9,8 +9,8 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.utils.PressFeedbackType // 如果使用交互式卡片
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.utils.PressFeedbackType // 如果使用交互式卡片
 ```
 
 ## 基本用法

@@ -19,19 +19,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Slider
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDialog
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.ButtonDefaults
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.Slider
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.basic.TextField
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperDialog
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Contacts
+import site.unclefish.yubeix.theme.YubeixTheme
 
 fun LazyListScope.arrowSection() {
     item(key = "arrow") {
@@ -52,17 +52,17 @@ fun LazyListScope.arrowSection() {
                         modifier = Modifier.padding(end = 8.dp),
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Contacts,
+                            imageVector = YubeixIcons.Contacts,
                             contentDescription = "Personal",
-                            tint = MiuixTheme.colorScheme.onBackground,
+                            tint = YubeixTheme.colorScheme.onBackground,
                         )
                     }
                 },
                 endActions = {
                     Text(
                         text = "End",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
                 onClick = {},
@@ -72,8 +72,8 @@ fun LazyListScope.arrowSection() {
                 endActions = {
                     Text(
                         text = "${(volume * 100).toInt()}%",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
                 onClick = {
@@ -93,8 +93,8 @@ fun LazyListScope.arrowSection() {
                 endActions = {
                     Text(
                         text = "End",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
                 enabled = false,

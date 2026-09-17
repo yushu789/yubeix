@@ -20,10 +20,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.HorizontalDivider
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.VerticalDivider
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.HorizontalDivider
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.VerticalDivider
 
 @Composable
 fun DividerDemo() {

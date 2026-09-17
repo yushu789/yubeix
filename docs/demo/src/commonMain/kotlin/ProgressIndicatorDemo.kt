@@ -22,9 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
-import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import site.unclefish.yubeix.basic.CircularProgressIndicator
+import site.unclefish.yubeix.basic.InfiniteProgressIndicator
+import site.unclefish.yubeix.basic.LinearProgressIndicator
 
 @Composable
 fun ProgressIndicatorDemo() {

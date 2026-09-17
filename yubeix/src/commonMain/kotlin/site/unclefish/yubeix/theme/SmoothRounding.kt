@@ -1,0 +1,80 @@
+// Copyright 2025, compose-miuix-ui contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package site.unclefish.yubeix.theme
+
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.kyant.shapes.Capsule
+import com.kyant.shapes.RoundedRectangle
+import com.kyant.shapes.UnevenRoundedRectangle
+
+/**
+ * CompositionLocal to control whether Yubeix components use G2-continuity smooth rounded corners
+ * (from com.kyant.shapes) or standard [RoundedCornerShape].
+ *
+ * When `true` (default), components use [RoundedRectangle] / [Capsule] for smoother corners.
+ * When `false`, components fall back to [RoundedCornerShape] / [CircleShape] for better HWUI performance.
+ */
+internal val LocalSmoothRounding = staticCompositionLocalOf { true }
+
+/**
+ * Returns a [RoundedRectangle] shape when smooth rounding is enabled,
+ * or a [RoundedCornerShape] when disabled.
+ */
+@Composable
+fun yubeixShape(cornerRadius: Dp): Shape {
+    val smooth = YubeixTheme.smoothRounding
+    return remember(cornerRadius, smooth) {
+        if (smooth) RoundedRectangle(cornerRadius) else RoundedCornerShape(cornerRadius)
+    }
+}
+
+/**
+ * Returns a [Capsule] shape when smooth rounding is enabled,
+ * or a [CircleShape] when disabled.
+ */
+@Composable
+fun yubeixCapsuleShape(): Shape {
+    val smooth = YubeixTheme.smoothRounding
+    return remember(smooth) {
+        if (smooth) Capsule() else CircleShape
+    }
+}
+
+/**
+ * Returns an [UnevenRoundedRectangle] shape when smooth rounding is enabled,
+ * or a [RoundedCornerShape] with individual corner radii when disabled.
+ */
+@Composable
+fun yubeixUnevenShape(
+    topStart: Dp = 0.dp,
+    topEnd: Dp = 0.dp,
+    bottomEnd: Dp = 0.dp,
+    bottomStart: Dp = 0.dp,
+): Shape {
+    val smooth = YubeixTheme.smoothRounding
+    return remember(topStart, topEnd, bottomEnd, bottomStart, smooth) {
+        if (smooth) {
+            UnevenRoundedRectangle(
+                topStart = topStart,
+                topEnd = topEnd,
+                bottomEnd = bottomEnd,
+                bottomStart = bottomStart,
+            )
+        } else {
+            RoundedCornerShape(
+                topStart = topStart,
+                topEnd = topEnd,
+                bottomEnd = bottomEnd,
+                bottomStart = bottomStart,
+            )
+        }
+    }
+}

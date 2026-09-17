@@ -13,12 +13,12 @@ These components are typically used in conjunction with the `Scaffold` component
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarDisplayMode
+import site.unclefish.yubeix.basic.NavigationBar
+import site.unclefish.yubeix.basic.NavigationBarItem
+import site.unclefish.yubeix.basic.FloatingNavigationBar
+import site.unclefish.yubeix.basic.FloatingNavigationBarItem
+import site.unclefish.yubeix.basic.NavigationBarDisplayMode
+import site.unclefish.yubeix.basic.FloatingNavigationBarDisplayMode
 ```
 
 ## Basic Usage

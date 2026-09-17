@@ -21,7 +21,7 @@ Each `Scaffold` automatically manages its own isolated popup state. Multiple nes
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Scaffold
+import site.unclefish.yubeix.basic.Scaffold
 ```
 
 ## Basic Usage

@@ -9,7 +9,7 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Switch
+import site.unclefish.yubeix.basic.Switch
 ```
 
 ## Basic Usage

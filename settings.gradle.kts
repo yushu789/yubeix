@@ -3,7 +3,7 @@
 
 @file:Suppress("UnstableApiUsage")
 
-rootProject.name = "compose-miuix-ui"
+rootProject.name = "yubeix-build"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
@@ -39,9 +39,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":miuix")
-include(":miuix-icons")
-include(":miuix-navigation3-ui")
+include(":yubeix")
+include(":yubeix-icons")
 
 include(":baselineprofile")
 

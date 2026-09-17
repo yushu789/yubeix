@@ -22,26 +22,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.Slider
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.extra.WindowBottomSheet
-import top.yukonga.miuix.kmp.extra.WindowDropdown
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Close
-import top.yukonga.miuix.kmp.icon.extended.Ok
-import top.yukonga.miuix.kmp.theme.LocalDismissState
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.CardDefaults
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.IconButton
+import site.unclefish.yubeix.basic.Slider
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.TextField
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperBottomSheet
+import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperSwitch
+import site.unclefish.yubeix.extra.WindowBottomSheet
+import site.unclefish.yubeix.extra.WindowDropdown
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Close
+import site.unclefish.yubeix.icon.extended.Ok
+import site.unclefish.yubeix.theme.LocalDismissState
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.utils.overScrollVertical
+import site.unclefish.yubeix.utils.scrollEndHaptic
 
 private val BottomSheetDropdownOptions = listOf("Option 1", "Option 2")
 
@@ -126,9 +126,9 @@ private fun SuperBottomSheetDemo(
                 onClick = onDismissRequest,
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Close,
+                    imageVector = YubeixIcons.Close,
                     contentDescription = "Cancel",
-                    tint = MiuixTheme.colorScheme.onBackground,
+                    tint = YubeixTheme.colorScheme.onBackground,
                 )
             }
         },
@@ -137,9 +137,9 @@ private fun SuperBottomSheetDemo(
                 onClick = onDismissRequest,
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Ok,
+                    imageVector = YubeixIcons.Ok,
                     contentDescription = "Confirm",
-                    tint = MiuixTheme.colorScheme.onBackground,
+                    tint = YubeixTheme.colorScheme.onBackground,
                 )
             }
         },
@@ -154,7 +154,7 @@ private fun SuperBottomSheetDemo(
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
+                        color = YubeixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
                     SuperSwitch(
@@ -188,7 +188,7 @@ private fun SuperBottomSheetDemo(
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
+                        color = YubeixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
                     SuperDropdown(
@@ -240,9 +240,9 @@ private fun WindowBottomSheetDemo(
                 onClick = { dismissState?.invoke() },
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Close,
+                    imageVector = YubeixIcons.Close,
                     contentDescription = "Cancel",
-                    tint = MiuixTheme.colorScheme.onBackground,
+                    tint = YubeixTheme.colorScheme.onBackground,
                 )
             }
         },
@@ -252,9 +252,9 @@ private fun WindowBottomSheetDemo(
                 onClick = { dismissState?.invoke() },
             ) {
                 Icon(
-                    imageVector = MiuixIcons.Ok,
+                    imageVector = YubeixIcons.Ok,
                     contentDescription = "Confirm",
-                    tint = MiuixTheme.colorScheme.onBackground,
+                    tint = YubeixTheme.colorScheme.onBackground,
                 )
             }
         },
@@ -269,7 +269,7 @@ private fun WindowBottomSheetDemo(
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
+                        color = YubeixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
                     SuperSwitch(
@@ -303,7 +303,7 @@ private fun WindowBottomSheetDemo(
                 Card(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.secondaryContainer,
+                        color = YubeixTheme.colorScheme.secondaryContainer,
                     ),
                 ) {
                     WindowDropdown(

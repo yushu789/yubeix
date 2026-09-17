@@ -43,18 +43,18 @@ import component.spinnerSection
 import component.switchSection
 import component.tabRowSection
 import component.textFieldSection
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SearchBar
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.BasicComponent
+import site.unclefish.yubeix.basic.InputField
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SearchBar
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.SnackbarHostState
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.theme.YubeixTheme
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -77,7 +77,7 @@ fun MainPage(
         }
     }
 
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
     val lazyListState = rememberLazyListState()
 
     Scaffold(
@@ -126,7 +126,7 @@ fun MainPage(
                                     ),
                                 text = "Cancel",
                                 style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
-                                color = MiuixTheme.colorScheme.primary,
+                                color = YubeixTheme.colorScheme.primary,
                             )
                         },
                         expanded = expanded,

@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.BasicComponent
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.theme.YubeixTheme
 
 fun LazyListScope.basicComponentSection() {
     item(key = "basicComponent") {
@@ -34,14 +34,14 @@ fun LazyListScope.basicComponentSection() {
                 endActions = {
                     Text(
                         text = "End1",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.onSurfaceVariantActions,
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "End2",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.onSurfaceVariantActions,
                     )
                 },
                 enabled = true,
@@ -52,20 +52,20 @@ fun LazyListScope.basicComponentSection() {
                 startAction = {
                     Text(
                         text = "Start",
-                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                        color = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
                 endActions = {
                     Text(
                         text = "End1",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "End2",
-                        fontSize = MiuixTheme.textStyles.body2.fontSize,
-                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                        fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        color = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                     )
                 },
                 enabled = false,

@@ -11,7 +11,7 @@ This project builds upon it to provide some extended components, enabling develo
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.BasicComponent
+import site.unclefish.yubeix.basic.BasicComponent
 ```
 
 ## Basic Usage

@@ -9,8 +9,8 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.TabRow // Standard style
-import top.yukonga.miuix.kmp.basic.TabRowWithContour // Contour style
+import site.unclefish.yubeix.basic.TabRow // Standard style
+import site.unclefish.yubeix.basic.TabRowWithContour // Contour style
 ```
 
 ## Basic Usage

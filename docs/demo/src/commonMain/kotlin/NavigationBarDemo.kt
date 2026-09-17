@@ -20,20 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarDisplayMode
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationItem
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.FloatingNavigationBar
+import site.unclefish.yubeix.basic.FloatingNavigationBarDisplayMode
+import site.unclefish.yubeix.basic.FloatingNavigationBarItem
+import site.unclefish.yubeix.basic.NavigationBar
+import site.unclefish.yubeix.basic.NavigationBarItem
+import site.unclefish.yubeix.basic.NavigationItem
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Contacts
+import site.unclefish.yubeix.icon.extended.Settings
+import site.unclefish.yubeix.icon.extended.VerticalSplit
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun NavigationBarDemo() {
@@ -56,9 +56,9 @@ fun NavigationBarDemo() {
             ) {
                 val pages = listOf("Home", "Profile", "Settings")
                 val items = listOf(
-                    NavigationItem("Home", MiuixIcons.VerticalSplit),
-                    NavigationItem("Profile", MiuixIcons.Contacts),
-                    NavigationItem("Settings", MiuixIcons.Settings),
+                    NavigationItem("Home", YubeixIcons.VerticalSplit),
+                    NavigationItem("Profile", YubeixIcons.Contacts),
+                    NavigationItem("Settings", YubeixIcons.Settings),
                 )
                 var selectedIndex1 by remember { mutableIntStateOf(0) }
                 var selectedIndex2 by remember { mutableIntStateOf(0) }
@@ -87,7 +87,7 @@ fun NavigationBarDemo() {
                         ) {
                             Text(
                                 text = "Current: ${pages[selectedIndex1]}",
-                                style = MiuixTheme.textStyles.title1,
+                                style = YubeixTheme.textStyles.title1,
                             )
                         }
                     }
@@ -119,7 +119,7 @@ fun NavigationBarDemo() {
                         ) {
                             Text(
                                 text = "Current: ${pages[selectedIndex2]}",
-                                style = MiuixTheme.textStyles.title1,
+                                style = YubeixTheme.textStyles.title1,
                             )
                         }
                     }

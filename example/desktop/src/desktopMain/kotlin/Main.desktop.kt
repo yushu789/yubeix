@@ -9,8 +9,8 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import org.jetbrains.compose.resources.painterResource
-import top.yukonga.miuix.kmp.shared.generated.resources.Res
-import top.yukonga.miuix.kmp.shared.generated.resources.icon
+import site.unclefish.yubeix.shared.generated.resources.Res
+import site.unclefish.yubeix.shared.generated.resources.icon
 import java.awt.Dimension
 
 fun main() = application {

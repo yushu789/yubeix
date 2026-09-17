@@ -24,8 +24,8 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperListPopup
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import site.unclefish.yubeix.extra.SuperListPopup
+import site.unclefish.yubeix.basic.ListPopupColumn
 ```
 
 ## Basic Usage

@@ -16,9 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.TextButton
+import site.unclefish.yubeix.basic.ButtonDefaults
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.TextButton
 
 fun LazyListScope.buttonSection() {
     item(key = "button") {

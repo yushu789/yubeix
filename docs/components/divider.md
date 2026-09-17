@@ -9,8 +9,8 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.HorizontalDivider // Horizontal divider
-import top.yukonga.miuix.kmp.basic.VerticalDivider   // Vertical divider
+import site.unclefish.yubeix.basic.HorizontalDivider // Horizontal divider
+import site.unclefish.yubeix.basic.VerticalDivider   // Vertical divider
 ```
 
 ## Basic Usage

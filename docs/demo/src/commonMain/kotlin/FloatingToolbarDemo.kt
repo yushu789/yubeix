@@ -18,17 +18,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.FloatingToolbar
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ToolbarPosition
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Delete
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.FloatingToolbar
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.IconButton
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.ToolbarPosition
+import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Delete
+import site.unclefish.yubeix.icon.extended.Edit
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun FloatingToolbarDemo() {
@@ -62,16 +62,16 @@ fun FloatingToolbarDemo() {
                                     // or Column
                                     IconButton(onClick = { /* Action 1 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Edit,
+                                            imageVector = YubeixIcons.Edit,
                                             contentDescription = "Edit",
-                                            tint = MiuixTheme.colorScheme.onBackground,
+                                            tint = YubeixTheme.colorScheme.onBackground,
                                         )
                                     }
                                     IconButton(onClick = { /* Action 2 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Delete,
+                                            imageVector = YubeixIcons.Delete,
                                             contentDescription = "Delete",
-                                            tint = MiuixTheme.colorScheme.onBackground,
+                                            tint = YubeixTheme.colorScheme.onBackground,
                                         )
                                     }
                                 }
@@ -102,16 +102,16 @@ fun FloatingToolbarDemo() {
                                     // or Column
                                     IconButton(onClick = { /* Action 1 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Edit,
+                                            imageVector = YubeixIcons.Edit,
                                             contentDescription = "Edit",
-                                            tint = MiuixTheme.colorScheme.onBackground,
+                                            tint = YubeixTheme.colorScheme.onBackground,
                                         )
                                     }
                                     IconButton(onClick = { /* Action 2 */ }) {
                                         Icon(
-                                            imageVector = MiuixIcons.Delete,
+                                            imageVector = YubeixIcons.Delete,
                                             contentDescription = "Delete",
-                                            tint = MiuixTheme.colorScheme.onBackground,
+                                            tint = YubeixTheme.colorScheme.onBackground,
                                         )
                                     }
                                 }

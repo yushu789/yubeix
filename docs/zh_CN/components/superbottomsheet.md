@@ -24,7 +24,7 @@ popupHost: MiuixPopupHost
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import site.unclefish.yubeix.extra.SuperBottomSheet
 ```
 
 ## 基本用法

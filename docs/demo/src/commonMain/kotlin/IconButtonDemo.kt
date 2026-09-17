@@ -17,13 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Favorites
-import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.IconButton
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Favorites
+import site.unclefish.yubeix.icon.extended.More
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun IconButtonDemo() {
@@ -52,8 +52,8 @@ fun IconButtonDemo() {
                         onClick = {},
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.More,
-                            tint = MiuixTheme.colorScheme.onBackground,
+                            imageVector = YubeixIcons.More,
+                            tint = YubeixTheme.colorScheme.onBackground,
                             contentDescription = "More",
                         )
                     }
@@ -62,7 +62,7 @@ fun IconButtonDemo() {
                         onClick = {},
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Favorites,
+                            imageVector = YubeixIcons.Favorites,
                             contentDescription = "Favorites",
                         )
                     }
@@ -72,8 +72,8 @@ fun IconButtonDemo() {
                         enabled = false,
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.More,
-                            tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                            imageVector = YubeixIcons.More,
+                            tint = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                             contentDescription = "More",
                         )
                     }
@@ -83,8 +83,8 @@ fun IconButtonDemo() {
                         enabled = false,
                     ) {
                         Icon(
-                            imageVector = MiuixIcons.Favorites,
-                            tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                            imageVector = YubeixIcons.Favorites,
+                            tint = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                             contentDescription = "Favorites",
                         )
                     }

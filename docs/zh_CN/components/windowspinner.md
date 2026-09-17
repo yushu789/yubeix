@@ -23,8 +23,8 @@ popupHost: None
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowSpinner
-import top.yukonga.miuix.kmp.extra.SpinnerEntry
+import site.unclefish.yubeix.extra.WindowSpinner
+import site.unclefish.yubeix.extra.SpinnerEntry
 ```
 
 ## 基本用法

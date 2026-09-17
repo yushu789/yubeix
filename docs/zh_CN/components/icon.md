@@ -11,7 +11,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Icon
+import site.unclefish.yubeix.basic.Icon
 ```
 
 ## 基本用法

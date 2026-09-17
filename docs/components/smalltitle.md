@@ -9,7 +9,7 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.SmallTitle
+import site.unclefish.yubeix.basic.SmallTitle
 ```
 
 ## Basic Usage

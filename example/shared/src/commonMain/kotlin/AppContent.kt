@@ -70,36 +70,36 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import navigation3.Navigator
 import navigation3.Route
-import top.yukonga.miuix.kmp.basic.FabPosition
-import top.yukonga.miuix.kmp.basic.FloatingActionButton
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarDisplayMode
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
-import top.yukonga.miuix.kmp.basic.FloatingToolbar
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
-import top.yukonga.miuix.kmp.basic.NavigationItem
-import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
-import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SnackbarHost
-import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.ToolbarPosition
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Create
-import top.yukonga.miuix.kmp.icon.extended.Delete
-import top.yukonga.miuix.kmp.icon.extended.Edit
-import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
-import top.yukonga.miuix.kmp.icon.extended.Image
-import top.yukonga.miuix.kmp.icon.extended.Link
-import top.yukonga.miuix.kmp.icon.extended.More
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.Sort
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.FabPosition
+import site.unclefish.yubeix.basic.FloatingActionButton
+import site.unclefish.yubeix.basic.FloatingNavigationBar
+import site.unclefish.yubeix.basic.FloatingNavigationBarDisplayMode
+import site.unclefish.yubeix.basic.FloatingNavigationBarItem
+import site.unclefish.yubeix.basic.FloatingToolbar
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.IconButton
+import site.unclefish.yubeix.basic.NavigationBar
+import site.unclefish.yubeix.basic.NavigationBarDisplayMode
+import site.unclefish.yubeix.basic.NavigationBarItem
+import site.unclefish.yubeix.basic.NavigationItem
+import site.unclefish.yubeix.basic.NavigationRail
+import site.unclefish.yubeix.basic.NavigationRailDisplayMode
+import site.unclefish.yubeix.basic.NavigationRailItem
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SnackbarHost
+import site.unclefish.yubeix.basic.SnackbarHostState
+import site.unclefish.yubeix.basic.ToolbarPosition
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Create
+import site.unclefish.yubeix.icon.extended.Delete
+import site.unclefish.yubeix.icon.extended.Edit
+import site.unclefish.yubeix.icon.extended.HorizontalSplit
+import site.unclefish.yubeix.icon.extended.Image
+import site.unclefish.yubeix.icon.extended.Link
+import site.unclefish.yubeix.icon.extended.More
+import site.unclefish.yubeix.icon.extended.Settings
+import site.unclefish.yubeix.icon.extended.Sort
+import site.unclefish.yubeix.theme.YubeixTheme
 import utils.FPSMonitor
 import utils.shouldShowSplitPane
 import kotlin.math.abs
@@ -147,11 +147,11 @@ fun AppContent(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem(UIConstants.PAGE_TITLES[0], MiuixIcons.HorizontalSplit),
-            NavigationItem(UIConstants.PAGE_TITLES[1], MiuixIcons.Create),
-            NavigationItem(UIConstants.PAGE_TITLES[2], MiuixIcons.Image),
-            NavigationItem(UIConstants.PAGE_TITLES[3], MiuixIcons.Sort),
-            NavigationItem(UIConstants.PAGE_TITLES[4], MiuixIcons.Settings),
+            NavigationItem(UIConstants.PAGE_TITLES[0], YubeixIcons.HorizontalSplit),
+            NavigationItem(UIConstants.PAGE_TITLES[1], YubeixIcons.Create),
+            NavigationItem(UIConstants.PAGE_TITLES[2], YubeixIcons.Image),
+            NavigationItem(UIConstants.PAGE_TITLES[3], YubeixIcons.Sort),
+            NavigationItem(UIConstants.PAGE_TITLES[4], YubeixIcons.Settings),
         )
     }
 
@@ -279,7 +279,7 @@ private fun WideScreenContent(
     Row {
         if (appState.showNavigationBar) {
             NavigationRail(
-                modifier = Modifier.background(MiuixTheme.colorScheme.surface),
+                modifier = Modifier.background(YubeixTheme.colorScheme.surface),
                 mode = NavigationRailDisplayMode.entries[appState.navigationRailMode],
             ) {
                 navigationItems.forEachIndexed { index, item ->
@@ -392,7 +392,7 @@ private fun NavigationBar(
         ) {
             Box(
                 modifier = Modifier
-                    .background(MiuixTheme.colorScheme.surface)
+                    .background(YubeixTheme.colorScheme.surface)
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
@@ -459,8 +459,8 @@ private fun FloatingActionButton(
             },
         ) {
             Icon(
-                imageVector = MiuixIcons.Link,
-                tint = MiuixTheme.colorScheme.onPrimary,
+                imageVector = YubeixIcons.Link,
+                tint = YubeixTheme.colorScheme.onPrimary,
                 contentDescription = "GitHub",
             )
         }
@@ -478,31 +478,31 @@ private fun FloatingToolbar(
         exit = fadeOut(),
     ) {
         FloatingToolbar(
-            color = MiuixTheme.colorScheme.primary,
+            color = YubeixTheme.colorScheme.primary,
             cornerRadius = 20.dp,
         ) {
             AnimatedContent(
                 targetState = floatingToolbarOrientation,
             ) { orientation ->
-                val iconTint = MiuixTheme.colorScheme.onPrimary
+                val iconTint = YubeixTheme.colorScheme.onPrimary
                 val content = @Composable {
                     IconButton(onClick = { /* Action 1 */ }) {
                         Icon(
-                            MiuixIcons.Edit,
+                            YubeixIcons.Edit,
                             contentDescription = "Edit",
                             tint = iconTint,
                         )
                     }
                     IconButton(onClick = { /* Action 2 */ }) {
                         Icon(
-                            MiuixIcons.Delete,
+                            YubeixIcons.Delete,
                             contentDescription = "Delete",
                             tint = iconTint,
                         )
                     }
                     IconButton(onClick = { /* Action 3 */ }) {
                         Icon(
-                            MiuixIcons.More,
+                            YubeixIcons.More,
                             contentDescription = "More",
                             tint = iconTint,
                         )

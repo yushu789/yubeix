@@ -9,8 +9,8 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.TabRow // 标准样式
-import top.yukonga.miuix.kmp.basic.TabRowWithContour // 带轮廓样式
+import site.unclefish.yubeix.basic.TabRow // 标准样式
+import site.unclefish.yubeix.basic.TabRowWithContour // 带轮廓样式
 ```
 
 ## 基本用法

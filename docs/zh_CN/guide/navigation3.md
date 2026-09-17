@@ -8,7 +8,7 @@
 
 ```kotlin
 implementation("androidx.navigation3:navigation3-runtime:<navigation3-version>")
-implementation("top.yukonga.miuix.kmp:miuix-navigation3-ui:<version>")
+implementation("site.unclefish.yubeix:miuix-navigation3-ui:<version>")
 ```
 
 ::: warning

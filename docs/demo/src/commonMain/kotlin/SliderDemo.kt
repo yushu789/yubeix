@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.RangeSlider
-import top.yukonga.miuix.kmp.basic.Slider
+import site.unclefish.yubeix.basic.RangeSlider
+import site.unclefish.yubeix.basic.Slider
 
 @Composable
 fun SliderDemo() {

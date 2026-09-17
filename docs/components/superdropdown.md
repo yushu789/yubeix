@@ -24,7 +24,7 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperDropdown
 ```
 
 ## Basic Usage

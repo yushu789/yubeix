@@ -9,9 +9,9 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.LinearProgressIndicator // Linear progress bar
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator // Circular progress indicator
-import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator // Infinite spinning indicator
+import site.unclefish.yubeix.basic.LinearProgressIndicator // Linear progress bar
+import site.unclefish.yubeix.basic.CircularProgressIndicator // Circular progress indicator
+import site.unclefish.yubeix.basic.InfiniteProgressIndicator // Infinite spinning indicator
 ```
 
 ## Basic Usage

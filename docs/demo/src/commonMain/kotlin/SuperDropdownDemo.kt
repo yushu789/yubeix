@@ -19,9 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.extra.SuperDropdown
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.extra.SuperDropdown
 
 @Composable
 fun SuperDropdownDemo() {

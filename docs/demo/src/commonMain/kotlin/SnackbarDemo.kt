@@ -22,14 +22,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SnackbarDuration
-import top.yukonga.miuix.kmp.basic.SnackbarHost
-import top.yukonga.miuix.kmp.basic.SnackbarHostState
-import top.yukonga.miuix.kmp.basic.SnackbarResult
-import top.yukonga.miuix.kmp.basic.TextButton
+import site.unclefish.yubeix.basic.ButtonDefaults
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SnackbarDuration
+import site.unclefish.yubeix.basic.SnackbarHost
+import site.unclefish.yubeix.basic.SnackbarHostState
+import site.unclefish.yubeix.basic.SnackbarResult
+import site.unclefish.yubeix.basic.TextButton
 
 @Composable
 fun SnackbarDemo() {

@@ -6,16 +6,16 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.miuix)
+    implementation(projects.yubeix)
 }
 
 val iconsSourceDir =
     rootProject.layout.projectDirectory
-        .dir("miuix/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .dir("miuix/src/commonMain/kotlin/site/unclefish/yubeix/icon")
         .asFile
 val extendedIconsSourceDir =
     rootProject.layout.projectDirectory
-        .dir("miuix-icons/src/commonMain/kotlin/top/yukonga/miuix/kmp/icon")
+        .dir("miuix-icons/src/commonMain/kotlin/site/unclefish/yubeix/icon")
         .asFile
 val outputDir = project.file("../public/icons")
 val docFile = project.file("../guide/icons.md")
@@ -26,7 +26,7 @@ tasks.register<JavaExec>("generateIcons") {
     description = "Generate SVGs from Compose ImageVector definitions"
     dependsOn(tasks.named("classes"))
     classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("top.yukonga.miuix.docs.icongen.MainKt")
+    mainClass.set("site.unclefish.yubeix.docs.icongen.MainKt")
     val lightColor = project.findProperty("iconLightColor")?.toString() ?: "#000000"
     val darkColor = project.findProperty("iconDarkColor")?.toString() ?: "#FFFFFF"
     val preserve = project.findProperty("iconPreserveColors")?.toString()?.equals("true", true) == true

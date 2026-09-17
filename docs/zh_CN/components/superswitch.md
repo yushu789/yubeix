@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperSwitch
+import site.unclefish.yubeix.extra.SuperSwitch
 ```
 
 ## 基本用法

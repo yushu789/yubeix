@@ -23,8 +23,8 @@ This component does not rely on `Scaffold` and can be used in any Composable sco
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowSpinner
-import top.yukonga.miuix.kmp.extra.SpinnerEntry
+import site.unclefish.yubeix.extra.WindowSpinner
+import site.unclefish.yubeix.extra.SpinnerEntry
 ```
 
 ## Basic Usage

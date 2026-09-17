@@ -24,8 +24,8 @@ This component depends on `Scaffold` providing `MiuixPopupHost` to render popup 
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.theme.LocalDismissState
+import site.unclefish.yubeix.extra.SuperBottomSheet
+import site.unclefish.yubeix.theme.LocalDismissState
 ```
 
 ## Basic Usage

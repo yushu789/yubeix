@@ -11,8 +11,8 @@ For a demo, see the DropDowns page of the <a href="https://compose-miuix-ui.gith
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.PullToRefresh
-import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import site.unclefish.yubeix.basic.PullToRefresh
+import site.unclefish.yubeix.basic.rememberPullToRefreshState
 ```
 
 ## Basic Usage

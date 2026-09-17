@@ -24,7 +24,7 @@ popupHost: MiuixPopupHost
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperDropdown
 ```
 
 ## 基本用法

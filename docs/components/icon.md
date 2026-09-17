@@ -11,7 +11,7 @@ To follow night mode or theme changes, you need to actively use the `tint` prope
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Icon
+import site.unclefish.yubeix.basic.Icon
 ```
 
 ## Basic Usage

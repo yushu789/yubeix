@@ -34,18 +34,18 @@ import component.SearchBox
 import component.SearchPager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import site.unclefish.yubeix.basic.BasicComponent
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.YubeixTheme.colorScheme
 import utils.AdaptiveTopAppBar
 import utils.All
 import utils.SearchStatus
@@ -61,7 +61,7 @@ fun IconsPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
     val dynamicTopPadding by remember(isWideScreen) {
         derivedStateOf { if (isWideScreen) 0.dp else 12.dp * (1f - topAppBarScrollBehavior.state.collapsedFraction) }
     }
@@ -72,7 +72,7 @@ fun IconsPage(
     var searchOffsetY by remember { mutableStateOf(0.dp) }
 
     // Icon data
-    val allIcons = remember { MiuixIcons.All }
+    val allIcons = remember { YubeixIcons.All }
     val lightIcons = remember(allIcons) { allIcons["Light"] ?: emptyList() }
     val regularIcons = remember(allIcons) { allIcons["Regular"] ?: emptyList() }
     val heavyIcons = remember(allIcons) { allIcons["Heavy"] ?: emptyList() }
@@ -198,27 +198,27 @@ fun IconsPage(
                             Text(
                                 text = "Name",
                                 modifier = Modifier.weight(2f),
-                                style = MiuixTheme.textStyles.footnote1,
+                                style = YubeixTheme.textStyles.footnote1,
                                 color = colorScheme.onSurfaceVariantActions,
                             )
                             Text(
                                 text = "Light",
                                 modifier = Modifier.weight(1f),
-                                style = MiuixTheme.textStyles.footnote1,
+                                style = YubeixTheme.textStyles.footnote1,
                                 color = colorScheme.onSurfaceVariantActions,
                                 textAlign = TextAlign.Center,
                             )
                             Text(
                                 text = "Regular",
                                 modifier = Modifier.weight(1f),
-                                style = MiuixTheme.textStyles.footnote1,
+                                style = YubeixTheme.textStyles.footnote1,
                                 color = colorScheme.onSurfaceVariantActions,
                                 textAlign = TextAlign.Center,
                             )
                             Text(
                                 text = "Heavy",
                                 modifier = Modifier.weight(1f),
-                                style = MiuixTheme.textStyles.footnote1,
+                                style = YubeixTheme.textStyles.footnote1,
                                 color = colorScheme.onSurfaceVariantActions,
                                 textAlign = TextAlign.Center,
                             )
@@ -245,7 +245,7 @@ fun IconsPage(
                             Text(
                                 text = iconNames[index],
                                 modifier = Modifier.weight(2f),
-                                style = MiuixTheme.textStyles.body2,
+                                style = YubeixTheme.textStyles.body2,
                                 color = colorScheme.onSurface,
                             )
                             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {

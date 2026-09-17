@@ -22,17 +22,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.NavigationItem
-import top.yukonga.miuix.kmp.basic.NavigationRail
-import top.yukonga.miuix.kmp.basic.NavigationRailDisplayMode
-import top.yukonga.miuix.kmp.basic.NavigationRailItem
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Settings
-import top.yukonga.miuix.kmp.icon.extended.VerticalSplit
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.NavigationItem
+import site.unclefish.yubeix.basic.NavigationRail
+import site.unclefish.yubeix.basic.NavigationRailDisplayMode
+import site.unclefish.yubeix.basic.NavigationRailItem
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Contacts
+import site.unclefish.yubeix.icon.extended.Settings
+import site.unclefish.yubeix.icon.extended.VerticalSplit
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun NavigationRailDemo() {
@@ -52,9 +52,9 @@ fun NavigationRailDemo() {
         ) {
             val pages = listOf("Home", "Profile", "Settings")
             val items = listOf(
-                NavigationItem("Home", MiuixIcons.VerticalSplit),
-                NavigationItem("Profile", MiuixIcons.Contacts),
-                NavigationItem("Settings", MiuixIcons.Settings),
+                NavigationItem("Home", YubeixIcons.VerticalSplit),
+                NavigationItem("Profile", YubeixIcons.Contacts),
+                NavigationItem("Settings", YubeixIcons.Settings),
             )
             var selectedIndex by remember { mutableIntStateOf(0) }
 
@@ -87,7 +87,7 @@ fun NavigationRailDemo() {
                         ) {
                             Text(
                                 text = "Current: ${pages[selectedIndex]}",
-                                style = MiuixTheme.textStyles.title1,
+                                style = YubeixTheme.textStyles.title1,
                             )
                         }
                     }

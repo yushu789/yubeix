@@ -23,8 +23,8 @@ popupHost: None
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowListPopup
-import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import site.unclefish.yubeix.extra.WindowListPopup
+import site.unclefish.yubeix.basic.ListPopupColumn
 ```
 
 ## 基本用法

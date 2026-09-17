@@ -24,8 +24,8 @@ popupHost: MiuixPopupHost
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.SuperSpinner
-import top.yukonga.miuix.kmp.extra.SpinnerEntry
+import site.unclefish.yubeix.extra.SuperSpinner
+import site.unclefish.yubeix.extra.SpinnerEntry
 ```
 
 ## 基本用法

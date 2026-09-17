@@ -19,7 +19,7 @@ popupHost: None
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowDropdown
+import site.unclefish.yubeix.extra.WindowDropdown
 ```
 
 ## Basic Usage

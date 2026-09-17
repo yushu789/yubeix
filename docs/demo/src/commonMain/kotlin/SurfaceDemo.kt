@@ -18,9 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Surface
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Surface
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun SurfaceDemo() {
@@ -42,14 +42,14 @@ fun SurfaceDemo() {
                 modifier = Modifier
                     .size(height = 200.dp, width = 400.dp)
                     .padding(16.dp),
-                color = MiuixTheme.colorScheme.background,
+                color = YubeixTheme.colorScheme.background,
                 shape = RoundedCornerShape(16.dp),
                 shadowElevation = 4.dp,
             ) {
                 Text(
                     text = "Surface Example\n\n" +
                         "Size: height = 200.dp, width = 400.dp\n" +
-                        "color: MiuixTheme.colorScheme.background\n" +
+                        "color: YubeixTheme.colorScheme.background\n" +
                         "shape: RoundedCornerShape(16.dp)\n" +
                         "shadowElevation: 4.dp\n" +
                         "isSystemInDarkTheme: ${isSystemInDarkTheme()}",

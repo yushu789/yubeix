@@ -15,10 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import site.unclefish.yubeix.basic.ScrollBehavior
+import site.unclefish.yubeix.basic.SmallTopAppBar
+import site.unclefish.yubeix.basic.TopAppBar
+import site.unclefish.yubeix.utils.scrollEndHaptic
 
 fun Modifier.pageScrollModifiers(
     enableScrollEndHaptic: Boolean,

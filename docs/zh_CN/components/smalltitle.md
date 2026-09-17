@@ -9,7 +9,7 @@
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.SmallTitle
+import site.unclefish.yubeix.basic.SmallTitle
 ```
 
 ## 基本用法

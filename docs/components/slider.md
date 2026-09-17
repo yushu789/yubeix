@@ -11,9 +11,9 @@ Miuix also provides `VerticalSlider` for vertical orientation and `RangeSlider` 
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Slider
-import top.yukonga.miuix.kmp.basic.VerticalSlider
-import top.yukonga.miuix.kmp.basic.RangeSlider
+import site.unclefish.yubeix.basic.Slider
+import site.unclefish.yubeix.basic.VerticalSlider
+import site.unclefish.yubeix.basic.RangeSlider
 ```
 
 ## Basic Usage

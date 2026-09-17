@@ -20,12 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
-import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.SearchBar
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.BasicComponent
+import site.unclefish.yubeix.basic.BasicComponentDefaults
+import site.unclefish.yubeix.basic.InputField
+import site.unclefish.yubeix.basic.SearchBar
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun SearchBarDemo() {
@@ -67,7 +67,7 @@ fun SearchBarDemo() {
                                 searchValue = ""
                             },
                         text = "Cancel",
-                        color = MiuixTheme.colorScheme.primary,
+                        color = YubeixTheme.colorScheme.primary,
                     )
                 },
                 expanded = expanded,

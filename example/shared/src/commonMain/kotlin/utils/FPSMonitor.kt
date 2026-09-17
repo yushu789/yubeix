@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import top.yukonga.miuix.kmp.basic.Text
+import site.unclefish.yubeix.basic.Text
 
 /**
  * A simple FPS monitor that displays the current frames per second.

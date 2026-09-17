@@ -22,15 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Contacts
-import top.yukonga.miuix.kmp.icon.extended.Favorites
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.Button
+import site.unclefish.yubeix.basic.ButtonDefaults
+import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.icon.YubeixIcons
+import site.unclefish.yubeix.icon.extended.Contacts
+import site.unclefish.yubeix.icon.extended.Favorites
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun ButtonDemo() {
@@ -63,14 +63,14 @@ fun ButtonDemo() {
                     },
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Favorites,
+                        imageVector = YubeixIcons.Favorites,
                         contentDescription = "Favorites",
                         tint = Color.Unspecified,
                         modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = buttonText1,
-                        style = MiuixTheme.textStyles.button,
+                        style = YubeixTheme.textStyles.button,
                         modifier = Modifier.padding(start = 8.dp),
                     )
                 }
@@ -93,15 +93,15 @@ fun ButtonDemo() {
                     colors = ButtonDefaults.buttonColorsPrimary(),
                 ) {
                     Icon(
-                        imageVector = MiuixIcons.Contacts,
+                        imageVector = YubeixIcons.Contacts,
                         contentDescription = null,
-                        tint = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                        tint = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                         modifier = Modifier.size(24.dp),
                     )
                     Text(
                         text = "Disabled Button",
-                        style = MiuixTheme.textStyles.button,
-                        color = MiuixTheme.colorScheme.disabledOnSecondaryVariant,
+                        style = YubeixTheme.textStyles.button,
+                        color = YubeixTheme.colorScheme.disabledOnSecondaryVariant,
                         modifier = Modifier.padding(start = 8.dp),
                     )
                 }

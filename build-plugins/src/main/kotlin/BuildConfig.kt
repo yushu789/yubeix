@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 object BuildConfig {
-    const val LIBRARY_VERSION = "0.8.8"
-    const val LIBRARY_ID = "top.yukonga.miuix.kmp"
-    const val APPLICATION_NAME = "Miuix"
+    const val LIBRARY_VERSION = "0.1.0"
+    const val LIBRARY_ID = "site.unclefish.yubeix"
+    const val APPLICATION_NAME = "Yubeix"
     const val APPLICATION_VERSION_NAME = "1.0.8"
-    const val APPLICATION_ID = "top.yukonga.miuix.uitest"
-    const val APPLICATION_SHARED_ID = "top.yukonga.miuix.shared"
+    const val APPLICATION_ID = "site.unclefish.yubeix.example"
+    const val APPLICATION_SHARED_ID = "site.unclefish.yubeix.shared"
     const val COMPILE_SDK = 36
     const val TARGET_SDK = 36
     const val MIN_SDK = 23

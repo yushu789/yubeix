@@ -19,9 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.ColorPicker
-import top.yukonga.miuix.kmp.basic.SliderDefaults
-import top.yukonga.miuix.kmp.theme.MiuixTheme
+import site.unclefish.yubeix.basic.ColorPicker
+import site.unclefish.yubeix.basic.SliderDefaults
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun ColorPickerDemo() {
@@ -39,8 +39,8 @@ fun ColorPickerDemo() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val miuixColor = MiuixTheme.colorScheme.primary
-            var selectedColor by remember { mutableStateOf(miuixColor) }
+            val yubeixColor = YubeixTheme.colorScheme.primary
+            var selectedColor by remember { mutableStateOf(yubeixColor) }
             ColorPicker(
                 color = selectedColor,
                 onColorChanged = { selectedColor = it },

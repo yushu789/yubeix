@@ -26,21 +26,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Surface
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.theme.Colors
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.darkColorScheme
-import top.yukonga.miuix.kmp.theme.lightColorScheme
-import top.yukonga.miuix.kmp.theme.platformDynamicColors
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.basic.CardDefaults
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
+import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.Surface
+import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.theme.Colors
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.darkColorScheme
+import site.unclefish.yubeix.theme.lightColorScheme
+import site.unclefish.yubeix.theme.platformDynamicColors
 import utils.AdaptiveTopAppBar
 import utils.pageContentPadding
 import utils.pageScrollModifiers
@@ -62,7 +62,7 @@ fun ColorPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = MiuixScrollBehavior()
+    val topAppBarScrollBehavior = YubeixScrollBehavior()
 
     val lightColors = remember { lightColorScheme() }
     val darkColors = remember { darkColorScheme() }
@@ -95,11 +95,11 @@ fun ColorPage(
                     SmallTitle("Current Theme Colors")
                     Card(
                         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
+                        colors = CardDefaults.defaultColors(color = YubeixTheme.colorScheme.surfaceContainer),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(horizontal = 16.dp),
                     ) {
-                        ColorsPreview(MiuixTheme.colorScheme)
+                        ColorsPreview(YubeixTheme.colorScheme)
                     }
                 }
                 item(key = "light") {

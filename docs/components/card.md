@@ -9,8 +9,8 @@
 ## Import
 
 ```kotlin
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.utils.PressFeedbackType // If using interactive card
+import site.unclefish.yubeix.basic.Card
+import site.unclefish.yubeix.utils.PressFeedbackType // If using interactive card
 ```
 
 ## Basic Usage

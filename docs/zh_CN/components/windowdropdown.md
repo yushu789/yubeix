@@ -23,7 +23,7 @@ popupHost: None
 ## 引入
 
 ```kotlin
-import top.yukonga.miuix.kmp.extra.WindowDropdown
+import site.unclefish.yubeix.extra.WindowDropdown
 ```
 
 ## 基本用法
