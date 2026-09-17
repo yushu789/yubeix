@@ -5,7 +5,7 @@ package site.unclefish.yubeix.navigation
 
 import androidx.compose.runtime.Composable
 
-/**
+/*
  * Minimal, API-compatible port of the `androidx.navigation3.runtime` essentials the scene
  * navigation is built on: [NavKey], [NavEntry], and the [entryProvider] DSL. Hosts declaring
  * routes with `sealed interface Screen : NavKey` and registering them with
@@ -84,16 +84,14 @@ class EntryProviderBuilder<T : NavKey> {
         entriesByInstance[route] = NavEntry(route, metadata) { content(route) }
     }
 
-    internal fun build(): (T) -> NavEntry<T> {
-        return { route ->
-            entriesByInstance[route]
-                ?: entriesByClass[route::class]?.invoke(route)
-                ?: onNoRouteFound?.invoke(route)
-                ?: throw IllegalArgumentException(
-                    "No entry registered for route ${route::class.simpleName} - " +
-                        "add entry(route) { } or entry<${route::class.simpleName}> { } in entryProvider."
-                )
-        }
+    internal fun build(): (T) -> NavEntry<T> = { route ->
+        entriesByInstance[route]
+            ?: entriesByClass[route::class]?.invoke(route)
+            ?: onNoRouteFound?.invoke(route)
+            ?: throw IllegalArgumentException(
+                "No entry registered for route ${route::class.simpleName} - " +
+                    "add entry(route) { } or entry<${route::class.simpleName}> { } in entryProvider.",
+            )
     }
 }
 

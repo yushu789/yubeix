@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.basic
@@ -119,7 +119,7 @@ fun Card(
     if (buttonHapticFeedbackEnabled) {
         ButtonHapticFeedback(
             interactionSource = interactionSource,
-            enabled = onClick != null
+            enabled = onClick != null,
         )
     }
 

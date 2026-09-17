@@ -49,7 +49,7 @@ fun LazyListScope.paddingItem(
                     fillHeight
                 }
                 layout(constraints.maxWidth, height) {}
-            }
+            },
         )
     }
 }

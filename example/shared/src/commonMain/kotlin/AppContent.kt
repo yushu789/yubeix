@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.animation.AnimatedContent
@@ -54,18 +54,15 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.navigation.NavigationPath
-import site.unclefish.yubeix.navigation.SceneDisplay
-import site.unclefish.yubeix.navigation.entryProvider
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import appnavigation.Navigator
+import appnavigation.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import appnavigation.Navigator
-import appnavigation.Route
 import site.unclefish.yubeix.basic.FabPosition
 import site.unclefish.yubeix.basic.FloatingActionButton
 import site.unclefish.yubeix.basic.FloatingNavigationBar
@@ -95,6 +92,9 @@ import site.unclefish.yubeix.icon.extended.Link
 import site.unclefish.yubeix.icon.extended.More
 import site.unclefish.yubeix.icon.extended.Settings
 import site.unclefish.yubeix.icon.extended.Sort
+import site.unclefish.yubeix.navigation.NavigationPath
+import site.unclefish.yubeix.navigation.SceneDisplay
+import site.unclefish.yubeix.navigation.entryProvider
 import site.unclefish.yubeix.theme.YubeixTheme
 import utils.FPSMonitor
 import utils.shouldShowSplitPane
@@ -138,7 +138,7 @@ fun AppContent(
         mainPagerState.syncPage()
     }
 
-    val navigationPath = remember { NavigationPath(Route.Main) }
+    val navigationPath = remember { NavigationPath<Route>(Route.Main) }
     val navigator = remember { Navigator(navigationPath) }
 
     val navigationItems = remember {

@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
@@ -31,16 +31,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import appnavigation.Route
 import component.BackNavigationIcon
 import misc.VersionInfo
-import appnavigation.Route
 import org.jetbrains.compose.resources.painterResource
 import site.unclefish.yubeix.basic.Card
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.ScrollBehavior
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi

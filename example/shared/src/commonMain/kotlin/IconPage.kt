@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
@@ -37,10 +37,10 @@ import kotlinx.coroutines.launch
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.Icon
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.icon.YubeixIcons
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi

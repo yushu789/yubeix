@@ -346,8 +346,10 @@ fun Slider(
                 val markerFraction = if (valueRange.endInclusive == valueRange.start) {
                     0f
                 } else {
-                    ((markerValue - valueRange.start) /
-                        (valueRange.endInclusive - valueRange.start)).coerceIn(0f, 1f)
+                    (
+                        (markerValue - valueRange.start) /
+                            (valueRange.endInclusive - valueRange.start)
+                        ).coerceIn(0f, 1f)
                 }
                 val markerVisualFraction = if (mirrored) 1f - markerFraction else markerFraction
                 val markerCenterPx = thumbSizePx / 2f + usableWidthPx * markerVisualFraction

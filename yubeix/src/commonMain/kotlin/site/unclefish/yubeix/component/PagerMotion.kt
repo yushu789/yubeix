@@ -10,8 +10,8 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 
-private const val PagerSnapStiffness = 220f
-private const val PagerSnapVisibilityThresholdPx = 0.5f
+private const val PAGER_SNAP_STIFFNESS = 220f
+private const val PAGER_SNAP_VISIBILITY_THRESHOLD_PX = 0.5f
 
 /**
  * Moves a pager after a tab or navigation-button tap.
@@ -27,8 +27,8 @@ suspend fun PagerState.animatePagerToPage(page: Int) {
         page = targetPage,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = PagerSnapStiffness,
-            visibilityThreshold = PagerSnapVisibilityThresholdPx,
+            stiffness = PAGER_SNAP_STIFFNESS,
+            visibilityThreshold = PAGER_SNAP_VISIBILITY_THRESHOLD_PX,
         ),
     )
 }
@@ -38,13 +38,11 @@ suspend fun PagerState.animatePagerToPage(page: Int) {
  * snap. The spring preserves release velocity while avoiding the default pager's abrupt settle.
  */
 @Composable
-fun rememberPagerFlingBehavior(state: PagerState): TargetedFlingBehavior {
-    return PagerDefaults.flingBehavior(
-        state = state,
-        snapAnimationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = PagerSnapStiffness,
-            visibilityThreshold = PagerSnapVisibilityThresholdPx,
-        ),
-    )
-}
+fun rememberPagerFlingBehavior(state: PagerState): TargetedFlingBehavior = PagerDefaults.flingBehavior(
+    state = state,
+    snapAnimationSpec = spring(
+        dampingRatio = Spring.DampingRatioNoBouncy,
+        stiffness = PAGER_SNAP_STIFFNESS,
+        visibilityThreshold = PAGER_SNAP_VISIBILITY_THRESHOLD_PX,
+    ),
+)

@@ -29,7 +29,8 @@ internal fun Modifier.navigationSceneBitmapClip(
         is SceneTransition.Enter,
         is SceneTransition.Exit,
         SceneTransition.Drag,
-        is SceneTransition.DragEnd -> true
+        is SceneTransition.DragEnd,
+        -> true
 
         SceneTransition.None -> false
     }

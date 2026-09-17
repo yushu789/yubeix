@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
@@ -22,9 +22,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
 import site.unclefish.yubeix.basic.Card
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.SmallTitle
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.extra.SuperDropdown
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.utils.scrollEndHaptic

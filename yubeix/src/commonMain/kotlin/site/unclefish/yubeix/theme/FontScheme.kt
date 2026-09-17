@@ -61,7 +61,7 @@ object YubeixTextStyles {
             fontSize = 16,
             lineHeight = 24,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.15f
+            letterSpacing = 0.15f,
         )
 
     val titleSmall: TextStyle
@@ -69,7 +69,7 @@ object YubeixTextStyles {
             fontSize = 14,
             lineHeight = 20,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.1f
+            letterSpacing = 0.1f,
         )
 
     val bodyLarge: TextStyle
@@ -86,7 +86,7 @@ object YubeixTextStyles {
             fontSize = 14,
             lineHeight = 20,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.1f
+            letterSpacing = 0.1f,
         )
 
     val labelMedium: TextStyle
@@ -94,7 +94,7 @@ object YubeixTextStyles {
             fontSize = 12,
             lineHeight = 16,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.5f
+            letterSpacing = 0.5f,
         )
 
     val labelSmall: TextStyle
@@ -102,7 +102,7 @@ object YubeixTextStyles {
             fontSize = 11,
             lineHeight = 16,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.5f
+            letterSpacing = 0.5f,
         )
 }
 
@@ -113,7 +113,7 @@ fun TextStyle.withYubeixFont(
     fontFamily = when (role) {
         YubeixFontRole.Display -> fontScheme.display
         YubeixFontRole.Text -> fontScheme.text
-    }
+    },
 )
 
 @Composable

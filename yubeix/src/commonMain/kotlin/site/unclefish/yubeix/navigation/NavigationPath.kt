@@ -47,7 +47,7 @@ class Scene<T : NavKey> internal constructor(
             SceneLoadingState.WillLoad
         } else {
             SceneLoadingState.Loaded
-        }
+        },
     )
         internal set
 
@@ -189,7 +189,8 @@ class NavigationPath<T : NavKey>(
         when (val transition = targetScene.transition) {
             is SceneTransition.None,
             is SceneTransition.Enter,
-            is SceneTransition.DragEnd -> {
+            is SceneTransition.DragEnd,
+            -> {
                 if (transition is SceneTransition.DragEnd && transition.commit) {
                     return true
                 }
@@ -250,9 +251,13 @@ class NavigationPath<T : NavKey>(
         }
         when (val transition = scene.transition) {
             SceneTransition.Drag -> return true
+
             SceneTransition.None,
-            is SceneTransition.Enter -> Unit
+            is SceneTransition.Enter,
+            -> Unit
+
             is SceneTransition.DragEnd -> if (transition.commit) return false
+
             is SceneTransition.Exit -> return false
         }
         scene.gestureProgress = scene.progress
@@ -312,14 +317,12 @@ class NavigationPath<T : NavKey>(
         route: T,
         transition: SceneTransition,
         progress: Float,
-    ): Scene<T> {
-        return Scene(
-            id = nextSceneId++,
-            route = route,
-            initialTransition = transition,
-            initialProgress = progress,
-        )
-    }
+    ): Scene<T> = Scene(
+        id = nextSceneId++,
+        route = route,
+        initialTransition = transition,
+        initialProgress = progress,
+    )
 }
 
 val LocalNavigationPath = staticCompositionLocalOf<NavigationPath<*>?> { null }

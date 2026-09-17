@@ -16,8 +16,6 @@ internal fun Color.mixWith(other: Color, ratio: Float): Color {
     )
 }
 
-internal fun Color.isVisuallyCloseTo(other: Color, threshold: Float = 0.04f): Boolean {
-    return kotlin.math.abs(red - other.red) +
-        kotlin.math.abs(green - other.green) +
-        kotlin.math.abs(blue - other.blue) < threshold
-}
+internal fun Color.isVisuallyCloseTo(other: Color, threshold: Float = 0.04f): Boolean = kotlin.math.abs(red - other.red) +
+    kotlin.math.abs(green - other.green) +
+    kotlin.math.abs(blue - other.blue) < threshold

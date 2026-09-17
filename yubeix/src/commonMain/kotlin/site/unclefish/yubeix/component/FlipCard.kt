@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import kotlin.math.roundToInt
 
-private const val FlipCardCameraDistance = 12f
+private const val FLIP_CARD_CAMERA_DISTANCE = 12f
 
 /**
  * How far the card is allowed to tilt at the halfway point of the flip.
@@ -32,7 +32,7 @@ private const val FlipCardCameraDistance = 12f
  * rendered tilt keeps the narrowest frame at cos(80deg), about a sixth of the card's width, and
  * leaves the flat open and closed states untouched.
  */
-private const val FlipCardMaxTiltDegrees = 80f
+private const val FLIP_CARD_MAX_TILT_DEGREES = 80f
 
 /**
  * Stateless 3D flip-card renderer: [front] and [back] swap at the halfway point of
@@ -49,7 +49,7 @@ fun FlipCard(
     modifier: Modifier = Modifier,
     startScale: Float = 1f,
     sinkScale: Float = 1f,
-    front: @Composable BoxScope.() -> Unit,
+    front: @Composable BoxScope.() -> Unit = {},
     back: @Composable BoxScope.() -> Unit,
 ) {
     val density = LocalDensity.current
@@ -81,7 +81,7 @@ fun FlipCard(
     val renderedScale = visualScale * clampedSinkScale
     val showFront = rotationDegrees <= 90f
     val faceRotation = if (showFront) rotationDegrees else rotationDegrees - 180f
-    val visibleRotation = faceRotation * (FlipCardMaxTiltDegrees / 90f)
+    val visibleRotation = faceRotation * (FLIP_CARD_MAX_TILT_DEGREES / 90f)
 
     Box(
         modifier = modifier
@@ -97,7 +97,7 @@ fun FlipCard(
             )
             .graphicsLayer {
                 rotationY = visibleRotation
-                cameraDistance = FlipCardCameraDistance * density.density
+                cameraDistance = FLIP_CARD_CAMERA_DISTANCE * density.density
                 transformOrigin = TransformOrigin.Center
                 scaleX = renderedScale
                 scaleY = renderedScale

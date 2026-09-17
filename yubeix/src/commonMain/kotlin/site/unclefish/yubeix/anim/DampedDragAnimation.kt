@@ -50,7 +50,7 @@ class DampedDragAnimation(
         spring(
             0.5f,
             300f,
-            visibilityThreshold * 10f
+            visibilityThreshold * 10f,
         )
     private val pressProgressAnimationSpec =
         spring(1f, 1000f, 0.001f)
@@ -96,7 +96,7 @@ class DampedDragAnimation(
             onDragCancel = {
                 onDragStopped()
                 release()
-            }
+            },
         ) { change, dragAmount ->
             onDrag(size, dragAmount)
         }
@@ -150,7 +150,7 @@ class DampedDragAnimation(
     private fun updateVelocity() {
         velocityTracker.addPosition(
             monotonicTimeMillis(),
-            Offset(value, 0f)
+            Offset(value, 0f),
         )
         val targetVelocity = velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)
         animationScope.launch { velocityAnimation.animateTo(targetVelocity, velocityAnimationSpec) }

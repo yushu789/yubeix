@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.toArgb
 
 fun RuntimeShader(shaderString: String): RuntimeShader = AndroidRuntimeShader(
-    android.graphics.RuntimeShader(shaderString)
+    android.graphics.RuntimeShader(shaderString),
 )
 
 fun RuntimeShader.asComposeShader(): Shader = asAndroidRuntimeShader()
@@ -35,12 +35,11 @@ interface RuntimeShader {
     fun setColorUniform(name: String, color: Color)
 }
 
-internal fun RuntimeShader.asAndroidRuntimeShader(): android.graphics.RuntimeShader =
-    (this as AndroidRuntimeShader).shader
+internal fun RuntimeShader.asAndroidRuntimeShader(): android.graphics.RuntimeShader = (this as AndroidRuntimeShader).shader
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 private class AndroidRuntimeShader(
-    val shader: android.graphics.RuntimeShader
+    val shader: android.graphics.RuntimeShader,
 ) : RuntimeShader {
 
     val brush: ShaderBrush = ShaderBrush(shader)

@@ -3,17 +3,17 @@
 
 package site.unclefish.yubeix.extra
 
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Measured
-import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,11 +23,6 @@ import site.unclefish.yubeix.basic.CardDefaults
 import site.unclefish.yubeix.basic.HorizontalDivider
 import site.unclefish.yubeix.theme.YubeixTheme
 
-/**
- * A stateless [ColumnScope] receiver used to compose [SuperGroup]'s content. The group measures
- * its rows in a [SubcomposeLayout], so the receiver only exists to satisfy the public
- * `ColumnScope` content contract; the scope's modifiers never attach to a real Column parent.
- */
 /**
  * ColumnScope handed to [SuperGroup] content. The rows are measured by a SubcomposeLayout rather
  * than a real Column, so the scope's placement modifiers are no-ops here - the same behavior the

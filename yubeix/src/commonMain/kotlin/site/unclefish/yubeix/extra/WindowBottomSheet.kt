@@ -1,7 +1,5 @@
 // Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
-//
-// Portions of this file are adapted from Miuix 0.8.8 WindowBottomSheet and BottomSheetContentLayout.
 
 package site.unclefish.yubeix.extra
 
@@ -73,9 +71,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.NavigationEventTransitionState
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
-import site.unclefish.yubeix.icon.cupertino.outlined.Checkmark
-import site.unclefish.yubeix.icon.cupertino.outlined.Xmark
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -85,6 +80,9 @@ import site.unclefish.yubeix.anim.yubeixSpring
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
+import site.unclefish.yubeix.icon.cupertino.outlined.Checkmark
+import site.unclefish.yubeix.icon.cupertino.outlined.Xmark
 import site.unclefish.yubeix.theme.LocalContentColor
 import site.unclefish.yubeix.theme.LocalDismissState
 import site.unclefish.yubeix.theme.YubeixSheetElevatedTheme
@@ -479,7 +477,7 @@ private fun WindowBottomSheetContentLayout(
     content: @Composable () -> Unit,
 ) {
     val animationProgress = remember {
-        Animatable(0f, visibilityThreshold = WindowBottomSheetAnimationVisibilityThreshold)
+        Animatable(0f, visibilityThreshold = WINDOW_BOTTOM_SHEET_ANIMATION_VISIBILITY_THRESHOLD)
     }
     val dragOffsetY = remember { Animatable(0f) }
     val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
@@ -1120,11 +1118,11 @@ private val WindowBottomSheetDefaultMaxWidth = 560.dp
 private val WindowBottomSheetDefaultInsideMargin = DpSize(16.dp, 14.dp)
 private val WindowBottomSheetHeaderActionSize: Dp = 44.dp
 private val WindowBottomSheetHeaderActionIconSize: Dp = 20.dp
-private const val WindowBottomSheetAnimationVisibilityThreshold = 0.0001f
+private const val WINDOW_BOTTOM_SHEET_ANIMATION_VISIBILITY_THRESHOLD = 0.0001f
 
 /** The default smooth, non-bouncy spring used when presenting a [WindowBottomSheet]. */
 private val WindowBottomSheetEnterAnimationSpec: AnimationSpec<Float> = spring(
     dampingRatio = Spring.DampingRatioNoBouncy,
     stiffness = Spring.StiffnessLow,
-    visibilityThreshold = WindowBottomSheetAnimationVisibilityThreshold,
+    visibilityThreshold = WINDOW_BOTTOM_SHEET_ANIMATION_VISIBILITY_THRESHOLD,
 )

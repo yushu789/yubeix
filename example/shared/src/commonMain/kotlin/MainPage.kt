@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
@@ -45,13 +45,13 @@ import component.tabRowSection
 import component.textFieldSection
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.InputField
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.SearchBar
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.SnackbarHostState
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.YubeixTheme

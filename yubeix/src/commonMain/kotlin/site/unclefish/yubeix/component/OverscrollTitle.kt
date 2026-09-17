@@ -20,16 +20,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-private const val OverscrollTitleMaxFontScale = 1.1f
-private val OverscrollTitleMaxFontScaleDistance = 150.dp
+private const val OVERSCROLL_TITLE_MAX_FONT_SCALE = 1.1f
+private val OVERSCROLL_TITLE_MAX_FONT_SCALE_DISTANCE = 150.dp
 
 @Composable
 fun OverscrollTitle(
     restingTopInWindowPx: Float,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    maxFontScale: Float = OverscrollTitleMaxFontScale,
-    maxFontScaleDistance: Dp = OverscrollTitleMaxFontScaleDistance,
+    maxFontScale: Float = OVERSCROLL_TITLE_MAX_FONT_SCALE,
+    maxFontScaleDistance: Dp = OVERSCROLL_TITLE_MAX_FONT_SCALE_DISTANCE,
     content: @Composable () -> Unit,
 ) {
     require(maxFontScale >= 1f) { "maxFontScale must be >= 1." }
@@ -70,6 +70,4 @@ fun OverscrollTitle(
 }
 
 @Composable
-fun overscrollTitleTextStyle(style: TextStyle): TextStyle {
-    return style
-}
+fun overscrollTitleTextStyle(style: TextStyle): TextStyle = style

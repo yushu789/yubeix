@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.SmallTopAppBar
 import site.unclefish.yubeix.basic.TopAppBar
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.icon.YubeixIcons
 import site.unclefish.yubeix.icon.extended.Back

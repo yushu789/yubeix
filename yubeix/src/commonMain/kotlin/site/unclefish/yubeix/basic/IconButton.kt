@@ -137,7 +137,7 @@ object IconButtonDefaults {
 // Ported from the wordmoment app's chrome: the back chevron glyph, the flat capsule button, and
 // the grouped flat-surface icon buttons used in hero titles and session screens.
 
-private var _backChevron: ImageVector? = null
+private var backChevronCache: ImageVector? = null
 
 /**
  * The chevron glyph behind [BackIcon]: a rounded caret pointing backwards, mirrored
@@ -145,8 +145,8 @@ private var _backChevron: ImageVector? = null
  */
 private val BackChevron: ImageVector
     get() {
-        if (_backChevron != null) return _backChevron!!
-        _backChevron = ImageVector.Builder(
+        if (backChevronCache != null) return backChevronCache!!
+        backChevronCache = ImageVector.Builder(
             name = "BackChevron",
             defaultWidth = 32.dp,
             defaultHeight = 32.dp,
@@ -167,7 +167,7 @@ private val BackChevron: ImageVector
                 fill = SolidColor(Color.Black),
             )
         }.build()
-        return _backChevron!!
+        return backChevronCache!!
     }
 
 /**

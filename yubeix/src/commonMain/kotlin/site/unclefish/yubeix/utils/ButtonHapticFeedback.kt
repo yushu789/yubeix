@@ -15,20 +15,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val ButtonReleaseHapticDelayMillis = 220L
-private const val ButtonDuplicatePressSuppressMillis = 80L
+private const val BUTTON_RELEASE_HAPTIC_DELAY_MILLIS = 220L
+private const val BUTTON_DUPLICATE_PRESS_SUPPRESS_MILLIS = 80L
 
 /**
  * Button press haptics with a release confirmation: a tick on press-down, and a confirm tick when
  * the release comes long enough after the press ([releaseFeedbackDelayMillis]) - a quick tap
  * intentionally gets only the press tick. Duplicate presses within
- * [ButtonDuplicatePressSuppressMillis] are suppressed so rapid re-taps don't machine-gun.
+ * [BUTTON_DUPLICATE_PRESS_SUPPRESS_MILLIS] are suppressed so rapid re-taps don't machine-gun.
  */
 @Composable
 fun ButtonHapticFeedback(
     interactionSource: InteractionSource,
     enabled: Boolean = true,
-    releaseFeedbackDelayMillis: Long = ButtonReleaseHapticDelayMillis
+    releaseFeedbackDelayMillis: Long = BUTTON_RELEASE_HAPTIC_DELAY_MILLIS,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
@@ -48,7 +48,7 @@ fun ButtonHapticFeedback(
             releaseFeedbackReady = false
             suppressDuplicatePressJob?.cancel()
             suppressDuplicatePressJob = launch {
-                delay(ButtonDuplicatePressSuppressMillis)
+                delay(BUTTON_DUPLICATE_PRESS_SUPPRESS_MILLIS)
                 suppressDuplicatePressJob = null
             }
         }
@@ -67,6 +67,7 @@ fun ButtonHapticFeedback(
                         }
                     }
                 }
+
                 is PressInteraction.Release -> {
                     if (isPressSessionActive) {
                         if (releaseFeedbackReady && currentEnabled) {
@@ -75,6 +76,7 @@ fun ButtonHapticFeedback(
                         endPressSession()
                     }
                 }
+
                 is PressInteraction.Cancel -> {
                     if (isPressSessionActive) {
                         endPressSession()

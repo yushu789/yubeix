@@ -1,4 +1,4 @@
-// Copyright 2026, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.interfaces

@@ -149,7 +149,7 @@ fun Modifier.textureBlur(
     blurRadius = blurRadius,
     noiseCoefficient = BlurDefaults.NoiseCoefficient,
     colors = colors,
-    maxDownscaleFactor = BlurDefaults.MaxDownscaleFactor,
+    maxDownscaleFactor = BlurDefaults.MAX_DOWNSCALE_FACTOR,
     contentBlendMode = contentBlendMode,
     enabled = true,
 )

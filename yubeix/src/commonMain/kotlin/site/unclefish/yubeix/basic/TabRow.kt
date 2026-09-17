@@ -52,9 +52,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -91,30 +91,34 @@ import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-private const val TabRowIndicatorSpringVisibilityThreshold = 0.0001f
-private const val TabRowIndicatorStiffness = 300f
-private const val TabRowCommitHandoffTimeoutMillis = 700L
+private const val TAB_ROW_INDICATOR_SPRING_VISIBILITY_THRESHOLD = 0.0001f
+private const val TAB_ROW_INDICATOR_STIFFNESS = 300f
+private const val TAB_ROW_COMMIT_HANDOFF_TIMEOUT_MILLIS = 700L
+
 // A press that lands on the indicator has already declared its intent, so it only needs a fraction
 // of the usual slop before the drag is claimed.
-private const val TabRowIndicatorGrabSlopFactor = 0.35f
+private const val TAB_ROW_INDICATOR_GRAB_SLOP_FACTOR = 0.35f
+
 // How far the finger travels to step one tab, as a fraction of that tab's width. Below 1 so a flick
 // switches without dragging the whole way across.
-private const val TabRowStepStrideFactor = 0.45f
-private const val TabRowShadowLayerCount = 5
+private const val TAB_ROW_STEP_STRIDE_FACTOR = 0.45f
+private const val TAB_ROW_SHADOW_LAYER_COUNT = 5
 private val TabRowLabelWeight = FontWeight.Medium
+
 // Every tab row shares this curve so the indicator reads the same everywhere. Callers that want a
 // different pace should not hand-roll one - change it here.
 private val TabRowIndicatorAnimationSpec: AnimationSpec<Float> = spring(
     dampingRatio = Spring.DampingRatioNoBouncy,
-    stiffness = TabRowIndicatorStiffness,
-    visibilityThreshold = TabRowIndicatorSpringVisibilityThreshold,
+    stiffness = TAB_ROW_INDICATOR_STIFFNESS,
+    visibilityThreshold = TAB_ROW_INDICATOR_SPRING_VISIBILITY_THRESHOLD,
 )
+
 // A critically damped spring released from rest starts at zero velocity, which over the short hop
 // between two tabs reads as the indicator hesitating before it sets off. Launching it at exactly
 // omega x distance cancels the linear term of the critically damped solution and leaves a pure
 // exponential decay: fastest on the very first frame, then a long natural settle. Compose springs
 // use unit mass, so omega = sqrt(k).
-private val TabRowIndicatorInitialVelocityFactor = sqrt(TabRowIndicatorStiffness)
+private val TabRowIndicatorInitialVelocityFactor = sqrt(TAB_ROW_INDICATOR_STIFFNESS)
 
 /**
  * A segmented [TabRow] with an iOS-style sliding indicator.
@@ -469,7 +473,6 @@ private fun YubeixTabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit,
-    modifier: Modifier,
     colors: TabRowColors,
     widthMode: TabRowWidthMode,
     minWidth: Dp,
@@ -489,6 +492,7 @@ private fun YubeixTabRow(
     selectedShadowOffsetY: Dp,
     selectedShadowColor: Color,
     indicatorPosition: Float?,
+    modifier: Modifier = Modifier,
 ) {
     if (tabs.isEmpty()) return
 
@@ -551,7 +555,7 @@ private fun YubeixTabRow(
                 valueRange = 0f..1f,
                 visibilityThreshold = 0.001f,
                 initialScale = 1f,
-                pressedScale = TabRowDefaults.PressedIndicatorScale,
+                pressedScale = TabRowDefaults.PRESSED_INDICATOR_SCALE,
                 onDragStarted = {},
                 onDragStopped = {},
                 onDrag = { _, _ -> },
@@ -562,7 +566,7 @@ private fun YubeixTabRow(
             val committed = committedIndex ?: return@LaunchedEffect
             // Bounded, because a caller is free to ignore the selection; when it does, the indicator
             // should animate back to where the caller actually is rather than stay parked.
-            withTimeoutOrNull(TabRowCommitHandoffTimeoutMillis) {
+            withTimeoutOrNull(TAB_ROW_COMMIT_HANDOFF_TIMEOUT_MILLIS) {
                 snapshotFlow { selectedIndex }.first { it == committed }
             }
             committedIndex = null
@@ -643,7 +647,7 @@ private fun YubeixTabRow(
                     // shorter threshold. Making it wait the full slop is what reads as the drag not
                     // responding. Elsewhere the full slop still protects the tap.
                     val dragThreshold = if (grabbedIndicator) {
-                        viewConfiguration.touchSlop * TabRowIndicatorGrabSlopFactor
+                        viewConfiguration.touchSlop * TAB_ROW_INDICATOR_GRAB_SLOP_FACTOR
                     } else {
                         viewConfiguration.touchSlop
                     }
@@ -679,7 +683,7 @@ private fun YubeixTabRow(
                         // having to haul the finger the whole way across.
                         val stridePx = currentConfig.tabWidths.getOrNull(currentIndex)
                             ?.toPx()
-                            ?.times(TabRowStepStrideFactor)
+                            ?.times(TAB_ROW_STEP_STRIDE_FACTOR)
                             ?: continue
                         val steps = ((logicalX - anchorX) / stridePx).toInt()
                         if (steps == 0) continue
@@ -798,8 +802,10 @@ private fun YubeixTabRow(
                             .align(Alignment.BottomStart)
                             .offset {
                                 IntOffset(
-                                    (indicatorOffset.value - scrollOffset +
-                                        with(density) { indicatorHorizontalInset.toPx() }).roundToInt(),
+                                    (
+                                        indicatorOffset.value - scrollOffset +
+                                            with(density) { indicatorHorizontalInset.toPx() }
+                                        ).roundToInt(),
                                     0,
                                 )
                             }
@@ -905,8 +911,8 @@ private fun Modifier.tabRowIndicatorShadow(
 ): Modifier = drawWithCache {
     val blurPx = blurRadius.toPx()
     val offsetYPx = offsetY.toPx()
-    val expandedOutlines = (TabRowShadowLayerCount downTo 1).map { layer ->
-        val expandPx = blurPx * layer / TabRowShadowLayerCount
+    val expandedOutlines = (TAB_ROW_SHADOW_LAYER_COUNT downTo 1).map { layer ->
+        val expandPx = blurPx * layer / TAB_ROW_SHADOW_LAYER_COUNT
         val outline = shape.createOutline(
             size = Size(size.width + expandPx * 2f, size.height + expandPx * 2f),
             layoutDirection = layoutDirection,
@@ -919,7 +925,7 @@ private fun Modifier.tabRowIndicatorShadow(
             translate(-expandPx, offsetYPx - expandPx) {
                 drawOutline(
                     outline = outline,
-                    color = color.copy(alpha = color.alpha / TabRowShadowLayerCount),
+                    color = color.copy(alpha = color.alpha / TAB_ROW_SHADOW_LAYER_COUNT),
                 )
             }
         }
@@ -1099,10 +1105,12 @@ private fun calculateEqualTabWidth(
     val idealWidth = contentWidth / tabCount
     return when {
         idealWidth < minWidth -> minWidth
+
         idealWidth > maxWidth -> {
             val totalMaxWidth = maxWidth * tabCount + totalSpacing
             if (totalMaxWidth < availableWidth) idealWidth else maxWidth
         }
+
         else -> idealWidth
     }
 }
@@ -1230,7 +1238,7 @@ object TabRowDefaults {
      * The indicator shrinks under the finger rather than swelling: it already fills the track's
      * height, so growing it would spill over the track's edges.
      */
-    const val PressedIndicatorScale = 0.94f
+    const val PRESSED_INDICATOR_SCALE = 0.94f
 
     /**
      * The default colors for the [TabRow] and [TabRowWithContour].
@@ -1281,14 +1289,12 @@ object TabRowDefaults {
         contentColor: Color = YubeixTheme.colorScheme.onSurfaceVariantSummary,
         indicatorColor: Color = tabRowSelectedAccentColor(),
         selectedContentColor: Color = indicatorColor,
-    ): TabRowColors {
-        return tabRowColors(
-            backgroundColor = backgroundColor,
-            contentColor = contentColor,
-            selectedBackgroundColor = indicatorColor,
-            selectedContentColor = selectedContentColor,
-        )
-    }
+    ): TabRowColors = tabRowColors(
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+        selectedBackgroundColor = indicatorColor,
+        selectedContentColor = selectedContentColor,
+    )
 }
 
 @Composable
@@ -1324,25 +1330,22 @@ data class TabRowColors(
      * The track color behind all tabs, or the sliding indicator color when [selected] is true.
      */
     @Stable
-    fun backgroundColor(selected: Boolean): Color =
-        if (selected) selectedBackgroundColor else backgroundColor
+    fun backgroundColor(selected: Boolean): Color = if (selected) selectedBackgroundColor else backgroundColor
 
     /**
      * The label color of an unselected tab, or of the selected tab when [selected] is true.
      */
     @Stable
-    fun contentColor(selected: Boolean): Color =
-        if (selected) selectedContentColor else contentColor
+    fun contentColor(selected: Boolean): Color = if (selected) selectedContentColor else contentColor
 
     /**
      * The label color interpolated along [selectedProgress] (0f unselected, 1f selected), so a
      * label recolours continuously while the indicator travels towards it.
      */
     @Stable
-    fun contentColor(selectedProgress: Float): Color =
-        androidx.compose.ui.graphics.lerp(
-            contentColor,
-            selectedContentColor,
-            selectedProgress.coerceIn(0f, 1f),
-        )
+    fun contentColor(selectedProgress: Float): Color = androidx.compose.ui.graphics.lerp(
+        contentColor,
+        selectedContentColor,
+        selectedProgress.coerceIn(0f, 1f),
+    )
 }

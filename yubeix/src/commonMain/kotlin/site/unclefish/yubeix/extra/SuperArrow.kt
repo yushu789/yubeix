@@ -25,13 +25,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.RoundedCornerStyle
 import com.kyant.shapes.RoundedRectangle
-import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
-import site.unclefish.yubeix.icon.cupertino.outlined.ChevronBackward
-import site.unclefish.yubeix.icon.cupertino.outlined.ChevronForward
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.BasicComponentColors
 import site.unclefish.yubeix.basic.BasicComponentDefaults
 import site.unclefish.yubeix.basic.Icon
+import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
+import site.unclefish.yubeix.icon.cupertino.outlined.ChevronBackward
+import site.unclefish.yubeix.icon.cupertino.outlined.ChevronForward
 import site.unclefish.yubeix.theme.YubeixTheme
 
 /**

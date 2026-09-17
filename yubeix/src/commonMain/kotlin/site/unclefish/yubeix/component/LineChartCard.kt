@@ -41,12 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.first
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.CardDefaults
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.theme.YubeixTheme
-import kotlinx.coroutines.flow.first
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
@@ -67,7 +67,7 @@ private val ChartBarRadius = 3.dp
 private val ChartLineWidth = 2.6.dp
 private val ChartPointRadius = 5.dp
 private val ChartInnerPointRadius = 2.dp
-private const val ChartAxisStepCount = 4
+private const val CHART_AXIS_STEP_COUNT = 4
 
 /**
  * One labeled data point along a chart's x axis.
@@ -162,7 +162,7 @@ fun LineChartCard(
     val colors = YubeixTheme.colorScheme
     val maxValue = points.maxOfOrNull { it.value } ?: 0f
     val axisStep = remember(maxValue) { computeNiceAxisStep(maxValue) }
-    val axisMax = axisStep * ChartAxisStepCount
+    val axisMax = axisStep * CHART_AXIS_STEP_COUNT
     val legendItems = legendLabel?.let { listOf(ChartLegendItem(color = color, label = it)) }
     val legend: (@Composable () -> Unit)? = legendItems?.let { items ->
         { ChartLegendRow(items = items) }
@@ -173,8 +173,8 @@ fun LineChartCard(
         title = title,
         icon = icon,
         unit = unit,
-        axisLabels = List(ChartAxisStepCount + 1) { index ->
-            axisLabelFormatter(axisStep * (ChartAxisStepCount - index))
+        axisLabels = List(CHART_AXIS_STEP_COUNT + 1) { index ->
+            axisLabelFormatter(axisStep * (CHART_AXIS_STEP_COUNT - index))
         },
         plotCount = points.size,
         legend = legend,
@@ -224,7 +224,7 @@ fun BarChartCard(
     val colors = YubeixTheme.colorScheme
     val maxValue = series.flatMap { it.values }.maxOfOrNull { it } ?: 0f
     val axisStep = remember(maxValue) { computeNiceAxisStep(maxValue) }
-    val axisMax = axisStep * ChartAxisStepCount
+    val axisMax = axisStep * CHART_AXIS_STEP_COUNT
     val legendItems = remember(series) { series.map { ChartLegendItem(it.color, it.label) } }
 
     ChartCardFrame(
@@ -232,8 +232,8 @@ fun BarChartCard(
         title = title,
         icon = icon,
         unit = unit,
-        axisLabels = List(ChartAxisStepCount + 1) { index ->
-            axisLabelFormatter(axisStep * (ChartAxisStepCount - index))
+        axisLabels = List(CHART_AXIS_STEP_COUNT + 1) { index ->
+            axisLabelFormatter(axisStep * (CHART_AXIS_STEP_COUNT - index))
         },
         plotCount = pointLabels.size,
         legend = { ChartLegendRow(items = legendItems) },
@@ -263,7 +263,7 @@ private fun ChartCardFrame(
     axisLabels: List<String>,
     plotCount: Int,
     modifier: Modifier = Modifier,
-    legend: (@Composable () -> Unit)?,
+    legend: (@Composable () -> Unit)? = null,
     chart: @Composable () -> Unit,
 ) {
     val colors = YubeixTheme.colorScheme
@@ -375,7 +375,7 @@ private fun ChartFixedAxis(
             strokeWidth = 1.dp.toPx(),
         )
         labels.forEachIndexed { index, label ->
-            val y = top + height * index / ChartAxisStepCount.toFloat()
+            val y = top + height * index / CHART_AXIS_STEP_COUNT.toFloat()
             val layout = textMeasurer.measure(AnnotatedString(label), style)
             drawText(
                 textLayoutResult = layout,
@@ -523,8 +523,8 @@ private fun DrawScope.drawChartGrid(
     color: Color,
 ) {
     val height = bottom - top
-    repeat(ChartAxisStepCount + 1) { index ->
-        val y = top + height * index / ChartAxisStepCount.toFloat()
+    repeat(CHART_AXIS_STEP_COUNT + 1) { index ->
+        val y = top + height * index / CHART_AXIS_STEP_COUNT.toFloat()
         drawLine(color, Offset(start, y), Offset(end, y), 1.dp.toPx())
     }
 }
@@ -575,14 +575,13 @@ private fun DrawScope.drawTextAt(
     )
 }
 
-private fun chartAxisTextStyle(color: Color) =
-    TextStyle(color = color, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+private fun chartAxisTextStyle(color: Color) = TextStyle(color = color, fontSize = 10.sp, fontWeight = FontWeight.Medium)
 
-/** Rounds [maxValue] / [ChartAxisStepCount] up to a "nice" step (1, 2, 3, 4, 5 or 10 times a
+/** Rounds [maxValue] / [CHART_AXIS_STEP_COUNT] up to a "nice" step (1, 2, 3, 4, 5 or 10 times a
  *  power of ten) so the y-axis ticks land on readable values. */
 private fun computeNiceAxisStep(maxValue: Float): Float {
     if (maxValue <= 0f) return 1f
-    val target = maxValue.toDouble() / ChartAxisStepCount
+    val target = maxValue.toDouble() / CHART_AXIS_STEP_COUNT
     val exponent = floor(log10(target)).toInt()
     val power = 10.0.pow(exponent.toDouble())
     val fraction = target / power

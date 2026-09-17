@@ -72,9 +72,9 @@ private object NavigationShapeMaskCache {
         style = Paint.Style.FILL
     }
 
-    private val cache = object : LinkedHashMap<MaskKey, MaskBitmap>(MaskCacheMaxSize, 0.75f, true) {
+    private val cache = object : LinkedHashMap<MaskKey, MaskBitmap>(MASK_CACHE_MAX_SIZE, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<MaskKey, MaskBitmap>): Boolean {
-            val shouldRemove = size > MaskCacheMaxSize
+            val shouldRemove = size > MASK_CACHE_MAX_SIZE
             if (shouldRemove) {
                 eldest.value.bitmap.recycle()
             }
@@ -89,7 +89,7 @@ private object NavigationShapeMaskCache {
         layoutDirection: LayoutDirection,
         density: Density,
     ): MaskBitmap {
-        val paddingPx = (radiusPx * MaskPaddingRadiusMultiplier).roundToInt()
+        val paddingPx = (radiusPx * MASK_PADDING_RADIUS_MULTIPLIER).roundToInt()
         val key = MaskKey(
             width = width,
             height = height,
@@ -150,8 +150,8 @@ private fun Outline.toPath(): Path = when (this) {
     is Outline.Rounded -> Path().apply { addRoundRect(roundRect) }
 }
 
-private const val MaskCacheMaxSize = 6
-private const val MaskPaddingRadiusMultiplier = 2f
+private const val MASK_CACHE_MAX_SIZE = 6
+private const val MASK_PADDING_RADIUS_MULTIPLIER = 2f
 
 private data class MaskKey(
     val width: Int,

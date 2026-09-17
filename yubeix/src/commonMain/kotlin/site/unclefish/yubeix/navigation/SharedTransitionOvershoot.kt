@@ -9,7 +9,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 
-/**
+/*
  * How a shared transition reads the scene progress handed to it by [SceneDisplay].
  *
  * That progress is a spring, so it leaves 0..1 at the end of a transition: [navigationSharedElementExitSpring]
@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
  * past its target. Well above the spring's own overshoot, so its bounce is never clipped - a clipped
  * bounce reads as a flat spot in the landing.
  */
-private const val SharedTransitionOvershootLimit = 0.2f
+private const val SHARED_TRANSITION_OVERSHOOT_LIMIT = 0.2f
 
 /**
  * How far the window carries on past what it is landing on, per unit of the spring's overshoot. With
@@ -55,25 +55,24 @@ private const val SharedTransitionOvershootLimit = 0.2f
  * measures the bounce in screen distance, not in travel and not in the source's size, so the same
  * handful of dp is what lands the same everywhere.
  */
-private val SharedTransitionOvershootCarryPerUnit = 520.dp
+private val SHARED_TRANSITION_OVERSHOOT_CARRY_PER_UNIT = 520.dp
 
 /** A fling has no natural bound; the carry stops here. */
-private val SharedTransitionOvershootMaxCarry = 32.dp
+private val SHARED_TRANSITION_OVERSHOOT_MAX_CARRY = 32.dp
 
 /**
  * Below this much travel there is no direction worth carrying along: the source is where the window
  * ends up anyway, and a fixed carry along a direction made of a few pixels of noise would fling it
  * somewhere arbitrary. The carry fades out over the last of it rather than switching off.
  */
-private val SharedTransitionOvershootMinTravel = 64.dp
+private val SHARED_TRANSITION_OVERSHOOT_MIN_TRAVEL = 64.dp
 
 /** The 0..1 part of [progress]: everything but the spring's overshoot. */
 fun sharedTransitionExpansion(progress: Float): Float = progress.coerceIn(0f, 1f)
 
 /** The part of [progress] past an endpoint: negative onto the source, positive past full screen. */
-fun sharedTransitionOvershoot(progress: Float): Float =
-    (progress - sharedTransitionExpansion(progress))
-        .coerceIn(-SharedTransitionOvershootLimit, SharedTransitionOvershootLimit)
+fun sharedTransitionOvershoot(progress: Float): Float = (progress - sharedTransitionExpansion(progress))
+    .coerceIn(-SHARED_TRANSITION_OVERSHOOT_LIMIT, SHARED_TRANSITION_OVERSHOOT_LIMIT)
 
 /**
  * How far the window is carried past the source it lands on: along the line it was already travelling
@@ -93,9 +92,9 @@ fun sharedTransitionOvershootPast(
     if (length <= 0f || landing == 0f) {
         return Offset.Zero
     }
-    val maxCarry = with(density) { SharedTransitionOvershootMaxCarry.toPx() }
-    val minTravel = with(density) { SharedTransitionOvershootMinTravel.toPx() }
-    val carry = with(density) { SharedTransitionOvershootCarryPerUnit.toPx() * landing }
+    val maxCarry = with(density) { SHARED_TRANSITION_OVERSHOOT_MAX_CARRY.toPx() }
+    val minTravel = with(density) { SHARED_TRANSITION_OVERSHOOT_MIN_TRAVEL.toPx() }
+    val carry = with(density) { SHARED_TRANSITION_OVERSHOOT_CARRY_PER_UNIT.toPx() * landing }
         .coerceIn(-maxCarry, maxCarry) * (length / minTravel).coerceAtMost(1f)
     return travel / length * carry
 }
@@ -126,5 +125,4 @@ fun sharedTransitionWindow(
     )
 }
 
-private fun lerp(start: Float, stop: Float, fraction: Float): Float =
-    start + (stop - start) * fraction
+private fun lerp(start: Float, stop: Float, fraction: Float): Float = start + (stop - start) * fraction

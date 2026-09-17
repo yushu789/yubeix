@@ -27,8 +27,8 @@ import site.unclefish.yubeix.utils.rememberSafeTopInset
 
 // Matches the iOS sheet presentation: the page behind the sheet shrinks a little, drops below the
 // status bar and picks up rounded corners over a black backdrop.
-private const val SheetBackgroundScaleDivisor = 11f
-private const val SheetBackgroundTranslationMultiplier = 2.75f
+private const val SHEET_BACKGROUND_SCALE_DIVISOR = 11f
+private const val SHEET_BACKGROUND_TRANSLATION_MULTIPLIER = 2.75f
 private val SheetBackgroundTopSpacing = 10.dp
 private val SheetBackgroundMinTopInset = 10.dp
 
@@ -109,11 +109,11 @@ fun Modifier.sheetBackgroundTransform(
     cornerRadius: Dp,
 ): Modifier = graphicsLayer {
     val currentProgress = progress().coerceIn(0f, 1f)
-    val scale = 1f - currentProgress / SheetBackgroundScaleDivisor
+    val scale = 1f - currentProgress / SHEET_BACKGROUND_SCALE_DIVISOR
     scaleX = scale
     scaleY = scale
     translationY =
-        (1f - scale) * topInsetPx * SheetBackgroundTranslationMultiplier
+        (1f - scale) * topInsetPx * SHEET_BACKGROUND_TRANSLATION_MULTIPLIER
 }
     .navigationBitmapClip(
         cornerRadius = cornerRadius,

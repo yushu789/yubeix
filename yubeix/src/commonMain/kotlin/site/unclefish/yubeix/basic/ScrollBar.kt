@@ -142,7 +142,7 @@ fun VerticalScrollBar(
     colors: ScrollBarColors = ScrollBarDefaults.scrollBarColors(),
     thumbWidth: Dp = ScrollBarDefaults.ThumbWidth,
     cornerRadius: Dp = ScrollBarDefaults.CornerRadius,
-    thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
+    thumbMinLength: Dp = ScrollBarDefaults.THUMB_MIN_LENGTH,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
 ) {
     ScrollBar(
@@ -182,7 +182,7 @@ fun HorizontalScrollBar(
     colors: ScrollBarColors = ScrollBarDefaults.scrollBarColors(),
     thumbWidth: Dp = ScrollBarDefaults.ThumbWidth,
     cornerRadius: Dp = ScrollBarDefaults.CornerRadius,
-    thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
+    thumbMinLength: Dp = ScrollBarDefaults.THUMB_MIN_LENGTH,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
 ) {
     ScrollBar(
@@ -208,7 +208,7 @@ object ScrollBarDefaults {
     val EndPadding: Dp = 3.dp
 
     /** The minimum length of the thumb. */
-    val ThumbMinLength: Dp = 12.dp
+    val THUMB_MIN_LENGTH: Dp = 12.dp
 
     /** The corner radius. [Dp.Unspecified] defaults to half of [ThumbWidth]. */
     val CornerRadius: Dp = Dp.Unspecified
@@ -217,15 +217,15 @@ object ScrollBarDefaults {
     val FadeDelayMillis = 1000
 
     /** How long the fade-in takes. */
-    val FadeInMillis = 120
+    val FADE_IN_MILLIS = 120
 
     /** How long the fade-out takes. */
-    val FadeOutMillis = 220
+    val FADE_OUT_MILLIS = 220
 
-    /** How long the whole fade used to take; superseded by [FadeInMillis] and [FadeOutMillis]. */
+    /** How long the whole fade used to take; superseded by [FADE_IN_MILLIS] and [FADE_OUT_MILLIS]. */
     @Deprecated(
-        message = "Superseded by FadeInMillis and FadeOutMillis.",
-        replaceWith = ReplaceWith("ScrollBarDefaults.FadeOutMillis"),
+        message = "Superseded by FADE_IN_MILLIS and FADE_OUT_MILLIS.",
+        replaceWith = ReplaceWith("ScrollBarDefaults.FADE_OUT_MILLIS"),
     )
     val FadeDurationMillis = 500
 
@@ -242,13 +242,13 @@ object ScrollBarDefaults {
     val DragThumbAlpha = 0.5f
 
     /** The stiffness of the spring that animates the thumb metrics. */
-    const val MetricSpringStiffness = 900f
+    const val METRIC_SPRING_STIFFNESS = 900f
 
     /** The overscroll offset in pixels above which the thumb is considered overscrolled. */
-    const val OverscrollVisibilityThresholdPx = 0.5f
+    const val OVERSCROLL_VISIBILITY_THRESHOLD_PX = 0.5f
 
     /** How far the thumb can shrink during overscroll, as a fraction of its resting length. */
-    const val OverscrollMinThumbScale = 0.35f
+    const val OVERSCROLL_MIN_THUMB_SCALE = 0.35f
 
     /** The duration of the hover/drag highlight animation. */
     val DragAnimationDurationMillis = 150
@@ -273,7 +273,7 @@ private fun ScrollBar(
     colors: ScrollBarColors = ScrollBarDefaults.scrollBarColors(),
     thumbWidth: Dp = ScrollBarDefaults.ThumbWidth,
     cornerRadius: Dp = ScrollBarDefaults.CornerRadius,
-    thumbMinLength: Dp = ScrollBarDefaults.ThumbMinLength,
+    thumbMinLength: Dp = ScrollBarDefaults.THUMB_MIN_LENGTH,
     endPadding: Dp = ScrollBarDefaults.EndPadding,
 ) {
     val density = LocalDensity.current
@@ -315,7 +315,7 @@ private fun ScrollBar(
             animate(
                 initialValue = opacity,
                 targetValue = 1f,
-                animationSpec = tween(ScrollBarDefaults.FadeInMillis),
+                animationSpec = tween(ScrollBarDefaults.FADE_IN_MILLIS),
             ) { value, _ ->
                 opacity = value
             }
@@ -329,7 +329,7 @@ private fun ScrollBar(
             animate(
                 initialValue = opacity,
                 targetValue = 0f,
-                animationSpec = tween(ScrollBarDefaults.FadeOutMillis),
+                animationSpec = tween(ScrollBarDefaults.FADE_OUT_MILLIS),
             ) { value, _ ->
                 opacity = value
             }
@@ -470,7 +470,7 @@ private fun ScrollBar(
                                 targetValue = targetThumbLength,
                                 animationSpec = spring(
                                     dampingRatio = Spring.DampingRatioNoBouncy,
-                                    stiffness = ScrollBarDefaults.MetricSpringStiffness,
+                                    stiffness = ScrollBarDefaults.METRIC_SPRING_STIFFNESS,
                                     visibilityThreshold = 0.5f,
                                 ),
                             ) { value, _ ->
@@ -489,9 +489,9 @@ private fun ScrollBar(
                     false -> overscrollState?.offset?.x ?: 0f
                 }
                 val overscrollAbsPx = abs(overscrollOffsetPx)
-                val isOverscrolled = overscrollAbsPx > ScrollBarDefaults.OverscrollVisibilityThresholdPx
+                val isOverscrolled = overscrollAbsPx > ScrollBarDefaults.OVERSCROLL_VISIBILITY_THRESHOLD_PX
                 val restingThumbLength = displayedThumbLength
-                val overscrollMinLengthPx = (restingThumbLength * ScrollBarDefaults.OverscrollMinThumbScale)
+                val overscrollMinLengthPx = (restingThumbLength * ScrollBarDefaults.OVERSCROLL_MIN_THUMB_SCALE)
                     .coerceAtLeast(1f)
                     .coerceAtMost(restingThumbLength)
                 val thumbLength = if (isOverscrolled) {

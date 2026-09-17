@@ -40,7 +40,7 @@ import kotlin.time.TimeSource
  * and drives the iOS-style push/pop motion between them.
  *
  * - New pages slide in from the right while the page below shifts left by a third of its width
- *   ([horizontalSlideSceneTransform]); a dark dim (alpha [NavigationDimAmount]) sits between the
+ *   ([horizontalSlideSceneTransform]); a dark dim (alpha [NAVIGATION_DIM_AMOUNT]) sits between the
  *   layers so the stack reads as depth.
  * - [predictiveBackEnabled] wires the system back gesture to a live drag of the front scene
  *   through the navigationevent pipeline, so the page follows the finger where the platform
@@ -75,11 +75,13 @@ fun <T : NavKey> SceneDisplay(
     // rides the plain no-bounce springs: a terminal overshoot reads as a second jump on small
     // sources, however it is tuned.
     sharedTransitionElastic: (from: T?, to: T?) -> Boolean = { _, _ -> false },
-    customSceneTransform: ((
-        scene: Scene<T>,
-        followingScenes: List<Scene<T>>,
-        zIndex: Float,
-    ) -> Modifier)? = null,
+    customSceneTransform: (
+        (
+            scene: Scene<T>,
+            followingScenes: List<Scene<T>>,
+            zIndex: Float,
+        ) -> Modifier
+    )? = null,
 ) {
     val scenes = navigationPath.scenes
     if (scenes.isEmpty()) {
@@ -94,7 +96,7 @@ fun <T : NavKey> SceneDisplay(
     // One ViewModelStore per scene so ViewModel creation inside an entry is scoped to the scene
     // rather than the host. Without this, a screen's ViewModel (and everything it holds - cached
     // PagingData, StateFlows, etc.) outlives the scene and is only released when the host dies.
-    val sceneViewModelStores = remember { mutableMapOf<Any, ViewModelStore>() }
+    val sceneViewModelStores = remember { SceneViewModelStores() }
 
     LaunchedEffect(retainedSceneIds, saveableStateHolder) {
         (knownSceneIds - retainedSceneIds).forEach { id ->
@@ -161,7 +163,7 @@ fun <T : NavKey> SceneDisplay(
         1f - frontScene.overshootProgress
     } else {
         frontScene.overshootProgress
-    }.coerceIn(-SharedProgressOvershootBand, 1f + SharedProgressOvershootBand)
+    }.coerceIn(-SHARED_PROGRESS_OVERSHOOT_BAND, 1f + SHARED_PROGRESS_OVERSHOOT_BAND)
     val sharedDirection = when {
         !sharedTransitionActive -> SharedTransitionDirection.None
         isPopTransition -> SharedTransitionDirection.Pop
@@ -285,7 +287,7 @@ fun Modifier.horizontalSlideSceneTransform(
                 0f
             }
             clip = false
-        }
+        },
 )
 
 @Composable
@@ -314,7 +316,7 @@ private fun <T : NavKey> PlatformBackAnimationHandler(
                     scene = scene,
                     commit = true,
                     velocityProgressPerSecond =
-                        session.velocityProgressPerSecond * session.dragStartProgress,
+                    session.velocityProgressPerSecond * session.dragStartProgress,
                 )
             }
             session.reset()
@@ -354,11 +356,8 @@ private fun <T : NavKey> PlatformBackAnimationHandler(
 /** Gesture-scoped drag state for the predictive back handler. */
 private class BackDragSession<T : NavKey> {
     var started = false
-        private set
     var scene: Scene<T>? = null
-        private set
     var dragStartProgress = 1f
-        private set
     var lastProgress = 0f
     var lastFrame: TimeSource.Monotonic.ValueTimeMark? = null
     var velocityProgressPerSecond = 0f
@@ -378,16 +377,25 @@ private class BackDragSession<T : NavKey> {
     }
 }
 
+/** Owns one [ViewModelStore] per scene id; cleared scene-by-scene as scenes leave the stack. */
+private class SceneViewModelStores {
+    private val stores = mutableMapOf<Any, ViewModelStore>()
+
+    fun storeFor(id: Any): ViewModelStore = stores.getOrPut(id) { ViewModelStore() }
+
+    fun remove(id: Any): ViewModelStore? = stores.remove(id)
+}
+
 private fun <T : NavKey> List<Scene<T>>.renderWindow(): List<Scene<T>> {
     if (isEmpty()) {
         return emptyList()
     }
 
-    var firstRenderedIndex = (size - IdleRenderedScenes).coerceAtLeast(0)
+    var firstRenderedIndex = (size - IDLE_RENDERED_SCENES).coerceAtLeast(0)
     var renderedCount = size - firstRenderedIndex
     while (
         firstRenderedIndex > 0 &&
-        renderedCount < MaxRenderedScenes &&
+        renderedCount < MAX_RENDERED_SCENES &&
         this[firstRenderedIndex].transition !is SceneTransition.None
     ) {
         firstRenderedIndex -= 1
@@ -407,7 +415,7 @@ private fun SceneOverlay(
             .fillMaxSize()
             .zIndex(zIndex)
             .graphicsLayer {
-                alpha = NavigationDimAmount * scene.progress.coerceIn(0f, 1f)
+                alpha = NAVIGATION_DIM_AMOUNT * scene.progress.coerceIn(0f, 1f)
             }
             .background(Color.Black),
     )
@@ -463,9 +471,11 @@ private fun <T : NavKey> SceneTransitionEffect(
                     targetValue = target,
                     animationSpec = when {
                         !elasticSharedElement -> navigationDragSettleSpring()
+
                         // Closing lands elastically; snapping back open does not, the same way the
                         // open itself does not.
                         transition.commit -> navigationSharedElementDragSettleSpring()
+
                         else -> navigationSharedElementDragCancelSpring()
                     },
                     // The gesture's velocity is reported in back-progress units, which run
@@ -483,7 +493,8 @@ private fun <T : NavKey> SceneTransitionEffect(
             }
 
             SceneTransition.Drag,
-            SceneTransition.None -> Unit
+            SceneTransition.None,
+            -> Unit
         }
     }
 }
@@ -495,8 +506,7 @@ private fun <T : NavKey> RenderScene(
     entryProvider: (T) -> NavEntry<T>,
     saveableStateHolder: SaveableStateHolder,
     saveableKey: Any,
-    sceneViewModelStores: MutableMap<Any, ViewModelStore>,
-    modifier: Modifier,
+    sceneViewModelStores: SceneViewModelStores,
     sharedScope: Any,
     sharedTransitionActive: Boolean,
     sharedHostTargetVisible: Boolean,
@@ -504,6 +514,7 @@ private fun <T : NavKey> RenderScene(
     sharedTransitionDirection: SharedTransitionDirection,
     isTransitionBackground: Boolean,
     isForeground: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val entry = remember(scene.route, entryProvider) {
         entryProvider(scene.route)
@@ -514,7 +525,7 @@ private fun <T : NavKey> RenderScene(
     val delegateOwner = LocalViewModelStoreOwner.current
     val delegateFactory = delegateOwner as? HasDefaultViewModelProviderFactory
     val sceneStore = remember(scene.id, sceneViewModelStores) {
-        sceneViewModelStores.getOrPut(scene.id) { ViewModelStore() }
+        sceneViewModelStores.storeFor(scene.id)
     }
     val viewModelStoreOwner: ViewModelStoreOwner = remember(scene.id, delegateFactory) {
         val factory = delegateFactory
@@ -558,7 +569,8 @@ private fun <T : NavKey> RenderScene(
 private class SceneViewModelStoreOwner(
     override val viewModelStore: ViewModelStore,
     private val factoryDelegate: HasDefaultViewModelProviderFactory,
-) : ViewModelStoreOwner, HasDefaultViewModelProviderFactory {
+) : ViewModelStoreOwner,
+    HasDefaultViewModelProviderFactory {
     override val defaultViewModelProviderFactory: ViewModelProvider.Factory
         get() = factoryDelegate.defaultViewModelProviderFactory
     override val defaultViewModelCreationExtras: CreationExtras
@@ -577,17 +589,15 @@ internal fun Modifier.sceneTransform(
     enabled = enabled,
 )
 
-private fun lerp(start: Float, stop: Float, fraction: Float): Float {
-    return start + (stop - start) * fraction
-}
+private fun lerp(start: Float, stop: Float, fraction: Float): Float = start + (stop - start) * fraction
 
-private const val IdleRenderedScenes = 2
-private const val MaxRenderedScenes = 3
-private const val NavigationDimAmount = 0.42f
+private const val IDLE_RENDERED_SCENES = 2
+private const val MAX_RENDERED_SCENES = 3
+private const val NAVIGATION_DIM_AMOUNT = 0.42f
 
 /**
  * How far past 0..1 a shared transition's progress may run. Wide enough for the elastic settle of
  * [navigationSharedElementExitSpring] plus whatever a released fling adds, and narrow enough that a
  * host reading it cannot be handed a wild value.
  */
-private const val SharedProgressOvershootBand = 0.35f
+private const val SHARED_PROGRESS_OVERSHOOT_BAND = 0.35f

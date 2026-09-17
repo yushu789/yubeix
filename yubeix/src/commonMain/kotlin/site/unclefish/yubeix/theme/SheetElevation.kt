@@ -28,19 +28,19 @@ private val DarkElevationLadder = listOf(
 
 // Dark fills that are not on the ladder - Monet tints, the search field grey - are lifted by the
 // average step of the ladder instead.
-private const val ElevatedSurfaceLightenRatio = 0.08f
-private const val DarkSurfaceLuminanceThreshold = 0.5f
+private const val ELEVATED_SURFACE_LIGHTEN_RATIO = 0.08f
+private const val DARK_SURFACE_LUMINANCE_THRESHOLD = 0.5f
 
 /**
  * Raises an opaque dark background one level. Light and translucent colors are returned as they
  * are: a translucent fill already composites over whatever layer it is drawn on.
  */
 fun Color.elevatedSheetSurface(): Color {
-    if (alpha < 1f || luminance() >= DarkSurfaceLuminanceThreshold) return this
+    if (alpha < 1f || luminance() >= DARK_SURFACE_LUMINANCE_THRESHOLD) return this
     DarkElevationLadder.forEach { (base, elevated) ->
         if (isVisuallyCloseTo(base)) return elevated
     }
-    return mixWith(Color.White, ElevatedSurfaceLightenRatio)
+    return mixWith(Color.White, ELEVATED_SURFACE_LIGHTEN_RATIO)
 }
 
 /** The palette a sheet's own content is drawn with. Foreground colors are left alone. */

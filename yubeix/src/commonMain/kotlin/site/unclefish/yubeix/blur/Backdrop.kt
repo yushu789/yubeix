@@ -43,6 +43,6 @@ interface Backdrop {
         coordinates: LayoutCoordinates?,
         layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
         downscaleFactor: Int = 1,
-    ): Unit {
+    ) {
     }
 }

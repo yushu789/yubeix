@@ -69,13 +69,13 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.shapes.RoundedRectangle
-import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
-import site.unclefish.yubeix.icon.cupertino.outlined.MagnifyingGlass
-import site.unclefish.yubeix.icon.cupertino.outlined.Xmark
 import kotlinx.coroutines.delay
 import site.unclefish.yubeix.icon.YubeixIcons
 import site.unclefish.yubeix.icon.basic.Search
 import site.unclefish.yubeix.icon.basic.SearchCleanup
+import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
+import site.unclefish.yubeix.icon.cupertino.outlined.MagnifyingGlass
+import site.unclefish.yubeix.icon.cupertino.outlined.Xmark
 import site.unclefish.yubeix.theme.LocalContentColor
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixCapsuleShape
@@ -395,9 +395,7 @@ object SearchFieldDefaults {
 
     /** The default container color of the [SearchField]. */
     @Composable
-    fun containerColor(): Color {
-        return YubeixTheme.colorScheme.surfaceContainerHigh
-    }
+    fun containerColor(): Color = YubeixTheme.colorScheme.surfaceContainerHigh
 }
 
 /**
@@ -448,6 +446,7 @@ fun SearchField(
     onQueryChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
     enabled: Boolean = true,
     onSearch: () -> Unit = {},
     onClear: (() -> Unit)? = null,
@@ -466,7 +465,6 @@ fun SearchField(
     iconColor: Color = placeholderColor,
     cursorColor: Color = YubeixTheme.colorScheme.primary,
     clearButtonContentDescription: String = "Clear",
-    textFieldModifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()

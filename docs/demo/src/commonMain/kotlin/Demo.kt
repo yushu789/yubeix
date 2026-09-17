@@ -22,8 +22,8 @@ import site.unclefish.yubeix.navigation.NavigationPath
 import site.unclefish.yubeix.navigation.SceneDisplay
 import site.unclefish.yubeix.navigation.entryProvider
 import site.unclefish.yubeix.theme.ColorSchemeMode
-import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.ThemeController
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun Demo(demoId: String? = null) {

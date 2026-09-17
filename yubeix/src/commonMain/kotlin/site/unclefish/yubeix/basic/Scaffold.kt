@@ -704,7 +704,7 @@ private val DefaultScreenHeroTitlePadding = PaddingValues(
     bottom = 4.dp,
 )
 
-private const val OverflowMenuContentDescription = "More"
+private const val OVERFLOW_MENU_CONTENT_DESCRIPTION = "More"
 
 private val TopBarMenuIconSize = 18.dp
 
@@ -784,8 +784,8 @@ object ScreenScaffoldDefaults {
 fun ScreenScaffold(
     title: String,
     onBack: (() -> Unit)?,
-    subtitle: String? = null,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     actions: List<TopBarActionSpec> = emptyList(),
     menuItems: List<TopBarMenuItemSpec> = emptyList(),
     topBarStartContent: (@Composable () -> Unit)? = null,
@@ -873,9 +873,9 @@ fun ScreenScaffold(
         null
     }
 
-    Scaffold(containerColor = Color.Transparent) { paddingValues ->
+    Scaffold(modifier = modifier, containerColor = Color.Transparent) { paddingValues ->
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .onGloballyPositioned { coordinates ->
                     scaffoldTopInWindowPx = coordinates.positionInWindow().y
@@ -999,9 +999,9 @@ fun ScreenScaffold(
 internal fun ScreenChromeTopBar(
     title: String,
     onBack: (() -> Unit)?,
-    subtitle: String? = null,
     modifier: Modifier = Modifier,
     barModifier: Modifier = Modifier,
+    subtitle: String? = null,
     actions: List<TopBarActionSpec> = emptyList(),
     menuItems: List<TopBarMenuItemSpec> = emptyList(),
     startContent: (@Composable () -> Unit)? = null,
@@ -1065,7 +1065,7 @@ internal fun ScreenChromeTopBar(
                                 ScreenChromeActionButton(
                                     spec = TopBarActionSpec(
                                         key = "overflow-menu",
-                                        contentDescription = OverflowMenuContentDescription,
+                                        contentDescription = OVERFLOW_MENU_CONTENT_DESCRIPTION,
                                         onClick = {
                                             if (!showOverflowMenu) {
                                                 showOverflowMenu = true
@@ -1417,10 +1417,10 @@ private fun ScreenChromeDisabledSurface(
 private fun ScreenChromeFlatCapsuleButton(
     label: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
     backgroundColor: Color,
     contentColor: Color,
     minWidth: Dp,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier

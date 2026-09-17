@@ -160,7 +160,7 @@ object BlurDefaults {
      * Maximum adaptive downscale factor used by custom Gaussian backdrop blur.
      * Valid effective values are powers of two in the range [1, 16].
      */
-    const val MaxDownscaleFactor: Int = 16
+    const val MAX_DOWNSCALE_FACTOR: Int = 16
 
     /**
      * Creates a [BlurColors] instance with the given parameters.

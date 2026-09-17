@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
@@ -28,19 +28,19 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import component.BackNavigationIcon
 import appnavigation.Route
+import component.BackNavigationIcon
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.DropdownImpl
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
 import site.unclefish.yubeix.basic.ListPopupColumn
 import site.unclefish.yubeix.basic.ListPopupDefaults
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.PopupPositionProvider
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.WindowListPopup

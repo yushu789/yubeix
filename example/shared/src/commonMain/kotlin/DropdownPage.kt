@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
@@ -31,10 +31,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.delay
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.PullToRefresh
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.VerticalScrollBar
+import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberPullToRefreshState
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.extra.SuperDropdown

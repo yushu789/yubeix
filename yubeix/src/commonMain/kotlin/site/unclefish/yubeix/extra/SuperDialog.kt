@@ -286,9 +286,9 @@ fun SuperDialog(
     val resolvedContainerColor = if (useHazeBackdrop) {
         containerColor.copy(
             alpha = if (dark) {
-                CupertinoAlertDialogDarkBackdropAlpha
+                CUPERTINO_ALERT_DIALOG_DARK_BACKDROP_ALPHA
             } else {
-                CupertinoAlertDialogLightBackdropAlpha
+                CUPERTINO_ALERT_DIALOG_LIGHT_BACKDROP_ALPHA
             },
         )
     } else {
@@ -588,9 +588,9 @@ private fun CupertinoAlertHost(
                 transitionSpec = {
                     tween(
                         durationMillis = if (targetState) {
-                            CupertinoAlertScrimEnterDurationMillis
+                            CUPERTINO_ALERT_SCRIM_ENTER_DURATION_MILLIS
                         } else {
-                            CupertinoAlertScrimExitDurationMillis
+                            CUPERTINO_ALERT_SCRIM_EXIT_DURATION_MILLIS
                         },
                     )
                 },
@@ -620,16 +620,16 @@ private fun CupertinoAlertHost(
                     enter = scaleIn(
                         initialScale = 1.2f,
                         animationSpec = tween(
-                            durationMillis = CupertinoAlertEnterDurationMillis,
+                            durationMillis = CUPERTINO_ALERT_ENTER_DURATION_MILLIS,
                             easing = LinearOutSlowInEasing,
                         ),
                     ) + fadeIn(
                         animationSpec = tween(
-                            durationMillis = CupertinoAlertEnterDurationMillis,
+                            durationMillis = CUPERTINO_ALERT_ENTER_DURATION_MILLIS,
                             easing = LinearOutSlowInEasing,
                         ),
                     ),
-                    exit = fadeOut(animationSpec = tween(CupertinoAlertExitDurationMillis)),
+                    exit = fadeOut(animationSpec = tween(CUPERTINO_ALERT_EXIT_DURATION_MILLIS)),
                 ) {
                     Box(
                         modifier = Modifier
@@ -758,12 +758,12 @@ private val CupertinoProgressDialogContentPadding = PaddingValues(horizontal = 2
 private val CupertinoProgressDialogIndicatorSize = 24.dp
 private val CupertinoProgressDialogBarHeight = 4.dp
 private val CupertinoProgressDialogBarTopPadding = 14.dp
-private const val CupertinoAlertDialogLightBackdropAlpha = 0.78f
-private const val CupertinoAlertDialogDarkBackdropAlpha = 0.72f
-private const val CupertinoAlertScrimEnterDurationMillis = 300
-private const val CupertinoAlertScrimExitDurationMillis = 250
-private const val CupertinoAlertEnterDurationMillis = 420
-private const val CupertinoAlertExitDurationMillis = 160
+private const val CUPERTINO_ALERT_DIALOG_LIGHT_BACKDROP_ALPHA = 0.78f
+private const val CUPERTINO_ALERT_DIALOG_DARK_BACKDROP_ALPHA = 0.72f
+private const val CUPERTINO_ALERT_SCRIM_ENTER_DURATION_MILLIS = 300
+private const val CUPERTINO_ALERT_SCRIM_EXIT_DURATION_MILLIS = 250
+private const val CUPERTINO_ALERT_ENTER_DURATION_MILLIS = 420
+private const val CUPERTINO_ALERT_EXIT_DURATION_MILLIS = 160
 private val CupertinoAlertDialogTitleStyle = TextStyle(
     fontSize = 17.sp,
     lineHeight = 22.sp,

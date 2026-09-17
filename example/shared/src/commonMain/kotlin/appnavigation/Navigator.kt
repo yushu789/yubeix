@@ -22,9 +22,7 @@ class Navigator(
     /**
      * Pop the top key if present.
      */
-    fun pop(): Boolean {
-        return navigationPath.pop()
-    }
+    fun pop(): Boolean = navigationPath.pop()
 
     fun current(): Route? = navigationPath.currentRoute
 

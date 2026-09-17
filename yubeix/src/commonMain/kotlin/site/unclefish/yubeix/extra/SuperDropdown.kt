@@ -5,6 +5,7 @@ package site.unclefish.yubeix.extra
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,8 +27,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
-import site.unclefish.yubeix.icon.cupertino.outlined.Checkmark
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.BasicComponentColors
 import site.unclefish.yubeix.basic.BasicComponentDefaults
@@ -39,6 +38,8 @@ import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.ListPopupColumn
 import site.unclefish.yubeix.basic.PopupPositionProvider
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
+import site.unclefish.yubeix.icon.cupertino.outlined.Checkmark
 import site.unclefish.yubeix.theme.YubeixTheme
 
 /**
@@ -244,34 +245,36 @@ private fun SuperDropdownPopupItem(
     val textColor = if (isSelected) dropdownColors.selectedContentColor else dropdownColors.contentColor
     val checkColor = if (isSelected) dropdownColors.selectedContentColor else Color.Transparent
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(start = 14.dp, end = 20.dp)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = CupertinoIcons.Outlined.Checkmark,
-            contentDescription = null,
-            tint = checkColor,
+    Column {
+        Row(
             modifier = Modifier
-                .padding(end = 10.dp)
-                .size(SuperDropdownPopupIconSize),
-        )
-        Text(
-            text = text,
-            style = YubeixTheme.textStyles.body1,
-            color = textColor,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.weight(1f),
-        )
-    }
-    if (index < optionSize - 1) {
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            color = YubeixTheme.colorScheme.dividerLine,
-        )
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(start = 14.dp, end = 20.dp)
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = CupertinoIcons.Outlined.Checkmark,
+                contentDescription = null,
+                tint = checkColor,
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .size(SuperDropdownPopupIconSize),
+            )
+            Text(
+                text = text,
+                style = YubeixTheme.textStyles.body1,
+                color = textColor,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        if (index < optionSize - 1) {
+            HorizontalDivider(
+                modifier = Modifier.fillMaxWidth(),
+                color = YubeixTheme.colorScheme.dividerLine,
+            )
+        }
     }
 }

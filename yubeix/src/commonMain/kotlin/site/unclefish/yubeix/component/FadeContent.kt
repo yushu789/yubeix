@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 
-private const val ContentFadeDurationMillis = 200
-private const val OverlayFadeDurationMillis = 420
+private const val CONTENT_FADE_DURATION_MILLIS = 200
+private const val OVERLAY_FADE_DURATION_MILLIS = 420
 
 /**
  * Cross-fades between values of [targetState] without moving anything: the outgoing state fades
@@ -48,21 +48,21 @@ fun <T> FadeContent(
         transitionSpec = {
             val enter = fadeIn(
                 animationSpec = tween(
-                    durationMillis = ContentFadeDurationMillis,
-                    easing = LinearOutSlowInEasing
-                )
+                    durationMillis = CONTENT_FADE_DURATION_MILLIS,
+                    easing = LinearOutSlowInEasing,
+                ),
             )
             val exit = fadeOut(
                 animationSpec = tween(
-                    durationMillis = ContentFadeDurationMillis,
-                    easing = LinearOutSlowInEasing
-                )
+                    durationMillis = CONTENT_FADE_DURATION_MILLIS,
+                    easing = LinearOutSlowInEasing,
+                ),
             )
             enter togetherWith exit using SizeTransform(clip = false)
         },
         modifier = modifier,
         contentAlignment = contentAlignment,
-        label = label
+        label = label,
     ) { state ->
         content(state)
     }
@@ -79,7 +79,7 @@ fun OverlayFadeContent(
     showOverlay: Boolean,
     backgroundColor: Color,
     modifier: Modifier = Modifier,
-    baseContent: @Composable () -> Unit,
+    baseContent: @Composable () -> Unit = {},
     overlayContent: @Composable () -> Unit,
 ) {
     val overlayAlpha = remember { Animatable(if (showOverlay) 1f else 0f) }
@@ -93,9 +93,9 @@ fun OverlayFadeContent(
             overlayAlpha.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = OverlayFadeDurationMillis,
-                    easing = LinearEasing
-                )
+                    durationMillis = OVERLAY_FADE_DURATION_MILLIS,
+                    easing = LinearEasing,
+                ),
             )
             baseComposed = false
         } else {
@@ -105,9 +105,9 @@ fun OverlayFadeContent(
                 overlayAlpha.animateTo(
                     targetValue = 0f,
                     animationSpec = tween(
-                        durationMillis = OverlayFadeDurationMillis,
-                        easing = LinearEasing
-                    )
+                        durationMillis = OVERLAY_FADE_DURATION_MILLIS,
+                        easing = LinearEasing,
+                    ),
                 )
             }
             overlayComposed = false
@@ -117,7 +117,7 @@ fun OverlayFadeContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(backgroundColor),
     ) {
         if (baseComposed) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -132,7 +132,7 @@ fun OverlayFadeContent(
                     .graphicsLayer {
                         this.alpha = alpha
                         clip = false
-                    }
+                    },
             ) {
                 overlayContent()
             }

@@ -997,9 +997,9 @@ private val TitleBarTitleMaxBlurRadius = 8.dp
 
 // Frosted glass for the flat title bar. Same recipe as the app's glass surfaces: wide radius, no
 // contrast change, a mild saturation lift so the blurred picture keeps its structure.
-private const val TitleBarGlassBlurRadius = 56f
+private const val TITLE_BAR_GLASS_BLUR_RADIUS = 56f
 
-private const val ProgressiveBlurLayerFadeSize = 0.16f
+private const val PROGRESSIVE_BLUR_LAYER_FADE_SIZE = 0.16f
 
 /**
  * Fades this layer's content out with a gradient alpha mask, for progressive blur stacks where the
@@ -1017,7 +1017,7 @@ fun Modifier.verticalProgressiveBlurLayerFade(
     }
     .drawWithContent {
         drawContent()
-        val fadeSize = ProgressiveBlurLayerFadeSize.coerceIn(0f, 1f)
+        val fadeSize = PROGRESSIVE_BLUR_LAYER_FADE_SIZE.coerceIn(0f, 1f)
         val maskStops = if (zeroAtStart) {
             arrayOf(
                 0f to Color.Transparent,
@@ -1072,6 +1072,7 @@ fun rememberCollapsedTitleVisible(
     ) {
         when {
             heroTitleBottomInWindowPx <= collapseThresholdPx -> isVisibleByPosition = true
+
             heroTitleBottomInWindowPx >= collapseThresholdPx + hysteresisPx -> {
                 isVisibleByPosition = false
             }
@@ -1099,8 +1100,7 @@ fun rememberBottomBarBackgroundVisible(scrolled: Boolean): Boolean {
 }
 
 @Composable
-private fun topBarTitleTextStyle(): TextStyle =
-    YubeixTheme.textStyles.main.copy(fontWeight = FontWeight.SemiBold)
+private fun topBarTitleTextStyle(): TextStyle = YubeixTheme.textStyles.main.copy(fontWeight = FontWeight.SemiBold)
 
 @Composable
 private fun topBarSubtitleTextStyle(): TextStyle = YubeixTheme.textStyles.footnote1
@@ -1168,11 +1168,11 @@ fun Modifier.topBarTitleClickable(
     )
 }
 
-private val TopBarScrollToTopEasing: Easing = CubicBezierEasing(0.22f, 0f, 0.18f, 1f)
-private const val TopBarScrollToTopMinDurationMillis = 320
-private const val TopBarScrollToTopMaxDurationMillis = 760
-private const val TopBarScrollToTopPreJumpThreshold = 24
-private const val TopBarScrollToTopPreJumpIndex = 8
+private val TOP_BAR_SCROLL_TO_TOP_EASING: Easing = CubicBezierEasing(0.22f, 0f, 0.18f, 1f)
+private const val TOP_BAR_SCROLL_TO_TOP_MIN_DURATION_MILLIS = 320
+private const val TOP_BAR_SCROLL_TO_TOP_MAX_DURATION_MILLIS = 760
+private const val TOP_BAR_SCROLL_TO_TOP_PRE_JUMP_THRESHOLD = 24
+private const val TOP_BAR_SCROLL_TO_TOP_PRE_JUMP_INDEX = 8
 
 /**
  * Scrolls a lazy list back to its top with the title bar's scroll-to-top animation: a single
@@ -1182,8 +1182,8 @@ private const val TopBarScrollToTopPreJumpIndex = 8
 suspend fun LazyListState.animateScrollToTopFromTitleBar() {
     if (firstVisibleItemIndex == 0 && firstVisibleItemScrollOffset == 0) return
 
-    if (firstVisibleItemIndex > TopBarScrollToTopPreJumpThreshold) {
-        scrollToItem(TopBarScrollToTopPreJumpIndex)
+    if (firstVisibleItemIndex > TOP_BAR_SCROLL_TO_TOP_PRE_JUMP_THRESHOLD) {
+        scrollToItem(TOP_BAR_SCROLL_TO_TOP_PRE_JUMP_INDEX)
     }
 
     val averageVisibleItemSize = layoutInfo.visibleItemsInfo
@@ -1196,13 +1196,13 @@ suspend fun LazyListState.animateScrollToTopFromTitleBar() {
         (firstVisibleItemIndex * averageVisibleItemSize + firstVisibleItemScrollOffset)
             .coerceAtLeast(1f)
     val durationMillis = (
-        TopBarScrollToTopMinDurationMillis +
+        TOP_BAR_SCROLL_TO_TOP_MIN_DURATION_MILLIS +
             estimatedDistanceToTop / 11f
         )
         .roundToInt()
         .coerceIn(
-            TopBarScrollToTopMinDurationMillis,
-            TopBarScrollToTopMaxDurationMillis,
+            TOP_BAR_SCROLL_TO_TOP_MIN_DURATION_MILLIS,
+            TOP_BAR_SCROLL_TO_TOP_MAX_DURATION_MILLIS,
         )
 
     scroll {
@@ -1212,7 +1212,7 @@ suspend fun LazyListState.animateScrollToTopFromTitleBar() {
             targetValue = 0f,
             animationSpec = tween(
                 durationMillis = durationMillis,
-                easing = TopBarScrollToTopEasing,
+                easing = TOP_BAR_SCROLL_TO_TOP_EASING,
             ),
         ) { currentAnimatedValue, _ ->
             val delta = currentAnimatedValue - previousAnimatedValue
@@ -1303,8 +1303,8 @@ internal fun FlatTitleBarSurfaceLayer(
 fun LargeTopAppBar(
     title: String,
     onBack: (() -> Unit)?,
-    subtitle: String? = null,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     actions: (@Composable () -> Unit)? = null,
     startContent: (@Composable () -> Unit)? = null,
     centerContent: (@Composable () -> Unit)? = null,
@@ -1372,7 +1372,7 @@ fun LargeTopAppBar(
                         .textureBlur(
                             backdrop = backdrop,
                             shape = RectangleShape,
-                            blurRadius = TitleBarGlassBlurRadius,
+                            blurRadius = TITLE_BAR_GLASS_BLUR_RADIUS,
                             colors = glassColors,
                         ),
                 )

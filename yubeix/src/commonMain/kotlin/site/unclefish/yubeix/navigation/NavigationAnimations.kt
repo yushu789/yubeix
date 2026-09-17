@@ -6,7 +6,7 @@ package site.unclefish.yubeix.navigation
 import androidx.compose.animation.core.SpringSpec
 import site.unclefish.yubeix.anim.bounceSpring
 
-/**
+/*
  * Springs for every scene transition in [SceneDisplay]: page pushes and pops run on
  * [navigationEnterExitSpring], and the back-gesture settle on [navigationDragSettleSpring]. The
  * welcome flow's navigation rides the same springs; shared-element pairs ride the elastic
@@ -19,20 +19,20 @@ import site.unclefish.yubeix.anim.bounceSpring
  */
 
 /** Progress is 0..1 across the whole page, so this is about a pixel of travel. */
-private const val NavigationSpringProgressThreshold = 0.001f
+private const val NAVIGATION_SPRING_PROGRESS_THRESHOLD = 0.001f
 
 /** Paced like the 430ms push/pop tween. */
 fun navigationEnterExitSpring(): SpringSpec<Float> = bounceSpring(
     durationMillis = 340,
     bounce = 0.0,
-    visibilityThreshold = NavigationSpringProgressThreshold,
+    visibilityThreshold = NAVIGATION_SPRING_PROGRESS_THRESHOLD,
 )
 
 /** Paced like the 320ms back-gesture settle tween. */
 fun navigationDragSettleSpring(): SpringSpec<Float> = bounceSpring(
     durationMillis = 260,
     bounce = 0.0,
-    visibilityThreshold = NavigationSpringProgressThreshold,
+    visibilityThreshold = NAVIGATION_SPRING_PROGRESS_THRESHOLD,
 )
 
 /**
@@ -57,7 +57,7 @@ fun navigationDragSettleSpring(): SpringSpec<Float> = bounceSpring(
  * own would drift out of step, and it would keep running during a back gesture, where the progress
  * must be the finger and nothing else.
  */
-private const val NavigationSharedElementBounce = 0.2
+private const val NAVIGATION_SHARED_ELEMENT_BOUNCE = 0.2
 
 /**
  * Shared transitions are paced slower than a page push: the window travels much further - a button's
@@ -67,34 +67,34 @@ private const val NavigationSharedElementBounce = 0.2
  * The close is slower again. It is the direction that has somewhere to arrive: the window has to be
  * seen finding the button it came from, and it carries the bounce, which needs room to read as one.
  */
-private const val NavigationSharedElementEnterDurationMillis = 460
-private const val NavigationSharedElementExitDurationMillis = 560
-private const val NavigationSharedElementDragSettleDurationMillis = 400
+private const val NAVIGATION_SHARED_ELEMENT_ENTER_DURATION_MILLIS = 460
+private const val NAVIGATION_SHARED_ELEMENT_EXIT_DURATION_MILLIS = 560
+private const val NAVIGATION_SHARED_ELEMENT_DRAG_SETTLE_DURATION_MILLIS = 400
 
 /** Opening: no bounce, so the page grows into place instead of past it. */
 fun navigationSharedElementEnterSpring(): SpringSpec<Float> = bounceSpring(
-    durationMillis = NavigationSharedElementEnterDurationMillis,
+    durationMillis = NAVIGATION_SHARED_ELEMENT_ENTER_DURATION_MILLIS,
     bounce = 0.0,
-    visibilityThreshold = NavigationSpringProgressThreshold,
+    visibilityThreshold = NAVIGATION_SPRING_PROGRESS_THRESHOLD,
 )
 
 /** Closing: the elastic settle onto the source the window is collapsing back onto. */
 fun navigationSharedElementExitSpring(): SpringSpec<Float> = bounceSpring(
-    durationMillis = NavigationSharedElementExitDurationMillis,
-    bounce = NavigationSharedElementBounce,
-    visibilityThreshold = NavigationSpringProgressThreshold,
+    durationMillis = NAVIGATION_SHARED_ELEMENT_EXIT_DURATION_MILLIS,
+    bounce = NAVIGATION_SHARED_ELEMENT_BOUNCE,
+    visibilityThreshold = NAVIGATION_SPRING_PROGRESS_THRESHOLD,
 )
 
 /** A released back gesture that closes: the same landing, at the gesture's own settle pace. */
 fun navigationSharedElementDragSettleSpring(): SpringSpec<Float> = bounceSpring(
-    durationMillis = NavigationSharedElementDragSettleDurationMillis,
-    bounce = NavigationSharedElementBounce,
-    visibilityThreshold = NavigationSpringProgressThreshold,
+    durationMillis = NAVIGATION_SHARED_ELEMENT_DRAG_SETTLE_DURATION_MILLIS,
+    bounce = NAVIGATION_SHARED_ELEMENT_BOUNCE,
+    visibilityThreshold = NAVIGATION_SPRING_PROGRESS_THRESHOLD,
 )
 
 /** A released back gesture that snaps the page back open: no bounce, like the open. */
 fun navigationSharedElementDragCancelSpring(): SpringSpec<Float> = bounceSpring(
-    durationMillis = NavigationSharedElementDragSettleDurationMillis,
+    durationMillis = NAVIGATION_SHARED_ELEMENT_DRAG_SETTLE_DURATION_MILLIS,
     bounce = 0.0,
-    visibilityThreshold = NavigationSpringProgressThreshold,
+    visibilityThreshold = NAVIGATION_SPRING_PROGRESS_THRESHOLD,
 )

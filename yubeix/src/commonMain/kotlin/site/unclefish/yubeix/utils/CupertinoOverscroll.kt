@@ -1,20 +1,5 @@
-/*
- * Copyright 2023 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Adapted for the Yubeix library (Compose Multiplatform): package retargeted, API unchanged.
- */
+// Copyright 2026, yubeix contributors
+// SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.utils
 
@@ -27,11 +12,12 @@ import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -99,14 +85,12 @@ private data class CupertinoOverscrollEffectFactory(
     private val layoutDirection: LayoutDirection,
     private val state: CupertinoOverscrollState?,
 ) : OverscrollFactory {
-    override fun createOverscrollEffect(): OverscrollEffect {
-        return CupertinoOverscrollEffect(
-            density = density.density,
-            layoutDirection = layoutDirection,
-            applyClip = false,
-            state = state,
-        )
-    }
+    override fun createOverscrollEffect(): OverscrollEffect = CupertinoOverscrollEffect(
+        density = density.density,
+        layoutDirection = layoutDirection,
+        applyClip = false,
+        state = state,
+    )
 }
 
 private enum class CupertinoScrollSource {
@@ -186,12 +170,10 @@ private class CupertinoOverscrollEffect(
         state?.offset = visibleOverscrollOffset.toOffset()
     }
 
-    private fun NestedScrollSource.toCupertinoScrollSource(): CupertinoScrollSource? {
-        return when (this) {
-            NestedScrollSource.UserInput -> CupertinoScrollSource.DRAG
-            NestedScrollSource.SideEffect -> CupertinoScrollSource.FLING
-            else -> null
-        }
+    private fun NestedScrollSource.toCupertinoScrollSource(): CupertinoScrollSource? = when (this) {
+        NestedScrollSource.UserInput -> CupertinoScrollSource.DRAG
+        NestedScrollSource.SideEffect -> CupertinoScrollSource.FLING
+        else -> null
     }
 
     @Stable
@@ -307,25 +289,27 @@ private class CupertinoOverscrollEffect(
 
     private fun CupertinoOverscrollDirection.combinedWith(
         other: CupertinoOverscrollDirection,
-    ): CupertinoOverscrollDirection {
-        return when (this) {
-            CupertinoOverscrollDirection.UNKNOWN -> when (other) {
-                CupertinoOverscrollDirection.UNKNOWN -> CupertinoOverscrollDirection.UNKNOWN
-                CupertinoOverscrollDirection.VERTICAL -> CupertinoOverscrollDirection.VERTICAL
-                CupertinoOverscrollDirection.HORIZONTAL -> CupertinoOverscrollDirection.HORIZONTAL
-            }
+    ): CupertinoOverscrollDirection = when (this) {
+        CupertinoOverscrollDirection.UNKNOWN -> when (other) {
+            CupertinoOverscrollDirection.UNKNOWN -> CupertinoOverscrollDirection.UNKNOWN
+            CupertinoOverscrollDirection.VERTICAL -> CupertinoOverscrollDirection.VERTICAL
+            CupertinoOverscrollDirection.HORIZONTAL -> CupertinoOverscrollDirection.HORIZONTAL
+        }
 
-            CupertinoOverscrollDirection.VERTICAL -> when (other) {
-                CupertinoOverscrollDirection.UNKNOWN,
-                CupertinoOverscrollDirection.VERTICAL -> CupertinoOverscrollDirection.VERTICAL
-                CupertinoOverscrollDirection.HORIZONTAL -> CupertinoOverscrollDirection.HORIZONTAL
-            }
+        CupertinoOverscrollDirection.VERTICAL -> when (other) {
+            CupertinoOverscrollDirection.UNKNOWN,
+            CupertinoOverscrollDirection.VERTICAL,
+            -> CupertinoOverscrollDirection.VERTICAL
 
-            CupertinoOverscrollDirection.HORIZONTAL -> when (other) {
-                CupertinoOverscrollDirection.UNKNOWN,
-                CupertinoOverscrollDirection.HORIZONTAL -> CupertinoOverscrollDirection.HORIZONTAL
-                CupertinoOverscrollDirection.VERTICAL -> CupertinoOverscrollDirection.VERTICAL
-            }
+            CupertinoOverscrollDirection.HORIZONTAL -> CupertinoOverscrollDirection.HORIZONTAL
+        }
+
+        CupertinoOverscrollDirection.HORIZONTAL -> when (other) {
+            CupertinoOverscrollDirection.UNKNOWN,
+            CupertinoOverscrollDirection.HORIZONTAL,
+            -> CupertinoOverscrollDirection.HORIZONTAL
+
+            CupertinoOverscrollDirection.VERTICAL -> CupertinoOverscrollDirection.VERTICAL
         }
     }
 
@@ -333,20 +317,16 @@ private class CupertinoOverscrollEffect(
 
     private fun Float.toVelocity(): Velocity = toOffset().toVelocity()
 
-    private fun Offset.toFloat(): Float {
-        return when (direction) {
-            CupertinoOverscrollDirection.UNKNOWN -> 0f
-            CupertinoOverscrollDirection.VERTICAL -> y
-            CupertinoOverscrollDirection.HORIZONTAL -> x
-        }
+    private fun Offset.toFloat(): Float = when (direction) {
+        CupertinoOverscrollDirection.UNKNOWN -> 0f
+        CupertinoOverscrollDirection.VERTICAL -> y
+        CupertinoOverscrollDirection.HORIZONTAL -> x
     }
 
-    private fun Float.toOffset(): Offset {
-        return when (direction) {
-            CupertinoOverscrollDirection.UNKNOWN -> Offset.Zero
-            CupertinoOverscrollDirection.VERTICAL -> Offset(0f, this)
-            CupertinoOverscrollDirection.HORIZONTAL -> Offset(this, 0f)
-        }
+    private fun Float.toOffset(): Offset = when (direction) {
+        CupertinoOverscrollDirection.UNKNOWN -> Offset.Zero
+        CupertinoOverscrollDirection.VERTICAL -> Offset(0f, this)
+        CupertinoOverscrollDirection.HORIZONTAL -> Offset(this, 0f)
     }
 
     private suspend fun playInitialSpringAnimationIfNeeded(initialVelocity: Velocity): Velocity {
@@ -442,20 +422,16 @@ private class CupertinoOverscrollEffect(
         ) * density
     }
 
-    private fun Offset.reverseHorizontalIfNeeded(): Offset {
-        return Offset(
-            x = if (reverseHorizontal) -x else x,
-            y = y,
-        )
-    }
+    private fun Offset.reverseHorizontalIfNeeded(): Offset = Offset(
+        x = if (reverseHorizontal) -x else x,
+        y = y,
+    )
 
     private fun rubberBandedValue(
         value: Float,
         dimension: Float,
         coefficient: Float,
-    ): Float {
-        return sign(value) * (1f - (1f / (abs(value) * coefficient / dimension + 1f))) * dimension
-    }
+    ): Float = sign(value) * (1f - (1f / (abs(value) * coefficient / dimension + 1f))) * dimension
 
     private companion object {
         private const val RUBBER_BAND_COEFFICIENT = 0.55f
@@ -473,7 +449,7 @@ private class CupertinoOverscrollNode(
     DrawModifierNode,
     PointerInputModifierNode {
 
-    var pointersDown by mutableStateOf(0)
+    var pointersDown by mutableIntStateOf(0)
         private set
 
     override fun onRemeasured(size: IntSize) = onNodeRemeasured(size)

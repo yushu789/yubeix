@@ -17,7 +17,7 @@ import site.unclefish.yubeix.blur.asAndroidRuntimeShader
 internal fun RenderEffect?.chain(other: RenderEffect): RenderEffect = if (this != null) {
     android.graphics.RenderEffect.createChainEffect(
         other.asAndroidRenderEffect(),
-        this.asAndroidRenderEffect()
+        this.asAndroidRenderEffect(),
     ).asComposeRenderEffect()
 } else {
     other
@@ -26,10 +26,10 @@ internal fun RenderEffect?.chain(other: RenderEffect): RenderEffect = if (this !
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 internal fun runtimeShaderEffect(
     runtimeShader: RuntimeShader,
-    uniformShaderName: String
+    uniformShaderName: String,
 ): RenderEffect = android.graphics.RenderEffect.createRuntimeShaderEffect(
     runtimeShader.asAndroidRuntimeShader(),
-    uniformShaderName
+    uniformShaderName,
 ).asComposeRenderEffect()
 
 @RequiresApi(Build.VERSION_CODES.S)
@@ -39,20 +39,20 @@ internal fun blurEffect(
 ): RenderEffect = android.graphics.RenderEffect.createBlurEffect(
     radiusX,
     radiusY,
-    Shader.TileMode.CLAMP
+    Shader.TileMode.CLAMP,
 ).asComposeRenderEffect()
 
 @RequiresApi(Build.VERSION_CODES.S)
 internal fun colorFilterEffect(
     renderEffect: RenderEffect?,
-    colorFilter: ColorFilter
+    colorFilter: ColorFilter,
 ): RenderEffect = if (renderEffect != null) {
     android.graphics.RenderEffect.createColorFilterEffect(
         colorFilter.asAndroidColorFilter(),
-        renderEffect.asAndroidRenderEffect()
+        renderEffect.asAndroidRenderEffect(),
     ).asComposeRenderEffect()
 } else {
     android.graphics.RenderEffect.createColorFilterEffect(
-        colorFilter.asAndroidColorFilter()
+        colorFilter.asAndroidColorFilter(),
     ).asComposeRenderEffect()
 }

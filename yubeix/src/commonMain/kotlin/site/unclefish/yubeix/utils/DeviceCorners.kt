@@ -42,12 +42,12 @@ fun rememberDeviceCornerRadius(): Dp {
  */
 @Composable
 fun AnimatedRoundedLeftPage(
+    modifier: Modifier = Modifier,
     cornerRadius: Dp = rememberDeviceCornerRadius(),
     backgroundColor: Color = Color.White,
-    modifier: Modifier = Modifier,
     animateToSharp: Boolean = false,
     animationDuration: Int = 350,
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val animatedRadius = remember { Animatable(cornerRadius.value) }
 
@@ -63,7 +63,7 @@ fun AnimatedRoundedLeftPage(
         modifier = modifier
             .fillMaxSize()
             .clip(UnevenRoundedRectangle(topStart = animatedRadius.value.dp, bottomStart = animatedRadius.value.dp))
-            .background(backgroundColor)
+            .background(backgroundColor),
     ) {
         content()
     }
@@ -74,16 +74,16 @@ fun AnimatedRoundedLeftPage(
  */
 @Composable
 fun RoundedLeftPage(
+    modifier: Modifier = Modifier,
     cornerRadius: Dp = rememberDeviceCornerRadius(),
     backgroundColor: Color = Color.White,
-    modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .clip(UnevenRoundedRectangle(topStart = cornerRadius, bottomStart = cornerRadius))
-            .background(backgroundColor)
+            .background(backgroundColor),
     ) {
         content()
     }
@@ -94,15 +94,15 @@ fun RoundedLeftPage(
  */
 @Composable
 fun RoundedLeftDarkPage(
-    cornerRadius: Dp = rememberDeviceCornerRadius(),
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
+    cornerRadius: Dp = rememberDeviceCornerRadius(),
+    content: @Composable BoxScope.() -> Unit,
 ) {
     RoundedLeftPage(
         cornerRadius = cornerRadius,
         backgroundColor = Color(0xFF1a1a1a),
         modifier = modifier,
-        content = content
+        content = content,
     )
 }
 
@@ -111,14 +111,14 @@ fun RoundedLeftDarkPage(
  */
 @Composable
 fun RoundedLeftDimOverlay(
+    modifier: Modifier = Modifier,
     cornerRadius: Dp = rememberDeviceCornerRadius(),
     dimAlpha: Float = 0.4f,
-    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .clip(UnevenRoundedRectangle(topStart = cornerRadius, bottomStart = cornerRadius))
-            .background(Color.Black.copy(alpha = dimAlpha))
+            .background(Color.Black.copy(alpha = dimAlpha)),
     )
 }

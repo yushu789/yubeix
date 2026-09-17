@@ -80,9 +80,9 @@ fun CapsuleProgress(
             targetState = showingLabel,
             transitionSpec = {
                 val enter = fadeIn(
-                    animationSpec = tween(durationMillis = 240, delayMillis = 40)
+                    animationSpec = tween(durationMillis = 240, delayMillis = 40),
                 ) + slideInVertically(
-                    animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
+                    animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
                 ) { fullHeight -> fullHeight / 3 }
                 val exit = fadeOut(animationSpec = tween(durationMillis = 160))
                 enter togetherWith exit

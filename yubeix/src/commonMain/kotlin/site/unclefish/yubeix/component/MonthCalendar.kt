@@ -36,12 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
-import site.unclefish.yubeix.icon.cupertino.outlined.ChevronBackward
-import site.unclefish.yubeix.icon.cupertino.outlined.ChevronForward
 import site.unclefish.yubeix.basic.CircularProgressIndicator
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
+import site.unclefish.yubeix.icon.cupertino.outlined.ChevronBackward
+import site.unclefish.yubeix.icon.cupertino.outlined.ChevronForward
 import site.unclefish.yubeix.theme.YubeixTheme
 import kotlin.math.abs
 
@@ -317,9 +317,7 @@ private fun monthForPage(
 }
 
 /** Whole months between (ay,am) and (by,bm); sign-aware. */
-private fun monthDistance(ay: Int, am: Int, by: Int, bm: Int): Int {
-    return (by - ay) * 12 + (bm - am)
-}
+private fun monthDistance(ay: Int, am: Int, by: Int, bm: Int): Int = (by - ay) * 12 + (bm - am)
 
 private fun isAfterEarliestMonth(state: MonthCalendarState): Boolean {
     val earliest = yearMonthOf(state.earliestDayKey)
@@ -488,8 +486,7 @@ private fun yearMonthOf(dayKey: Int): Pair<Int, Int> = dayKey / 10_000 to (dayKe
 
 private fun dayOfMonth(dayKey: Int): Int = dayKey % 100
 
-private fun isLeapYear(year: Int): Boolean =
-    (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+private fun isLeapYear(year: Int): Boolean = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
 
 private fun daysInMonth(year: Int, month: Int): Int = when (month) {
     1, 3, 5, 7, 8, 10, 12 -> 31
@@ -501,7 +498,9 @@ private fun daysInMonth(year: Int, month: Int): Int = when (month) {
 /** Index of the 1st of [month] in a Monday-first week (Mon = 0 ... Sun = 6). */
 private fun firstWeekdayIndex(year: Int, month: Int): Int {
     val adjustedYear = if (month < 3) year - 1 else year
-    val sundayBased = (adjustedYear + adjustedYear / 4 - adjustedYear / 100 +
-        adjustedYear / 400 + DaysBeforeMonth[month - 1] + 1) % 7
+    val sundayBased = (
+        adjustedYear + adjustedYear / 4 - adjustedYear / 100 +
+            adjustedYear / 400 + DaysBeforeMonth[month - 1] + 1
+        ) % 7
     return (sundayBased + 6) % 7
 }

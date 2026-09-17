@@ -129,8 +129,11 @@ fun Switch(
                 if (didDrag) {
                     val delta = dragAmount.x / dragWidth
                     fraction =
-                        if (isLtr) (fraction + delta).fastCoerceIn(0f, 1f)
-                        else (fraction - delta).fastCoerceIn(0f, 1f)
+                        if (isLtr) {
+                            (fraction + delta).fastCoerceIn(0f, 1f)
+                        } else {
+                            (fraction - delta).fastCoerceIn(0f, 1f)
+                        }
                 }
             },
         )
@@ -203,8 +206,11 @@ fun Switch(
                     // widening grows toward the track interior instead of past its clipped edge.
                     val widening = (size.width - size.height).coerceAtLeast(0f)
                     translationX =
-                        if (isLtr) lerp(0f, dragWidth, value) - widening * value
-                        else lerp(0f, -dragWidth, value) + widening * value
+                        if (isLtr) {
+                            lerp(0f, dragWidth, value) - widening * value
+                        } else {
+                            lerp(0f, -dragWidth, value) + widening * value
+                        }
                     // Squash the thumb against the direction of travel while it moves fast.
                     val velocity = dampedDragAnimation.velocity / 50f
                     scaleX = 1f / (1f - (velocity * 0.75f).fastCoerceIn(-0.2f, 0.2f))

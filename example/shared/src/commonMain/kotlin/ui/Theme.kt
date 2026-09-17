@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package ui
@@ -7,10 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import site.unclefish.yubeix.theme.ColorSchemeMode
-import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.ThemeColorSpec
 import site.unclefish.yubeix.theme.ThemeController
 import site.unclefish.yubeix.theme.ThemePaletteStyle
+import site.unclefish.yubeix.theme.YubeixTheme
 
 @Composable
 fun AppTheme(

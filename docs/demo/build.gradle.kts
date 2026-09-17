@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2025, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
@@ -25,7 +25,6 @@ kotlin {
         commonMain.dependencies {
             api(projects.yubeix)
             implementation(projects.yubeixIcons)
-            implementation(libs.androidx.navigation3.runtime)
         }
     }
 }
