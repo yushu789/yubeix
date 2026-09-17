@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -14,7 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.BasicComponentColors
@@ -24,7 +26,7 @@ import site.unclefish.yubeix.basic.CheckboxColors
 import site.unclefish.yubeix.basic.CheckboxDefaults
 
 /**
- * A checkbox with a title and a summary.
+ * A checkbox row with a title and a summary, styled after wordmoment's preference rows.
  *
  * @param title The title of the [SuperCheckbox].
  * @param checked The checked state of the [SuperCheckbox].
@@ -37,9 +39,14 @@ import site.unclefish.yubeix.basic.CheckboxDefaults
  * @param endActions The [Composable] content that on the end side of the [SuperCheckbox].
  * @param checkboxLocation The location of checkbox, [CheckboxLocation.Start] or [CheckboxLocation.End].
  * @param bottomAction The [Composable] content at the bottom of the [SuperCheckbox].
- * @param insideMargin The margin inside the [SuperCheckbox].
+ * @param insideMargin The margin inside the [SuperCheckbox]. Defaults to the adaptive preference
+ *   row padding, which grows with a summary or a bottom action.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [SuperCheckbox] is clickable.
+ * @param minHeight The min height of the [SuperCheckbox]. Defaults to the adaptive preference row
+ *   min height.
+ * @param selected Whether the [SuperCheckbox] is highlighted as selected.
+ * @param selectedShape The shape used to clip the selected highlight of the [SuperCheckbox].
  */
 @Composable
 @NonRestartableComposable
@@ -55,11 +62,21 @@ fun SuperCheckbox(
     endActions: @Composable RowScope.() -> Unit = {},
     checkboxLocation: CheckboxLocation = CheckboxLocation.Start,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    insideMargin: PaddingValues = SuperRowDefaults.resolvedItemPadding(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     holdDownState: Boolean = false,
     enabled: Boolean = true,
+    minHeight: Dp = SuperRowDefaults.resolvedMinHeight(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
+    selected: Boolean = false,
+    selectedShape: Shape = SuperRowDefaults.SelectedShape,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val selectedModifier = Modifier.superRowSelectedModifier(selected, selectedShape)
     val startAction = if (checkboxLocation == CheckboxLocation.Start) {
         @Composable {
             SuperCheckboxStartAction(
@@ -74,7 +91,8 @@ fun SuperCheckbox(
     }
 
     BasicComponent(
-        modifier = modifier,
+        modifier = modifier
+            .then(selectedModifier),
         insideMargin = insideMargin,
         title = title,
         titleColor = titleColor,
@@ -105,6 +123,7 @@ fun SuperCheckbox(
         },
         holdDownState = holdDownState,
         enabled = enabled,
+        minHeight = minHeight,
     )
 }
 

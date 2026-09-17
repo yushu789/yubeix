@@ -1,10 +1,12 @@
-// Copyright 2026, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.basic
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
@@ -53,6 +55,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.utils.LocalCupertinoOverscrollState
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -198,16 +201,56 @@ fun HorizontalScrollBar(
 
 @ExperimentalScrollBarApi
 object ScrollBarDefaults {
-    val ThumbWidth: Dp = 3.64.dp
-    val EndPadding: Dp = 3.46.dp
-    val ThumbMinLength: Dp = 36.dp
+    /** The iOS-style thin thumb thickness. */
+    val ThumbWidth: Dp = 2.5.dp
+
+    /** The padding from the end edge. */
+    val EndPadding: Dp = 3.dp
+
+    /** The minimum length of the thumb. */
+    val ThumbMinLength: Dp = 12.dp
+
+    /** The corner radius. [Dp.Unspecified] defaults to half of [ThumbWidth]. */
     val CornerRadius: Dp = Dp.Unspecified
+
+    /** How long the thumb stays visible after scrolling stops, before it starts fading out. */
     val FadeDelayMillis = 1000
+
+    /** How long the fade-in takes. */
+    val FadeInMillis = 120
+
+    /** How long the fade-out takes. */
+    val FadeOutMillis = 220
+
+    /** How long the whole fade used to take; superseded by [FadeInMillis] and [FadeOutMillis]. */
+    @Deprecated(
+        message = "Superseded by FadeInMillis and FadeOutMillis.",
+        replaceWith = ReplaceWith("ScrollBarDefaults.FadeOutMillis"),
+    )
     val FadeDurationMillis = 500
+
+    /** The invisible strip around the track that still responds to touch and hover. */
     val TouchTargetWidth: Dp = 48.dp
+
+    /** The thumb width while it is being dragged. */
     val DragThumbWidth: Dp = 6.dp
-    val ThumbAlpha = 0.1f
-    val DragThumbAlpha = 0.3f
+
+    /** The resting alpha of the thumb. */
+    val ThumbAlpha = 0.32f
+
+    /** The alpha of the thumb while it is hovered or dragged. */
+    val DragThumbAlpha = 0.5f
+
+    /** The stiffness of the spring that animates the thumb metrics. */
+    const val MetricSpringStiffness = 900f
+
+    /** The overscroll offset in pixels above which the thumb is considered overscrolled. */
+    const val OverscrollVisibilityThresholdPx = 0.5f
+
+    /** How far the thumb can shrink during overscroll, as a fraction of its resting length. */
+    const val OverscrollMinThumbScale = 0.35f
+
+    /** The duration of the hover/drag highlight animation. */
     val DragAnimationDurationMillis = 150
 
     fun scrollBarColors(
@@ -260,8 +303,39 @@ private fun ScrollBar(
     val isHovered by interactionSource.collectIsHoveredAsState()
     var opacity by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
-    var hideJob by remember { mutableStateOf<Job?>(null) }
+    var visibilityJob by remember { mutableStateOf<Job?>(null) }
     val isHighlighted = isHovered || isDragging
+
+    // iOS-style visibility: a quick fade-in when the content scrolls, and after a dwell a slower
+    // fade-out. Both directions run through one job so a scroll interrupting a fade-out (or a
+    // fade-out interrupting a fade-in) always continues from the current opacity.
+    val showThumb = {
+        visibilityJob?.cancel()
+        visibilityJob = coroutineScope.launch {
+            animate(
+                initialValue = opacity,
+                targetValue = 1f,
+                animationSpec = tween(ScrollBarDefaults.FadeInMillis),
+            ) { value, _ ->
+                opacity = value
+            }
+        }
+        Unit
+    }
+    val hideThumbAfterDelay = {
+        visibilityJob?.cancel()
+        visibilityJob = coroutineScope.launch {
+            delay(ScrollBarDefaults.FadeDelayMillis.toLong())
+            animate(
+                initialValue = opacity,
+                targetValue = 0f,
+                animationSpec = tween(ScrollBarDefaults.FadeOutMillis),
+            ) { value, _ ->
+                opacity = value
+            }
+        }
+        Unit
+    }
 
     val highlightAnimSpec = tween<Float>(ScrollBarDefaults.DragAnimationDurationMillis)
     val animatedThumbWidthPx by animateFloatAsState(
@@ -280,20 +354,9 @@ private fun ScrollBar(
 
     LaunchedEffect(isHighlighted) {
         if (isHighlighted) {
-            hideJob?.cancel()
-            opacity = 1f
+            showThumb()
         } else if (opacity > 0f) {
-            hideJob?.cancel()
-            hideJob = coroutineScope.launch {
-                delay(ScrollBarDefaults.FadeDelayMillis.toLong())
-                animate(
-                    initialValue = 1f,
-                    targetValue = 0f,
-                    animationSpec = tween(ScrollBarDefaults.FadeDurationMillis),
-                ) { value, _ ->
-                    opacity = value
-                }
-            }
+            hideThumbAfterDelay()
         }
     }
 
@@ -301,22 +364,16 @@ private fun ScrollBar(
         snapshotFlow { adapter.scrollOffset }
             .drop(1)
             .collect {
-                opacity = 1f
+                showThumb()
                 if (!isHighlighted) {
-                    hideJob?.cancel()
-                    hideJob = coroutineScope.launch {
-                        delay(ScrollBarDefaults.FadeDelayMillis.toLong())
-                        animate(
-                            initialValue = 1f,
-                            targetValue = 0f,
-                            animationSpec = tween(ScrollBarDefaults.FadeDurationMillis),
-                        ) { value, _ ->
-                            opacity = value
-                        }
-                    }
+                    hideThumbAfterDelay()
                 }
             }
     }
+
+    // The cupertino overscroll state, when the host provides one: the thumb shrinks while the
+    // content is pulled past its edges, like the iOS scroll indicator.
+    val overscrollState = LocalCupertinoOverscrollState.current
 
     val measurePolicy = if (isVertical) {
         verticalMeasurePolicy(
@@ -360,7 +417,7 @@ private fun ScrollBar(
 
                     isDragging = true
                     opacity = 1f
-                    hideJob?.cancel()
+                    visibilityJob?.cancel()
                     down.consume()
 
                     sliderAdapter.onDragStarted()
@@ -411,7 +468,11 @@ private fun ScrollBar(
                             animate(
                                 initialValue = startValue,
                                 targetValue = targetThumbLength,
-                                animationSpec = tween(durationMillis = 150),
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                    stiffness = ScrollBarDefaults.MetricSpringStiffness,
+                                    visibilityThreshold = 0.5f,
+                                ),
                             ) { value, _ ->
                                 displayedThumbLength = value
                             }
@@ -421,9 +482,40 @@ private fun ScrollBar(
                     displayedThumbLength = targetThumbLength
                 }
 
+                // While the content is pulled past its edge, the thumb shrinks (down to a floor)
+                // and stays pinned at the edge being overscrolled, like the iOS scroll indicator.
+                val overscrollOffsetPx = when (isVertical) {
+                    true -> overscrollState?.offset?.y ?: 0f
+                    false -> overscrollState?.offset?.x ?: 0f
+                }
+                val overscrollAbsPx = abs(overscrollOffsetPx)
+                val isOverscrolled = overscrollAbsPx > ScrollBarDefaults.OverscrollVisibilityThresholdPx
+                val restingThumbLength = displayedThumbLength
+                val overscrollMinLengthPx = (restingThumbLength * ScrollBarDefaults.OverscrollMinThumbScale)
+                    .coerceAtLeast(1f)
+                    .coerceAtMost(restingThumbLength)
+                val thumbLength = if (isOverscrolled) {
+                    (restingThumbLength - overscrollAbsPx).coerceIn(overscrollMinLengthPx, restingThumbLength)
+                } else {
+                    restingThumbLength
+                }
+                var thumbOffset = beforeTrackPaddingPx + sliderAdapter.position.toFloat()
+                if (isOverscrolled) {
+                    val scrollFraction = if (adapter.maxScrollOffset > 0.0) {
+                        (adapter.scrollOffset / adapter.maxScrollOffset).coerceIn(0.0, 1.0)
+                    } else {
+                        0.0
+                    }
+                    val trackStart = beforeTrackPaddingPx
+                    val trackEnd = beforeTrackPaddingPx + sliderAdapter.trackSize
+                    thumbOffset = when {
+                        overscrollOffsetPx > 0f && scrollFraction <= 0f -> trackStart
+                        overscrollOffsetPx < 0f && scrollFraction >= 1.0 -> (trackEnd - thumbLength).coerceAtLeast(trackStart)
+                        else -> thumbOffset
+                    }
+                }
+
                 val color = baseThumbColor.copy(alpha = animatedThumbAlpha * opacity)
-                val thumbLength = displayedThumbLength
-                val thumbOffset = beforeTrackPaddingPx + sliderAdapter.position.toFloat()
 
                 if (isVertical) {
                     drawRoundRect(

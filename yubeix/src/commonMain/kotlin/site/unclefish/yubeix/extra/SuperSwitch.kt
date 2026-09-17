@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.BasicComponentColors
@@ -22,7 +24,9 @@ import site.unclefish.yubeix.basic.SwitchColors
 import site.unclefish.yubeix.basic.SwitchDefaults
 
 /**
- * A switch with a title and a summary.
+ * A switch row with a title and a summary, styled after wordmoment's preference rows. The row
+ * shows a trailing [Switch]; tapping the row toggles the switch only when [toggleOnRowClick] is
+ * enabled.
  *
  * @param checked The checked state of the [SuperSwitch].
  * @param onCheckedChange The callback when the checked state of the [SuperSwitch] is changed.
@@ -35,9 +39,16 @@ import site.unclefish.yubeix.basic.SwitchDefaults
  * @param endActions The [Composable] content on the end side of the [SuperSwitch].
  * @param bottomAction The [Composable] content at the bottom of the [SuperSwitch].
  * @param switchColors The [SwitchColors] of the [SuperSwitch].
- * @param insideMargin The margin inside the [SuperSwitch].
+ * @param insideMargin The margin inside the [SuperSwitch]. Defaults to the adaptive preference row
+ *   padding, which grows with a summary or a bottom action.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [SuperSwitch] is clickable.
+ * @param toggleOnRowClick Whether tapping anywhere on the row toggles the switch. When false,
+ *   only the [Switch] itself is interactive.
+ * @param minHeight The min height of the [SuperSwitch]. Defaults to the adaptive preference row
+ *   min height.
+ * @param selected Whether the [SuperSwitch] is highlighted as selected.
+ * @param selectedShape The shape used to clip the selected highlight of the [SuperSwitch].
  */
 @Composable
 @NonRestartableComposable
@@ -53,13 +64,25 @@ fun SuperSwitch(
     endActions: @Composable RowScope.() -> Unit = {},
     bottomAction: (@Composable () -> Unit)? = null,
     switchColors: SwitchColors = SwitchDefaults.switchColors(),
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    insideMargin: PaddingValues = SuperRowDefaults.resolvedItemPadding(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     holdDownState: Boolean = false,
     enabled: Boolean = true,
+    toggleOnRowClick: Boolean = false,
+    minHeight: Dp = SuperRowDefaults.resolvedMinHeight(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
+    selected: Boolean = false,
+    selectedShape: Shape = SuperRowDefaults.SelectedShape,
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val selectedModifier = Modifier.superRowSelectedModifier(selected, selectedShape)
     BasicComponent(
-        modifier = modifier,
+        modifier = modifier
+            .then(selectedModifier),
         insideMargin = insideMargin,
         title = title,
         titleColor = titleColor,
@@ -83,11 +106,14 @@ fun SuperSwitch(
             )
         },
         bottomAction = bottomAction,
-        onClick = {
-            currentOnCheckedChange.takeIf { enabled }?.invoke(!checked)
+        onClick = if (toggleOnRowClick) {
+            { currentOnCheckedChange.takeIf { enabled }?.invoke(!checked) }
+        } else {
+            null
         },
         holdDownState = holdDownState,
         enabled = enabled,
+        minHeight = minHeight,
     )
 }
 

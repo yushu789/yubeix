@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -17,11 +17,11 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -40,7 +40,7 @@ import site.unclefish.yubeix.basic.TextButton
 import site.unclefish.yubeix.theme.YubeixTheme
 
 /**
- * A spinner component with Yubeix style. (Popup Mode)
+ * A spinner row with Yubeix style, styled after wordmoment's preference rows. (Popup Mode)
  *
  * @param items The list of [SpinnerEntry] to be shown in the [SuperSpinner].
  * @param selectedIndex The index of the selected item in the [SuperSpinner].
@@ -52,7 +52,8 @@ import site.unclefish.yubeix.theme.YubeixTheme
  * @param spinnerColors The [SpinnerColors] of the [SuperSpinner].
  * @param startAction The [Composable] content that on the start side of the [SuperSpinner].
  * @param bottomAction The [Composable] content at the bottom of the [SuperSpinner].
- * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner].
+ * @param insideMargin The [PaddingValues] to be applied inside the [SuperSpinner]. Defaults to
+ *   the adaptive preference row padding, which grows with a summary or a bottom action.
  * @param maxHeight The maximum height of the [SuperListPopup].
  * @param enabled Whether the [SuperSpinner] is enabled.
  * @param showValue Whether to show the value of the [SuperSpinner].
@@ -60,6 +61,10 @@ import site.unclefish.yubeix.theme.YubeixTheme
  *   When true (default), the popup covers the full screen. When false, it renders within the
  *   current Scaffold's bounds with position compensation.
  * @param onSelectedIndexChange The callback to be invoked when the selected index of the [SuperSpinner] is changed.
+ * @param minHeight The min height of the [SuperSpinner]. Defaults to the adaptive preference row
+ *   min height.
+ * @param selected Whether the [SuperSpinner] is highlighted as selected.
+ * @param selectedShape The shape used to clip the selected highlight of the [SuperSpinner].
  */
 @Composable
 fun SuperSpinner(
@@ -73,12 +78,21 @@ fun SuperSpinner(
     spinnerColors: SpinnerColors = SpinnerDefaults.spinnerColors(),
     startAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    insideMargin: PaddingValues = SuperRowDefaults.resolvedItemPadding(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
+    minHeight: Dp = SuperRowDefaults.resolvedMinHeight(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
+    selected: Boolean = false,
+    selectedShape: Shape = SuperRowDefaults.SelectedShape,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = rememberSaveable { mutableStateOf(false) }
@@ -107,8 +121,10 @@ fun SuperSpinner(
         }
     }
 
+    val selectedModifier = Modifier.superRowSelectedModifier(selected, selectedShape)
     BasicComponent(
-        modifier = modifier,
+        modifier = modifier
+            .then(selectedModifier),
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
@@ -122,11 +138,9 @@ fun SuperSpinner(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .align(Alignment.CenterVertically)
-                        .weight(1f, fill = false),
-                    fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        .align(Alignment.CenterVertically),
+                    style = YubeixTheme.textStyles.body2,
                     color = actionColor,
-                    textAlign = TextAlign.End,
                 )
             }
             DropdownArrowEndAction(
@@ -151,6 +165,7 @@ fun SuperSpinner(
         onClick = handleClick,
         holdDownState = isHoldDown.value,
         enabled = actualEnabled,
+        minHeight = minHeight,
     )
 }
 
@@ -204,7 +219,8 @@ private fun SuperSpinnerPopup(
 }
 
 /**
- * A [SuperSpinner] component with Yubeix style, show Spinner as dialog. (Dialog Mode)
+ * A [SuperSpinner] row with Yubeix style, show Spinner as dialog, styled after wordmoment's
+ * preference rows. (Dialog Mode)
  *
  * @param items the list of [SpinnerEntry] to be shown in the [SuperSpinner].
  * @param selectedIndex the index of the selected item in the [SuperSpinner].
@@ -217,13 +233,18 @@ private fun SuperSpinnerPopup(
  * @param summaryColor the color of the summary of the [SuperSpinner].
  * @param startAction the action to be shown at the start side of the [SuperSpinner].
  * @param bottomAction the action to be shown at the bottom of the [SuperSpinner].
- * @param insideMargin the [PaddingValues] to be applied inside the [SuperSpinner].
+ * @param insideMargin the [PaddingValues] to be applied inside the [SuperSpinner]. Defaults to
+ *   the adaptive preference row padding, which grows with a summary or a bottom action.
  * @param enabled whether the [SuperSpinner] is enabled.
  * @param showValue whether to show the value of the [SuperSpinner].
  * @param renderInRootScaffold Whether to render the dialog in the root (outermost) Scaffold.
  *   When true (default), the dialog covers the full screen. When false, it renders within the
  *   current Scaffold's bounds.
  * @param onSelectedIndexChange the callback to be invoked when the selected index of the [SuperSpinner] is changed.
+ * @param minHeight The min height of the [SuperSpinner]. Defaults to the adaptive preference row
+ *   min height.
+ * @param selected Whether the [SuperSpinner] is highlighted as selected.
+ * @param selectedShape The shape used to clip the selected highlight of the [SuperSpinner].
  */
 @Composable
 fun SuperSpinner(
@@ -239,11 +260,20 @@ fun SuperSpinner(
     spinnerColors: SpinnerColors = SpinnerDefaults.dialogSpinnerColors(),
     startAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    insideMargin: PaddingValues = SuperRowDefaults.resolvedItemPadding(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     enabled: Boolean = true,
     showValue: Boolean = true,
     renderInRootScaffold: Boolean = true,
     onSelectedIndexChange: ((Int) -> Unit)? = null,
+    minHeight: Dp = SuperRowDefaults.resolvedMinHeight(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
+    selected: Boolean = false,
+    selectedShape: Shape = SuperRowDefaults.SelectedShape,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
@@ -270,8 +300,10 @@ fun SuperSpinner(
         }
     }
 
+    val selectedModifier = Modifier.superRowSelectedModifier(selected, selectedShape)
     BasicComponent(
-        modifier = modifier,
+        modifier = modifier
+            .then(selectedModifier),
         interactionSource = interactionSource,
         insideMargin = insideMargin,
         title = title,
@@ -285,11 +317,9 @@ fun SuperSpinner(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .align(Alignment.CenterVertically)
-                        .weight(1f, fill = false),
-                    fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        .align(Alignment.CenterVertically),
+                    style = YubeixTheme.textStyles.body2,
                     color = actionColor,
-                    textAlign = TextAlign.End,
                 )
             }
             DropdownArrowEndAction(
@@ -314,6 +344,7 @@ fun SuperSpinner(
         onClick = handleClick,
         holdDownState = isHoldDown.value,
         enabled = actualEnabled,
+        minHeight = minHeight,
     )
 }
 

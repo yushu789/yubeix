@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -13,19 +13,20 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.Dialog
+import site.unclefish.yubeix.theme.LocalContentColor
 import site.unclefish.yubeix.theme.LocalDismissState
+import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.utils.RemovePlatformDialogDefaultEffects
 import site.unclefish.yubeix.utils.platformDialogProperties
 
 /**
  * A dialog with a title, a summary, and other contents, rendered at window level without `Scaffold`.
  *
- * Use [LocalWindowDialogState] inside `content` to request dismissal from inner composables.
+ * Use [LocalDismissState] inside `content` to request dismissal from inner composables.
  *
  * @param show Whether the [WindowDialog] is shown.
  * @param modifier The modifier to be applied to the [WindowDialog].
@@ -34,6 +35,7 @@ import site.unclefish.yubeix.utils.platformDialogProperties
  * @param summary The summary of the [WindowDialog].
  * @param summaryColor The color of the summary.
  * @param backgroundColor The background color of the [WindowDialog].
+ * @param contentColor The preferred content color provided to the [WindowDialog] content.
  * @param enableWindowDim Whether to enable window dimming when the [WindowDialog] is shown.
  * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
  * @param onDismissFinished The callback when the [WindowDialog] is completely dismissed.
@@ -47,10 +49,11 @@ fun WindowDialog(
     show: Boolean,
     modifier: Modifier = Modifier,
     title: String? = null,
-    titleColor: Color = DialogDefaults.titleColor(),
+    titleColor: Color = YubeixTheme.colorScheme.onSurface,
     summary: String? = null,
-    summaryColor: Color = DialogDefaults.summaryColor(),
-    backgroundColor: Color = DialogDefaults.backgroundColor(),
+    summaryColor: Color = YubeixTheme.colorScheme.onSurfaceSecondary,
+    backgroundColor: Color = YubeixTheme.colorScheme.surface,
+    contentColor: Color = YubeixTheme.colorScheme.onSurface,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
@@ -99,6 +102,7 @@ fun WindowDialog(
                 LocalDismissState provides {
                     currentOnDismissRequest.value?.invoke()
                 },
+                LocalContentColor provides contentColor,
             ) {
                 content()
             }
@@ -112,7 +116,7 @@ fun WindowDialog(
 @Deprecated(
     message = "Use WindowDialog with show: Boolean parameter instead for unidirectional data flow.",
     replaceWith = ReplaceWith(
-        "WindowDialog(show = show.value, modifier = modifier, title = title, titleColor = titleColor, summary = summary, summaryColor = summaryColor, backgroundColor = backgroundColor, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, content = content)",
+        "WindowDialog(show = show.value, modifier = modifier, title = title, titleColor = titleColor, summary = summary, summaryColor = summaryColor, backgroundColor = backgroundColor, contentColor = contentColor, enableWindowDim = enableWindowDim, onDismissRequest = onDismissRequest, onDismissFinished = onDismissFinished, outsideMargin = outsideMargin, insideMargin = insideMargin, defaultWindowInsetsPadding = defaultWindowInsetsPadding, content = content)",
     ),
 )
 @Composable
@@ -120,10 +124,11 @@ fun WindowDialog(
     show: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     title: String? = null,
-    titleColor: Color = DialogDefaults.titleColor(),
+    titleColor: Color = YubeixTheme.colorScheme.onSurface,
     summary: String? = null,
-    summaryColor: Color = DialogDefaults.summaryColor(),
-    backgroundColor: Color = DialogDefaults.backgroundColor(),
+    summaryColor: Color = YubeixTheme.colorScheme.onSurfaceSecondary,
+    backgroundColor: Color = YubeixTheme.colorScheme.surface,
+    contentColor: Color = YubeixTheme.colorScheme.onSurface,
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
@@ -140,6 +145,7 @@ fun WindowDialog(
         summary = summary,
         summaryColor = summaryColor,
         backgroundColor = backgroundColor,
+        contentColor = contentColor,
         enableWindowDim = enableWindowDim,
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,

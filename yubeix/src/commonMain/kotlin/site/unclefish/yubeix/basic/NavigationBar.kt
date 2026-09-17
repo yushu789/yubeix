@@ -1,14 +1,15 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.basic
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -34,6 +36,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -44,85 +47,277 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.offset
 import androidx.compose.ui.unit.sp
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import site.unclefish.yubeix.anim.yubeixSpring
+import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixShape
 import site.unclefish.yubeix.utils.Platform
 import site.unclefish.yubeix.utils.platform
 
 /**
- * A [NavigationBar] that with 2 to 5 items.
+ * A [NavigationBar] that with 2 to 5 items, styled after the iOS bottom tab bar: a translucent
+ * (optionally blurred) glass surface with a hairline on its top edge.
  *
  * @param modifier The modifier to be applied to the [NavigationBar].
- * @param color The color of the [NavigationBar].
- * @param showDivider Whether to show the divider line between the [NavigationBar] and the content.
+ * @param color The color of the [NavigationBar]. The default is a translucent tint, matching the
+ *   iOS tab bar; it is also used as the haze tint when [hazeState] is provided.
+ * @param showDivider Whether to show the hairline divider on the top edge of the [NavigationBar].
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationBar].
  * @param mode The mode for displaying items in the [NavigationBar]. It can show icons, text or both.
+ * @param hazeState The [HazeState] of the content scrolled behind the bar. When non-null (and
+ *   reduced dynamic effects are not requested) the bar blurs that content behind its translucent
+ *   surface; otherwise it falls back to the translucent [color] alone.
  * @param content The content of the [NavigationBar], usually [NavigationBarItem]s.
  */
+@OptIn(ExperimentalHazeApi::class)
 @Composable
 fun NavigationBar(
     modifier: Modifier = Modifier,
-    color: Color = YubeixTheme.colorScheme.surface,
+    color: Color = YubeixTheme.colorScheme.background.copy(alpha = NavigationBarDefaults.BackgroundAlpha),
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
     mode: NavigationBarDisplayMode = NavigationBarDisplayMode.IconAndText,
+    hazeState: HazeState? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val captionBarPaddings = WindowInsets.captionBar.only(WindowInsetsSides.Bottom).asPaddingValues()
-    val captionBarBottomPaddingValue = captionBarPaddings.calculateBottomPadding()
-
-    val animatedCaptionBarHeight by animateDpAsState(
-        targetValue = if (captionBarBottomPaddingValue > 0.dp) captionBarBottomPaddingValue else 0.dp,
-        animationSpec = tween(durationMillis = 300),
-    )
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(color),
+    CupertinoNavigationBar(
+        modifier = modifier,
+        color = color,
+        showDivider = showDivider,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        hazeState = hazeState,
     ) {
-        if (showDivider) {
-            HorizontalDivider()
+        CompositionLocalProvider(LocalNavigationBarDisplayMode provides mode) {
+            content()
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CompositionLocalProvider(LocalNavigationBarDisplayMode provides mode) {
-                content()
-            }
-        }
-        if (defaultWindowInsetsPadding) {
-            val navigationBarsPadding = WindowInsets.navigationBars.asPaddingValues()
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .layout { measurable, constraints ->
-                        val totalHeight = (navigationBarsPadding.calculateBottomPadding() + animatedCaptionBarHeight).roundToPx()
-                        val fixedConstraints = constraints.copy(minHeight = totalHeight, maxHeight = totalHeight)
-                        val placeable = measurable.measure(fixedConstraints)
-                        layout(placeable.width, totalHeight) {
-                            placeable.placeRelative(0, 0)
-                        }
-                    }
-                    .pointerInput(Unit) { detectTapGestures { /* Do nothing to consume the click */ } },
+    }
+}
+
+/**
+ * A [NavigationBar] driven by a list of [NavigationBarItemSpec]s, styled after the iOS bottom tab
+ * bar: a translucent (optionally blurred) glass surface with a hairline on its top edge, a selected
+ * item tinted with the theme accent, and a tick of haptic feedback on every tap.
+ *
+ * @param selectedIndex The index of the currently selected item.
+ * @param items The items to display, at least two.
+ * @param onItemSelected The callback when an item is selected.
+ * @param modifier The modifier to be applied to the [NavigationBar].
+ * @param hazeState The [HazeState] of the content scrolled behind the bar. When non-null (and
+ *   reduced dynamic effects are not requested) the bar blurs that content behind its translucent
+ *   surface; otherwise it falls back to the translucent background color alone.
+ * @param hapticFeedbackEnabled Whether item taps trigger haptic feedback.
+ * @param showDivider Whether to show the hairline divider on the top edge of the [NavigationBar].
+ * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationBar].
+ */
+@Composable
+fun NavigationBar(
+    selectedIndex: Int,
+    items: List<NavigationBarItemSpec>,
+    onItemSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    hazeState: HazeState? = null,
+    hapticFeedbackEnabled: Boolean = true,
+    showDivider: Boolean = true,
+    defaultWindowInsetsPadding: Boolean = true,
+) {
+    require(items.size >= 2) { "Cupertino tab bars need at least two items." }
+
+    val currentIndex = selectedIndex.coerceIn(items.indices)
+    val currentOnItemSelected by rememberUpdatedState(onItemSelected)
+    val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+
+    CupertinoNavigationBar(
+        modifier = modifier,
+        color = YubeixTheme.colorScheme.background.copy(alpha = NavigationBarDefaults.BackgroundAlpha),
+        showDivider = showDivider,
+        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        hazeState = hazeState,
+    ) {
+        items.forEachIndexed { index, item ->
+            CupertinoTabBarItem(
+                item = item,
+                selected = index == currentIndex,
+                hapticFeedbackEnabled = currentHapticEnabled,
+                modifier = Modifier.weight(1f),
+                onClick = { currentOnItemSelected(index) },
             )
         }
     }
 }
 
 /**
- * A [NavigationBarItem] that is suitable for [NavigationBar].
+ * The shared iOS tab bar container: a translucent or haze-blurred surface of [NavigationBarDefaults.BarHeight]
+ * plus the bottom navigation bar inset, a row of items top-aligned inside it, and an optional
+ * hairline along the top edge.
+ */
+@OptIn(ExperimentalHazeApi::class)
+@Composable
+private fun CupertinoNavigationBar(
+    modifier: Modifier,
+    color: Color,
+    showDivider: Boolean,
+    defaultWindowInsetsPadding: Boolean,
+    hazeState: HazeState?,
+    content: @Composable RowScope.() -> Unit,
+) {
+    val reducedDynamicEffectsEnabled = LocalReducedDynamicEffectsEnabled.current
+    val navigationBarBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val insetPadding = if (defaultWindowInsetsPadding) navigationBarBottom else 0.dp
+    val hazeStyle = remember(color) {
+        HazeStyle(
+            backgroundColor = color,
+            tints = listOf(HazeTint(color)),
+            blurRadius = NavigationBarDefaults.BlurRadius,
+            noiseFactor = 0f,
+            fallbackTint = HazeTint(color),
+        )
+    }
+    val useHaze = hazeState != null && !reducedDynamicEffectsEnabled
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(NavigationBarDefaults.BarHeight + insetPadding)
+            .then(
+                when {
+                    useHaze -> {
+                        Modifier.hazeEffect(
+                            state = requireNotNull(hazeState),
+                            style = hazeStyle,
+                        ) {
+                            inputScale = HazeInputScale.Auto
+                        }
+                    }
+
+                    else -> {
+                        Modifier.background(color)
+                    }
+                }
+            ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(NavigationBarDefaults.BarHeight)
+                .align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            content()
+        }
+
+        if (showDivider) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(cupertinoHairline())
+                    .background(YubeixTheme.colorScheme.dividerLine),
+            )
+        }
+    }
+}
+
+/**
+ * A hairline that is one physical pixel tall, like the iOS tab bar's top edge.
+ */
+@Composable
+private fun cupertinoHairline(): Dp {
+    return (1f / LocalDensity.current.density).dp
+}
+
+/**
+ * The item model for the list-driven [NavigationBar] overload.
+ *
+ * @param label The label of the item, also used as its content description.
+ * @param icon The icon of the item.
+ * @param selectedIcon The icon of the item when selected; defaults to [icon].
+ */
+@Immutable
+data class NavigationBarItemSpec(
+    val label: String,
+    val icon: ImageVector,
+    val selectedIcon: ImageVector = icon,
+)
+
+@Composable
+private fun CupertinoTabBarItem(
+    item: NavigationBarItemSpec,
+    selected: Boolean,
+    hapticFeedbackEnabled: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val contentColor = if (selected) {
+        YubeixTheme.colorScheme.primary
+    } else {
+        YubeixTheme.colorScheme.onSurface.copy(alpha = NavigationBarDefaults.InactiveAlpha)
+    }
+    val hapticFeedback = LocalHapticFeedback.current
+    val currentOnClick = rememberUpdatedState(onClick)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
+    val currentHapticEnabled by rememberUpdatedState(hapticFeedbackEnabled)
+
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .semantics { this.selected = selected }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Tab,
+                onClick = {
+                    if (currentHapticEnabled) {
+                        currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    }
+                    currentOnClick.value()
+                },
+            )
+            .padding(vertical = NavigationBarDefaults.ItemVerticalPadding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = if (selected) item.selectedIcon else item.icon,
+            contentDescription = item.label,
+            tint = contentColor,
+            modifier = Modifier.size(NavigationBarDefaults.CupertinoIconSize),
+        )
+        Spacer(modifier = Modifier.height(NavigationBarDefaults.IconLabelSpacing))
+        Text(
+            text = item.label,
+            color = contentColor,
+            textAlign = TextAlign.Center,
+            fontSize = NavigationBarDefaults.LabelFontSize,
+            fontWeight = NavigationBarDefaults.LabelFontWeight,
+            letterSpacing = NavigationBarDefaults.LabelLetterSpacing,
+            maxLines = 1,
+        )
+    }
+}
+
+/**
+ * A [NavigationBarItem] that is suitable for [NavigationBar], styled after the iOS tab bar item:
+ * the selected item is tinted with the theme accent while unselected ones sit at a resting alpha,
+ * the label uses the iOS tab bar type scale, and a tap plays a tick of haptic feedback with a
+ * subtle press-down scale.
  *
  * @param selected Whether the item is selected.
  * @param onClick The callback when the item is clicked.
@@ -130,6 +325,7 @@ fun NavigationBar(
  * @param label The label of the item.
  * @param modifier The modifier to be applied to the [NavigationBarItem].
  * @param enabled Whether the item is enabled.
+ * @param hapticFeedbackEnabled Whether item taps trigger haptic feedback.
  */
 @Composable
 fun RowScope.NavigationBarItem(
@@ -139,31 +335,35 @@ fun RowScope.NavigationBarItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    hapticFeedbackEnabled: Boolean = true,
 ) {
-    val platform = platform()
-    val itemHeight = if (platform != Platform.IOS) NavigationBarDefaults.ItemHeight else NavigationBarDefaults.ItemHeightIOS
+    val hapticFeedback = LocalHapticFeedback.current
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
     var isPressed by remember { mutableStateOf(false) }
-
-    val onSurfaceContainerColor = YubeixTheme.colorScheme.onSurfaceContainer
-    val tint = when {
-        isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.SelectedPressedAlpha)
-        } else {
-            onSurfaceContainerColor.copy(alpha = NavigationBarDefaults.UnselectedPressedAlpha)
-        }
-
-        selected -> onSurfaceContainerColor
-
-        else -> onSurfaceContainerColor.copy(NavigationBarDefaults.UnselectedAlpha)
-    }
-    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
     val mode = LocalNavigationBarDisplayMode.current
+
+    val tint = if (selected) {
+        YubeixTheme.colorScheme.primary
+    } else {
+        YubeixTheme.colorScheme.onSurface.copy(alpha = NavigationBarDefaults.InactiveAlpha)
+    }
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed && enabled) NavigationBarDefaults.PressedItemScale else 1f,
+        animationSpec = yubeixSpring(damping = 0.6f, response = 0.25f),
+        label = "navigationBarItemSelectedScale",
+    )
 
     Column(
         modifier = modifier
-            .height(itemHeight)
+            .fillMaxHeight()
             .weight(1f)
-            .pointerInput(Unit) {
+            .semantics { this.selected = selected }
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
+            .pointerInput(enabled, hapticFeedbackEnabled) {
                 detectTapGestures(
                     onPress = {
                         if (enabled) {
@@ -172,87 +372,84 @@ fun RowScope.NavigationBarItem(
                             isPressed = false
                         }
                     },
-                    onTap = { if (enabled) onClick() },
+                    onTap = {
+                        if (enabled) {
+                            if (hapticFeedbackEnabled) {
+                                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                            }
+                            currentOnClick()
+                        }
+                    },
                 )
             },
         horizontalAlignment = CenterHorizontally,
-        verticalArrangement = if (mode == NavigationBarDisplayMode.IconAndText || mode == NavigationBarDisplayMode.IconWithSelectedLabel) Arrangement.Top else Arrangement.Center,
+        verticalArrangement = Arrangement.Center,
     ) {
         when (mode) {
             NavigationBarDisplayMode.IconAndText -> {
-                Image(
-                    modifier = Modifier.padding(top = NavigationBarDefaults.IconTopPadding).size(NavigationBarDefaults.IconSize),
+                Icon(
+                    modifier = Modifier.size(NavigationBarDefaults.CupertinoIconSize),
                     imageVector = icon,
                     contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
+                    tint = tint,
                 )
+                Spacer(modifier = Modifier.height(NavigationBarDefaults.IconLabelSpacing))
                 Text(
-                    modifier = Modifier.padding(bottom = if (platform != Platform.IOS) NavigationBarDefaults.BottomPadding else 0.dp),
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
                     fontSize = NavigationBarDefaults.LabelFontSize,
-                    fontWeight = fontWeight,
+                    fontWeight = NavigationBarDefaults.LabelFontWeight,
+                    letterSpacing = NavigationBarDefaults.LabelLetterSpacing,
+                    maxLines = 1,
                 )
             }
 
             NavigationBarDisplayMode.IconWithSelectedLabel -> {
-                val defaultPadding = (itemHeight - NavigationBarDefaults.IconSize) / 2
-                val iconTopPadding by animateDpAsState(
-                    targetValue = if (selected) NavigationBarDefaults.IconTopPadding else defaultPadding,
-                    animationSpec = tween(durationMillis = 300),
-                    label = "iconTopPadding",
-                )
-                val textAlpha by animateFloatAsState(
+                // The label keeps its slot reserved so the icon never shifts; it only fades in
+                // when the item is selected.
+                val labelAlpha by animateFloatAsState(
                     targetValue = if (selected) 1f else 0f,
                     animationSpec = tween(durationMillis = 300),
-                    label = "textAlpha",
+                    label = "navigationBarItemSelectedLabelAlpha",
                 )
-
-                Image(
-                    modifier = Modifier
-                        .layout { measurable, constraints ->
-                            val topPaddingPx = iconTopPadding.roundToPx()
-                            val placeable = measurable.measure(constraints.offset(vertical = -topPaddingPx))
-                            layout(placeable.width, placeable.height + topPaddingPx) {
-                                placeable.placeRelative(0, topPaddingPx)
-                            }
-                        }
-                        .size(NavigationBarDefaults.IconSize),
+                Icon(
+                    modifier = Modifier.size(NavigationBarDefaults.CupertinoIconSize),
                     imageVector = icon,
                     contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
+                    tint = tint,
                 )
+                Spacer(modifier = Modifier.height(NavigationBarDefaults.IconLabelSpacing))
                 Text(
-                    modifier = Modifier
-                        .padding(bottom = if (platform != Platform.IOS) NavigationBarDefaults.BottomPadding else 0.dp)
-                        .graphicsLayer { alpha = textAlpha },
+                    modifier = Modifier.graphicsLayer { alpha = labelAlpha },
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
                     fontSize = NavigationBarDefaults.LabelFontSize,
-                    fontWeight = fontWeight,
+                    fontWeight = NavigationBarDefaults.LabelFontWeight,
+                    letterSpacing = NavigationBarDefaults.LabelLetterSpacing,
+                    maxLines = 1,
                 )
             }
 
             NavigationBarDisplayMode.TextOnly -> {
                 Text(
-                    modifier = Modifier
-                        .padding(vertical = if (platform != Platform.IOS) NavigationBarDefaults.BottomPadding else 0.dp),
                     text = label,
                     color = tint,
                     textAlign = TextAlign.Center,
-                    fontSize = FloatingNavigationBarDefaults.TextFontSize,
-                    fontWeight = fontWeight,
+                    fontSize = NavigationBarDefaults.LabelFontSize,
+                    fontWeight = NavigationBarDefaults.LabelFontWeight,
+                    letterSpacing = NavigationBarDefaults.LabelLetterSpacing,
+                    maxLines = 1,
                 )
             }
 
-            else -> {
-                Image(
-                    modifier = Modifier.size(NavigationBarDefaults.IconSize),
+            NavigationBarDisplayMode.IconOnly -> {
+                Icon(
+                    modifier = Modifier.size(NavigationBarDefaults.CupertinoIconSize),
                     imageVector = icon,
                     contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
+                    tint = tint,
                 )
             }
         }
@@ -486,23 +683,39 @@ fun FloatingNavigationBarItem(
 
 /** Contains default values used by [NavigationBar] and [NavigationBarItem]. */
 object NavigationBarDefaults {
-    /** The default item height on non-iOS platforms. */
-    val ItemHeight = 64.dp
 
-    /** The default item height on iOS. */
-    val ItemHeightIOS = 48.dp
+    /** The height of the iOS-style tab bar, above any bottom window inset. */
+    val BarHeight = 64.dp
 
-    /** The default icon size. */
-    val IconSize = 26.dp
+    /** The vertical padding inside each item. */
+    val ItemVerticalPadding = 7.dp
 
-    /** The default label font size. */
-    val LabelFontSize = 12.sp
+    /** The size of the item icon. */
+    val CupertinoIconSize = 28.dp
 
-    /** The default top padding for the icon. */
-    val IconTopPadding = 8.dp
+    /** The spacing between the item icon and its label. */
+    val IconLabelSpacing = 2.dp
 
-    /** The default bottom padding for the label. */
-    val BottomPadding = 8.dp
+    /** The label font size, matching the iOS tab bar type scale. */
+    val LabelFontSize = 10.sp
+
+    /** The label font weight. */
+    val LabelFontWeight = FontWeight.Medium
+
+    /** The label letter spacing, matching the iOS tab bar type scale. */
+    val LabelLetterSpacing = (-0.24).sp
+
+    /** The blur radius of the glass surface when a [HazeState] is provided. */
+    val BlurRadius = 10.dp
+
+    /** The alpha of the bar's translucent background when no blur is applied. */
+    const val BackgroundAlpha = 0.6f
+
+    /** The alpha of an unselected item's content color. */
+    const val InactiveAlpha = 0.52f
+
+    /** The scale an item shrinks to while pressed. */
+    const val PressedItemScale = 0.92f
 
     /** The alpha value for the selected item when pressed. */
     val SelectedPressedAlpha = 0.5f
@@ -512,6 +725,21 @@ object NavigationBarDefaults {
 
     /** The alpha value for an unselected item. */
     val UnselectedAlpha = 0.4f
+
+    /** The default item height on non-iOS platforms. Kept for compatibility. */
+    val ItemHeight = 64.dp
+
+    /** The default item height on iOS. Kept for compatibility. */
+    val ItemHeightIOS = 48.dp
+
+    /** The icon size used before the cupertino tab bar visuals. Kept for compatibility. */
+    val IconSize = 26.dp
+
+    /** The default top padding for the icon. Kept for compatibility. */
+    val IconTopPadding = 8.dp
+
+    /** The default bottom padding for the label. Kept for compatibility. */
+    val BottomPadding = 8.dp
 }
 
 /** Contains default values used by [FloatingNavigationBar] and [FloatingNavigationBarItem]. */

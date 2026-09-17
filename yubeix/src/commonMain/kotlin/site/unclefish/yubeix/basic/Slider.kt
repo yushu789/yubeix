@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.basic
@@ -10,6 +10,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.hoverable
@@ -17,9 +19,14 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -36,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -46,6 +54,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -53,38 +62,61 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import com.kyant.shapes.RoundedCornerStyle
+import com.kyant.shapes.RoundedRectangle
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixShape
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * A [Slider] component with Yubeix style.
+ * A Cupertino style [Slider].
+ *
+ * A thin track with a floating thumb: the value follows the finger position directly (tap
+ * anywhere to jump, drag to scrub) instead of animating from the previous position.
+ *
+ * [detentValues] snap the thumb: while dragging or tapping, the value locks onto the nearest
+ * detent within [detentThreshold] (in value units), a haptic tick fires on each engagement when
+ * [detentHapticsEnabled] is true, and the detents are drawn as small track markers. The color of
+ * a marker switches from [SliderColors.keyPointColor] to [SliderColors.keyPointForegroundColor]
+ * once the value has passed it.
+ *
+ * The legacy discrete parameters fold into the same snap model: [steps] greater than 0 snaps to
+ * evenly spaced values across [valueRange], and [keyPoints] snap magnetically when within
+ * [magnetThreshold] (as a fraction of the range). Markers for steps/key points are drawn only
+ * when [showKeyPoints] is true.
  *
  * @param value The current value of the [Slider]. If outside of [valueRange] provided, value will be coerced to this range.
  * @param onValueChange The callback to be called when the value changes.
  * @param modifier The modifier to be applied to the [Slider].
  * @param enabled Whether the [Slider] is enabled.
  * @param valueRange Range of values that this slider can take. The passed [value] will be coerced to this range.
- * @param steps If positive, specifies the amount of discrete allowable values between the endpoints of [valueRange].
- *   For example, a range from 0 to 10 with 4 [steps] allows 4 values evenly distributed between 0 and 10 (i.e., 2, 4, 6, 8).
- *   If [steps] is 0, the slider will behave continuously and allow any value from the range. Must not be negative.
+ * @param steps If positive, snaps to the amount of discrete allowable values between the endpoints
+ *   of [valueRange]. For example, a range from 0 to 10 with 4 [steps] allows 4 values evenly
+ *   distributed between 0 and 10 (i.e., 2, 4, 6, 8). Must not be negative.
  * @param onValueChangeFinished Called when value change has ended. This should not be used to update the slider value
  *   (use [onValueChange] instead), but rather to know when the user has completed selecting a new value by ending a drag or a click.
- * @param reverseDirection Controls the direction of this slider. When false (default), slider increases from left to right.
- *   When true, slider increases from right to left (useful for RTL layouts or custom direction requirements).
- * @param height The height of the [Slider].
- * @param colors The [SliderColors] of the [Slider].
+ * @param reverseDirection Controls the direction of this slider. When false (default), the slider
+ *   increases from left to right in LTR layouts (mirrored in RTL). When true, the direction flips.
+ * @param height The height of the interactive [Slider] container; the thin track and thumb are centered inside it.
+ * @param colors The [SliderColors] of the [Slider]. The foreground/background, thumb and key point
+ *   colors double as the Cupertino active/inactive track, thumb and detent marker colors.
  * @param hapticEffect The haptic effect of the [Slider].
- * @param showKeyPoints Whether to show the key points (step indicators) on the slider. Only works when [keyPoints] is not null.
- * @param keyPoints Custom key point values to display on the slider. If null, uses step positions from [steps] parameter.
+ * @param showKeyPoints Whether to show markers at the [keyPoints] / [steps] positions on the track.
+ * @param keyPoints Custom key point values to magnetically snap to and (with [showKeyPoints]) display.
  *   Values should be within [valueRange]. For example, for a range of 0f..100f, you might specify listOf(0f, 25f, 50f, 75f, 100f).
- * @param magnetThreshold The magnetic snap threshold as a fraction (0.0 to 1.0). When the slider value is within this
- *   distance from a key point, it will snap to that point. Default is 0.02 (2%). Only applies when [keyPoints] is set.
+ * @param magnetThreshold The magnetic snap threshold as a fraction (0.0 to 1.0). A key point captures
+ *   the value when it is within this distance of it. Default is 0.02 (2%). Only applies when [keyPoints] is set.
+ * @param detentValues Values the slider snaps onto while dragging or tapping. An empty list (default)
+ *   disables detents. Values should be within [valueRange].
+ * @param detentThreshold Maximum distance (in value units) at which the nearest detent engages and captures the value.
+ * @param detentHapticsEnabled Whether a haptic tick plays whenever a detent engages.
  */
 @Composable
 fun Slider(
@@ -102,143 +134,68 @@ fun Slider(
     showKeyPoints: Boolean = false,
     keyPoints: List<Float>? = null,
     magnetThreshold: Float = 0.02f,
+    detentValues: List<Float> = emptyList(),
+    detentThreshold: Float = 0f,
+    detentHapticsEnabled: Boolean = true,
 ) {
     require(steps >= 0) { "steps should be >= 0" }
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
 
+    val density = LocalDensity.current
     val hapticFeedback = LocalHapticFeedback.current
     val layoutDirection = LocalLayoutDirection.current
-    val effectiveReverseDirection = if (layoutDirection == LayoutDirection.Rtl) !reverseDirection else reverseDirection
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+    val mirrored = isRtl != reverseDirection
     val onValueChangeState by rememberUpdatedState(onValueChange)
     val onValueChangeFinishedState by rememberUpdatedState(onValueChangeFinished)
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    var isDragging by remember { mutableStateOf(false) }
-    var isHoveringThumb by remember { mutableStateOf(false) }
-    var layoutWidth by remember { mutableIntStateOf(0) }
-    var layoutHeight by remember { mutableIntStateOf(0) }
     val hapticState = remember { SliderHapticState() }
-    val interactionSource = remember { MutableInteractionSource() }
-    val shape = yubeixShape(height)
-    val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
-
-    val progressAnimationSpec = remember(isDragging) {
-        if (isDragging) {
-            spring(dampingRatio = 0.9f, stiffness = 1755f)
+    val coercedDetentThreshold = detentThreshold.coerceAtLeast(0f)
+    val effectiveDetents = remember(detentValues, valueRange) {
+        detentValues.distinct().filter { detent -> detent in valueRange }
+    }
+    val stepValues = remember(steps, valueRange) {
+        if (steps > 0) {
+            List(steps + 1) { index ->
+                valueRange.start + (valueRange.endInclusive - valueRange.start) * index / (steps + 1)
+            }
         } else {
-            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+            emptyList()
+        }
+    }
+    val keyPointValues = remember(keyPoints, valueRange) {
+        keyPoints?.distinct()?.filter { keyPoint -> keyPoint in valueRange } ?: emptyList()
+    }
+
+    var engagedDetent by remember(detentValues) {
+        mutableStateOf<Float?>(
+            effectiveDetents.firstOrNull { detent -> abs(coercedValue - detent) <= coercedDetentThreshold },
+        )
+    }
+
+    val fraction = remember(coercedValue, valueRange) {
+        val range = valueRange.endInclusive - valueRange.start
+        if (range == 0f) {
+            0f
+        } else {
+            ((coercedValue - valueRange.start) / range).coerceIn(0f, 1f)
         }
     }
 
-    val animatedValueState = animateFloatAsState(coercedValue, progressAnimationSpec)
-    val thumbScaleState = animateFloatAsState(if (isPressed || isDragging || isHoveringThumb) 1.127f else 1f, ThumbScaleAnimationSpec)
-
-    val stepFractions = remember(steps) { stepsToTickFractions(steps) }
-
-    val keyPointFractions = remember(keyPoints, stepFractions, valueRange, showKeyPoints) {
-        computeKeyPointFractions(keyPoints, stepFractions, valueRange, showKeyPoints)
+    val markerValues = when {
+        effectiveDetents.isNotEmpty() -> effectiveDetents
+        showKeyPoints && keyPointValues.isNotEmpty() -> keyPointValues
+        showKeyPoints && stepValues.isNotEmpty() -> stepValues
+        else -> emptyList()
     }
-
-    val allKeyPointFractions = remember(keyPoints, stepFractions, valueRange) {
-        computeAllKeyPointFractions(keyPoints, stepFractions, valueRange)
+    val hapticKeyPointFractions = remember(keyPointValues, steps, valueRange) {
+        if (keyPoints != null) pointsToFractions(keyPointValues, valueRange) else stepsToTickFractions(steps)
     }
+    val hasCustomKeyPoints = keyPoints != null
 
-    val fractionToValue = remember(valueRange, steps, stepFractions, allKeyPointFractions, magnetThreshold) {
-        { fraction: Float ->
-            resolveValueFromFraction(
-                fraction = fraction,
-                valueRange = valueRange,
-                steps = steps,
-                allKeyPointFractions = allKeyPointFractions,
-                magnetThreshold = magnetThreshold,
-            )
-        }
-    }
-
-    val currentLayoutWidth by rememberUpdatedState(layoutWidth)
-    val currentLayoutHeight by rememberUpdatedState(layoutHeight)
-
-    Box(
+    BoxWithConstraints(
         modifier = modifier
-            .then(
-                if (enabled) {
-                    Modifier
-                        .onSizeChanged {
-                            layoutWidth = it.width
-                            layoutHeight = it.height
-                        }
-                        .pointerInput(effectiveReverseDirection, valueRange) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    val event = awaitPointerEvent()
-                                    val change = event.changes.last()
-
-                                    if (event.type == PointerEventType.Exit ||
-                                        event.type == PointerEventType.Release ||
-                                        change.type != PointerType.Mouse
-                                    ) {
-                                        isHoveringThumb = false
-                                        continue
-                                    }
-
-                                    val thumbRadius = currentLayoutHeight / 2f
-                                    val availableWidth = (currentLayoutWidth - 2f * thumbRadius).coerceAtLeast(0f)
-                                    val knobRadius = thumbRadius * 0.72f
-                                    val hitRadius = knobRadius + (thumbRadius * 0.5f)
-
-                                    val position = change.position
-                                    val fraction = (animatedValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-                                    val effectiveFraction = if (effectiveReverseDirection) 1f - fraction else fraction
-                                    val thumbX = thumbRadius + effectiveFraction * availableWidth
-
-                                    val isOver = abs(position.x - thumbX) <= hitRadius
-                                    if (isHoveringThumb != isOver) {
-                                        isHoveringThumb = isOver
-                                    }
-                                }
-                            }
-                        }
-                        .hoverable(
-                            interactionSource = interactionSource,
-                            enabled = enabled,
-                        )
-                        .draggable(
-                            orientation = Orientation.Horizontal,
-                            state = rememberDraggableState { dragAmount ->
-                                dragOffset += dragAmount
-                                val visualFraction = horizontalVisualFraction(dragOffset, layoutWidth, layoutHeight)
-                                val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
-                                val calculatedValue = fractionToValue(fractionForValue)
-                                onValueChangeState(calculatedValue)
-                                hapticState.handleHapticFeedback(
-                                    calculatedValue,
-                                    valueRange,
-                                    hapticEffect,
-                                    hapticFeedback,
-                                    allKeyPointFractions,
-                                    hasCustomKeyPoints = keyPoints != null,
-                                )
-                            },
-                            onDragStarted = { offset ->
-                                isDragging = true
-                                dragOffset = offset.x
-                                val visualFraction = horizontalVisualFraction(offset.x, layoutWidth, layoutHeight)
-                                val fractionForValue = if (effectiveReverseDirection) 1f - visualFraction else visualFraction
-                                val calculatedValue = fractionToValue(fractionForValue)
-                                onValueChangeState(calculatedValue)
-                                hapticState.reset(calculatedValue)
-                            },
-                            onDragStopped = {
-                                isDragging = false
-                                onValueChangeFinishedState?.invoke()
-                            },
-                        )
-                        .indication(interactionSource, null)
-                } else {
-                    Modifier
-                },
-            )
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     coercedValue,
@@ -250,26 +207,187 @@ fun Slider(
                     onValueChangeState(clamped)
                     true
                 }
-            },
+            }
+            .height(height),
         contentAlignment = Alignment.CenterStart,
     ) {
-        SliderTrack(
-            shape = shape,
-            backgroundColor = colors.backgroundColor(enabled),
-            foregroundColor = colors.foregroundColor(enabled),
-            thumbColor = colors.thumbColor(enabled),
-            keyPointColor = colors.keyPointColor(),
-            keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueProvider = { animatedValueState.value },
-            valueRange = valueRange,
-            isDragging = isDragging,
-            isVertical = false,
-            showKeyPoints = showKeyPoints,
-            stepFractions = keyPointFractions,
-            thumbScaleProvider = { thumbScaleState.value },
-            reverseDirection = effectiveReverseDirection,
-            modifier = Modifier.fillMaxWidth().height(height),
-        )
+        val thumbSizePx = with(density) { CupertinoSliderThumbSize.toPx() }
+        val detentMarkerWidthPx = with(density) { CupertinoSliderDetentMarkerWidth.toPx() }
+        val sliderWidthPx =
+            if (constraints.maxWidth != Constraints.Infinity) constraints.maxWidth.toFloat() else 0f
+        val usableWidthPx = (sliderWidthPx - thumbSizePx).coerceAtLeast(1f)
+        val visualFraction = if (mirrored) 1f - fraction else fraction
+        val thumbOffsetPx = usableWidthPx * visualFraction
+        val trackShape = remember {
+            RoundedRectangle(CupertinoSliderTrackHeight / 2, style = RoundedCornerStyle.Continuous)
+        }
+        val thumbShape = remember {
+            RoundedRectangle(CupertinoSliderThumbSize / 2, style = RoundedCornerStyle.Continuous)
+        }
+        val detentMarkerShape = remember {
+            RoundedRectangle(
+                CupertinoSliderDetentMarkerWidth / 2,
+                style = RoundedCornerStyle.Continuous,
+            )
+        }
+
+        fun valueForPosition(position: Offset): Float {
+            val rawFraction = ((position.x - thumbSizePx / 2f) / usableWidthPx).coerceIn(0f, 1f)
+            val resolvedFraction = if (mirrored) 1f - rawFraction else rawFraction
+            return valueRange.start +
+                (valueRange.endInclusive - valueRange.start) * resolvedFraction
+        }
+
+        fun emitValueForPosition(position: Offset) {
+            val rawValue = valueForPosition(position)
+            var emittedValue = rawValue
+            if (effectiveDetents.isNotEmpty()) {
+                val nearestDetent = effectiveDetents.minByOrNull { detent -> abs(detent - rawValue) }
+                if (nearestDetent != null && abs(rawValue - nearestDetent) <= coercedDetentThreshold) {
+                    if (nearestDetent != engagedDetent) {
+                        if (detentHapticsEnabled) {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        }
+                        engagedDetent = nearestDetent
+                    }
+                    emittedValue = nearestDetent
+                } else if (engagedDetent != null) {
+                    engagedDetent = null
+                }
+            } else if (stepValues.isNotEmpty()) {
+                emittedValue = stepValues.minByOrNull { step -> abs(step - rawValue) } ?: rawValue
+            } else if (keyPointValues.isNotEmpty()) {
+                val range = valueRange.endInclusive - valueRange.start
+                val rawFraction = if (range == 0f) 0f else (rawValue - valueRange.start) / range
+                val nearest = keyPointValues.minByOrNull { keyPoint -> abs(keyPoint - rawValue) }
+                if (nearest != null) {
+                    val nearestFraction = if (range == 0f) 0f else (nearest - valueRange.start) / range
+                    if (abs(nearestFraction - rawFraction) <= magnetThreshold) {
+                        emittedValue = nearest
+                    }
+                }
+            }
+            hapticState.handleHapticFeedback(
+                emittedValue,
+                valueRange,
+                hapticEffect,
+                hapticFeedback,
+                hapticKeyPointFractions,
+                hasCustomKeyPoints = hasCustomKeyPoints,
+            )
+            onValueChangeState(emittedValue)
+        }
+
+        val inputModifier = if (enabled) {
+            Modifier
+                .pointerInput(
+                    valueRange,
+                    mirrored,
+                    sliderWidthPx,
+                    effectiveDetents,
+                    coercedDetentThreshold,
+                    detentHapticsEnabled,
+                ) {
+                    detectTapGestures { position ->
+                        emitValueForPosition(position)
+                        onValueChangeFinishedState?.invoke()
+                    }
+                }
+                .pointerInput(
+                    valueRange,
+                    mirrored,
+                    sliderWidthPx,
+                    effectiveDetents,
+                    coercedDetentThreshold,
+                    detentHapticsEnabled,
+                ) {
+                    detectDragGestures(
+                        onDragStart = { position ->
+                            emitValueForPosition(position)
+                        },
+                        onDragEnd = {
+                            onValueChangeFinishedState?.invoke()
+                        },
+                        onDragCancel = {
+                            onValueChangeFinishedState?.invoke()
+                        },
+                    ) { change, _ ->
+                        emitValueForPosition(change.position)
+                    }
+                }
+        } else {
+            Modifier
+        }
+
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .then(inputModifier),
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = CupertinoSliderThumbSize / 2)
+                    .fillMaxWidth()
+                    .height(CupertinoSliderTrackHeight)
+                    .clip(trackShape)
+                    .background(colors.backgroundColor(enabled)),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(if (mirrored) Alignment.CenterEnd else Alignment.CenterStart)
+                        .fillMaxWidth(fraction)
+                        .fillMaxHeight()
+                        .background(colors.foregroundColor(enabled)),
+                )
+            }
+
+            markerValues.forEach { markerValue ->
+                val markerFraction = if (valueRange.endInclusive == valueRange.start) {
+                    0f
+                } else {
+                    ((markerValue - valueRange.start) /
+                        (valueRange.endInclusive - valueRange.start)).coerceIn(0f, 1f)
+                }
+                val markerVisualFraction = if (mirrored) 1f - markerFraction else markerFraction
+                val markerCenterPx = thumbSizePx / 2f + usableWidthPx * markerVisualFraction
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset {
+                            IntOffset(
+                                x = (markerCenterPx - detentMarkerWidthPx / 2f).roundToInt(),
+                                y = 0,
+                            )
+                        }
+                        .size(
+                            width = CupertinoSliderDetentMarkerWidth,
+                            height = CupertinoSliderDetentMarkerHeight,
+                        )
+                        .background(
+                            color = if (markerValue <= coercedValue) {
+                                colors.keyPointForegroundColor()
+                            } else {
+                                colors.keyPointColor()
+                            },
+                            shape = detentMarkerShape,
+                        ),
+                )
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .offset { IntOffset(thumbOffsetPx.roundToInt(), 0) }
+                    .size(CupertinoSliderThumbSize)
+                    .shadow(
+                        elevation = if (enabled) CupertinoSliderThumbElevation else 0.dp,
+                        shape = thumbShape,
+                        clip = false,
+                    )
+                    .background(colors.thumbColor(enabled), thumbShape),
+            )
+        }
     }
 }
 
@@ -1454,3 +1572,10 @@ data class SliderColors(
     @Stable
     internal fun keyPointForegroundColor(): Color = keyPointForegroundColor
 }
+
+// Cupertino slider metrics.
+private val CupertinoSliderThumbSize = 20.dp
+private val CupertinoSliderTrackHeight = 4.dp
+private val CupertinoSliderDetentMarkerWidth = 3.dp
+private val CupertinoSliderDetentMarkerHeight = 10.dp
+private val CupertinoSliderThumbElevation = 8.dp

@@ -6,7 +6,6 @@ about-libraries = "14.0.0-b03"
 androidx-activity = "1.13.0"
 androidx-collection = "1.6.0"
 androidx-navigation3 = "1.1.0-beta01"
-cupertino-icons = "3.3.1"
 haze = "1.7.2"
 kyant-shapes = "1.2.0"
 jetbrains-androidx-navigationevent = "1.0.1"
@@ -34,7 +33,6 @@ aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "androidx-collection" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "androidx-navigation3" }
-cupertino-icons-extended = { module = "io.github.robinpcrd:cupertino-icons-extended", version.ref = "cupertino-icons" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 jetbrains-androidx-navigationevent = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "jetbrains-androidx-navigationevent" }
 jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "jetbrains-compose-multiplatform" }

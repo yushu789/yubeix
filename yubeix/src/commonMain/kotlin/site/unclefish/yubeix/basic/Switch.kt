@@ -1,61 +1,74 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.basic
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.theme.LocalColors
+import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.lerp
+import com.kyant.shapes.RoundedCornerStyle
+import com.kyant.shapes.RoundedRectangle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
+import site.unclefish.yubeix.anim.DampedDragAnimation
 import site.unclefish.yubeix.theme.YubeixTheme
-import site.unclefish.yubeix.theme.YubeixTheme.isDynamicColor
-import site.unclefish.yubeix.theme.yubeixCapsuleShape
-import kotlin.math.absoluteValue
 
 /**
- * A [Switch] component with Yubeix style.
+ * A Cupertino style [Switch].
+ *
+ * The thumb is driven by a damped drag animation, so drags carry the flick velocity of the finger
+ * and settle with a spring, while plain taps toggle through the same spring. The commit decision
+ * happens on release: the switch ends on whichever side of the midpoint the thumb was left at
+ * (or animates to the flipped state for taps). A haptic tick plays on every [checked] change.
  *
  * @param checked The checked state of the [Switch].
  * @param onCheckedChange The callback to be called when the state of the [Switch] changes.
+ *   When `null` the [Switch] is a static display and cannot be interacted with.
  * @param modifier The modifier to be applied to the [Switch].
  * @param colors The [SwitchColors] of the [Switch].
  * @param enabled Whether the [Switch] is enabled.
+ * @param interactionSource The [MutableInteractionSource] backing press and hover feedback.
  */
 @Composable
 fun Switch(
@@ -64,148 +77,151 @@ fun Switch(
     modifier: Modifier = Modifier,
     colors: SwitchColors = SwitchDefaults.switchColors(),
     enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-    val interactionSource = remember { MutableInteractionSource() }
+    val currentChecked by rememberUpdatedState(checked)
+    val currentHapticFeedback by rememberUpdatedState(LocalHapticFeedback.current)
     val isPressed by interactionSource.collectIsPressedAsState()
-    val isDragged by interactionSource.collectIsDraggedAsState()
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val hapticFeedback = LocalHapticFeedback.current
-    val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
-    var hasVibrated by remember { mutableStateOf(false) }
-    var hasVibratedOnce by remember { mutableStateOf(false) }
-    var rawDragOffset by remember { mutableFloatStateOf(0f) }
-    var currentDragInteraction by remember { mutableStateOf<DragInteraction.Start?>(null) }
-
-    val capsuleShape = yubeixCapsuleShape()
-    val thumbOffsetSpringSpec = remember { spring<Dp>(dampingRatio = 0.7f, stiffness = 987f) }
-    val thumbScaleSpringSpec = remember { spring<Float>(dampingRatio = 0.6f, stiffness = 987f) }
-
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    val thumbOffsetState = animateDpAsState(
-        targetValue = (if (checked) 25.dp else 4.dp) + dragOffset.dp,
-        animationSpec = thumbOffsetSpringSpec,
+    // The thumb widens (not grows) under press/hover so the squeeze stays inside the track.
+    val animatedAspectRatio by animateFloatAsState(
+        targetValue = if (isPressed || isHovered) 1.25f else 1f,
+        label = "YubeixSwitchAspectRatio",
+    )
+    val animatedBackground by animateColorAsState(
+        targetValue = colors.trackColor(enabled, checked),
+        label = "YubeixSwitchTrackColor",
     )
 
-    val thumbScaleState = animateFloatAsState(
-        targetValue = if (!enabled) {
-            1f
-        } else if (isPressed || isDragged || isHovered) {
-            1.127f
-        } else {
-            1f
-        },
-        animationSpec = thumbScaleSpringSpec,
-    )
+    val density = LocalDensity.current
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    // Travel of the thumb: track inner width minus the resting thumb width (height minus padding).
+    val dragWidth = with(density) { (CupertinoSwitchWidth - CupertinoSwitchHeight).toPx() }
+    val animationScope = rememberCoroutineScope()
+    var didDrag by remember { mutableStateOf(false) }
+    var fraction by remember { mutableFloatStateOf(if (checked) 1f else 0f) }
+    val dampedDragAnimation = remember(dragWidth) {
+        DampedDragAnimation(
+            animationScope = animationScope,
+            initialValue = fraction,
+            valueRange = 0f..1f,
+            visibilityThreshold = 0.001f,
+            initialScale = 1f,
+            // No press scale: the thumb is clipped to the track, so feedback is the aspect squeeze.
+            pressedScale = 1f,
+            consumeDragChanges = true,
+            onDragStarted = {},
+            onDragStopped = {
+                if (didDrag) {
+                    val target = if (targetValue >= 0.5f) 1f else 0f
+                    fraction = target
+                    currentOnCheckedChange?.invoke(target == 1f)
+                    didDrag = false
+                }
+                // Without a real drag the tap falls through to [Modifier.toggleable] below.
+            },
+            onDrag = { _, dragAmount ->
+                if (!didDrag) {
+                    didDrag = dragAmount.x != 0f
+                }
+                if (didDrag) {
+                    val delta = dragAmount.x / dragWidth
+                    fraction =
+                        if (isLtr) (fraction + delta).fastCoerceIn(0f, 1f)
+                        else (fraction - delta).fastCoerceIn(0f, 1f)
+                }
+            },
+        )
+    }
 
-    val thumbColorState = animateColorAsState(
-        if (checked) colors.checkedThumbColor(enabled) else colors.uncheckedThumbColor(enabled),
-    )
+    LaunchedEffect(dampedDragAnimation) {
+        snapshotFlow { fraction }
+            .collectLatest { fraction ->
+                dampedDragAnimation.updateValue(fraction)
+            }
+    }
+    LaunchedEffect(dampedDragAnimation) {
+        snapshotFlow { currentChecked }
+            .collectLatest { isChecked ->
+                val target = if (isChecked) 1f else 0f
+                if (target != fraction) {
+                    fraction = target
+                    dampedDragAnimation.animateToValue(target)
+                }
+            }
+    }
+    LaunchedEffect(Unit) {
+        snapshotFlow { currentChecked }
+            .drop(1)
+            .collect {
+                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+            }
+    }
 
-    val backgroundColorState = animateColorAsState(
-        if (checked) colors.checkedTrackColor(enabled) else colors.uncheckedTrackColor(enabled),
-        animationSpec = spring(dampingRatio = 0.99f, stiffness = 438.6f),
-    )
-
+    val switchShape = remember {
+        RoundedRectangle(CupertinoSwitchHeight / 2, style = RoundedCornerStyle.Continuous)
+    }
     val hasCallback = onCheckedChange != null
     val toggleableModifier = if (hasCallback) {
         Modifier.toggleable(
             value = checked,
-            onValueChange = { v ->
-                currentOnCheckedChange?.invoke(v)
-                currentHapticFeedback.performHapticFeedback(
-                    if (v) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff,
-                )
-            },
+            onValueChange = { value -> currentOnCheckedChange?.invoke(value) },
             enabled = enabled,
             role = Role.Switch,
             interactionSource = interactionSource,
+            indication = null,
         )
     } else {
         Modifier
     }
 
-    Box(
-        modifier = modifier
-            .wrapContentSize(Alignment.Center)
-            .size(49.dp, 28.dp)
-            .clip(capsuleShape)
-            .drawBehind {
-                drawRect(backgroundColorState.value)
-            }
+    Column(
+        modifier
+            .then(toggleableModifier)
             .hoverable(
                 interactionSource = interactionSource,
                 enabled = enabled,
             )
-            .then(toggleableModifier),
+            .wrapContentSize(Alignment.Center)
+            .requiredSize(CupertinoSwitchWidth, CupertinoSwitchHeight)
+            .clip(switchShape)
+            .drawBehind {
+                drawRect(animatedBackground)
+            }
+            .padding(CupertinoSwitchThumbPadding),
     ) {
         Box(
-            modifier = Modifier
-                .size(20.dp)
-                .align(Alignment.CenterStart)
-                .offset {
-                    IntOffset(thumbOffsetState.value.roundToPx(), 0)
-                }
+            Modifier
+                .fillMaxHeight()
+                .aspectRatio(animatedAspectRatio)
+                .align(Alignment.Start)
                 .graphicsLayer {
-                    scaleX = thumbScaleState.value
-                    scaleY = thumbScaleState.value
-                }
-                .drawBehind {
-                    drawCircle(color = thumbColorState.value)
+                    val value = dampedDragAnimation.value
+                    // Start-anchored when unchecked, end-anchored when checked, so the press
+                    // widening grows toward the track interior instead of past its clipped edge.
+                    val widening = (size.width - size.height).coerceAtLeast(0f)
+                    translationX =
+                        if (isLtr) lerp(0f, dragWidth, value) - widening * value
+                        else lerp(0f, -dragWidth, value) + widening * value
+                    // Squash the thumb against the direction of travel while it moves fast.
+                    val velocity = dampedDragAnimation.velocity / 50f
+                    scaleX = 1f / (1f - (velocity * 0.75f).fastCoerceIn(-0.2f, 0.2f))
+                    scaleY = 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
                 }
                 .then(
                     if (enabled) {
-                        Modifier.draggable(
-                            orientation = Orientation.Horizontal,
-                            state = rememberDraggableState { dragAmount ->
-                                rawDragOffset += dragAmount / 2f
-                                dragOffset = if (checked) {
-                                    rawDragOffset.coerceIn(-21f, 0f)
-                                } else {
-                                    rawDragOffset.coerceIn(0f, 21f)
-                                }
-
-                                if (dragOffset in -11f..-10f || dragOffset in 10f..11f) {
-                                    hasVibratedOnce = false
-                                } else if (dragOffset in -20f..-1f || dragOffset in 1f..20f) {
-                                    hasVibrated = false
-                                } else if (!hasVibrated) {
-                                    if ((checked && dragOffset == -21f) || (!checked && dragOffset == 0f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                                        hasVibrated = true
-                                        hasVibratedOnce = true
-                                    } else if ((checked && dragOffset == 0f) || (!checked && dragOffset == 21f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                        hasVibrated = true
-                                        hasVibratedOnce = true
-                                    }
-                                }
-                            },
-                            onDragStarted = { _ ->
-                                currentDragInteraction = DragInteraction.Start().also { interactionSource.tryEmit(it) }
-                                hasVibrated = true
-                                hasVibratedOnce = false
-                                rawDragOffset = 0f
-                            },
-                            onDragStopped = {
-                                if (dragOffset.absoluteValue > 21f / 2f) currentOnCheckedChange?.invoke(!checked)
-                                if (!hasVibratedOnce && dragOffset.absoluteValue >= 1f) {
-                                    if ((checked && dragOffset <= -11f) || (!checked && dragOffset <= 10f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                                    } else if ((checked && dragOffset >= -10f) || (!checked && dragOffset >= 11f)) {
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                    }
-                                }
-                                currentDragInteraction?.let { interactionSource.tryEmit(DragInteraction.Stop(it)) }
-                                dragOffset = 0f
-                                rawDragOffset = 0f
-                            },
+                        Modifier.shadow(
+                            elevation = CupertinoSwitchThumbElevation,
+                            shape = switchShape,
                         )
                     } else {
-                        Modifier
+                        Modifier.clip(switchShape)
                     },
-                ),
+                )
+                .background(colors.thumbColor(enabled), switchShape)
+                .then(if (enabled) dampedDragAnimation.modifier else Modifier),
         )
     }
 }
@@ -213,18 +229,23 @@ fun Switch(
 object SwitchDefaults {
 
     /**
-     * The default colors for the [Switch].
+     * The default colors for the [Switch], following the Cupertino palette:
+     * a white thumb over a primary (checked) / neutral (unchecked) track.
      */
     @Composable
     fun switchColors(
-        checkedThumbColor: Color = if (isDynamicColor) LocalColors.current.onPrimary else YubeixTheme.colorScheme.onPrimary,
-        uncheckedThumbColor: Color = if (isDynamicColor) LocalColors.current.onSurface.copy(0.38f) else YubeixTheme.colorScheme.onSecondary,
-        disabledCheckedThumbColor: Color = if (isDynamicColor) LocalColors.current.surface else YubeixTheme.colorScheme.disabledOnPrimary,
-        disabledUncheckedThumbColor: Color = YubeixTheme.colorScheme.disabledOnSecondary,
+        checkedThumbColor: Color = Color.White,
+        uncheckedThumbColor: Color = Color.White,
+        disabledCheckedThumbColor: Color = Color.White.copy(alpha = 0.72f),
+        disabledUncheckedThumbColor: Color = Color.White.copy(alpha = 0.72f),
         checkedTrackColor: Color = YubeixTheme.colorScheme.primary,
-        uncheckedTrackColor: Color = YubeixTheme.colorScheme.secondary,
-        disabledCheckedTrackColor: Color = YubeixTheme.colorScheme.disabledPrimary,
-        disabledUncheckedTrackColor: Color = YubeixTheme.colorScheme.disabledSecondary,
+        uncheckedTrackColor: Color = if (YubeixTheme.colorScheme.surface.luminance() >= 0.5f) {
+            Color(0xFFE3E3E3)
+        } else {
+            Color(0xFF4B4B50)
+        },
+        disabledCheckedTrackColor: Color = checkedTrackColor.copy(alpha = 0.33f),
+        disabledUncheckedTrackColor: Color = uncheckedTrackColor.copy(alpha = 0.62f),
     ): SwitchColors = remember(
         checkedThumbColor,
         uncheckedThumbColor,
@@ -270,4 +291,20 @@ data class SwitchColors(
 
     @Stable
     internal fun uncheckedTrackColor(enabled: Boolean): Color = if (enabled) uncheckedTrackColor else disabledUncheckedTrackColor
+
+    @Stable
+    internal fun thumbColor(enabled: Boolean): Color = if (enabled) checkedThumbColor else disabledCheckedThumbColor
+
+    @Stable
+    internal fun trackColor(enabled: Boolean, checked: Boolean): Color = when {
+        enabled && checked -> checkedTrackColor
+        enabled -> uncheckedTrackColor
+        checked -> disabledCheckedTrackColor
+        else -> disabledUncheckedTrackColor
+    }
 }
+
+private val CupertinoSwitchWidth = 51.dp
+private val CupertinoSwitchHeight = 31.dp
+private val CupertinoSwitchThumbPadding = 2.dp
+private val CupertinoSwitchThumbElevation = 4.dp
