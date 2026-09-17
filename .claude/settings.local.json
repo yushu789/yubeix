@@ -6,7 +6,7 @@
       "Skill(code-review:code-review)",
       "Skill(code-review:code-review:*)",
       "Bash(./gradlew spotlessApply)",
-      "Bash(./gradlew :miuix:compileKotlinDesktop)"
+      "Bash(./gradlew :yubeix:compileKotlinDesktop)"
     ]
   }
 }

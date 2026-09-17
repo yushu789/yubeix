@@ -1,6 +1,6 @@
 ---
 name: create-component
-description: Create a new Compose Multiplatform UI component for the miuix library. Use when the user wants to add a new component, create a new composable, scaffold a component file, or add a UI element to miuix. Triggers on phrases like "create component", "new component", "add a component", "scaffold component", "new composable", "新建组件", "添加组件", "新组件".
+description: Create a new Compose Multiplatform UI component for the yubeix library. Use when the user wants to add a new component, create a new composable, scaffold a component file, or add a UI element to yubeix. Triggers on phrases like "create component", "new component", "add a component", "scaffold component", "new composable", "新建组件", "添加组件", "新组件".
 ---
 
 # 创建 Miuix 组件
@@ -26,15 +26,15 @@ description: Create a new Compose Multiplatform UI component for the miuix libra
 生成代码前，根据组件类型阅读对应的参考文件以精确匹配代码风格：
 
 **basic 组件参考：**
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Button.kt` — 可点击组件模式（Surface + 交互）
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Card.kt` — 容器组件模式（多重载 + press 反馈）
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Divider.kt` — 极简组件模式（无 Colors 类，直接用 Color 参数）
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/basic/ProgressIndicator.kt` — 动画/Canvas 绘制组件模式
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Button.kt` — 可点击组件模式（Surface + 交互）
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Card.kt` — 容器组件模式（多重载 + press 反馈）
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Divider.kt` — 极简组件模式（无 Colors 类，直接用 Color 参数）
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/ProgressIndicator.kt` — 动画/Canvas 绘制组件模式
 
 **extra 组件参考：**
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/extra/SuperArrow.kt` — 无状态 extra 模式
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/extra/SuperSwitch.kt` — 带状态 extra 模式（checked + onCheckedChange）
-- `miuix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Component.kt` — BasicComponent 完整 API
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/extra/SuperArrow.kt` — 无状态 extra 模式
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/extra/SuperSwitch.kt` — 带状态 extra 模式（checked + onCheckedChange）
+- `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/Component.kt` — BasicComponent 完整 API
 
 根据新建组件的复杂度，选择最接近的参考文件阅读。严格匹配编码风格、缩进和约定。
 
@@ -42,15 +42,15 @@ description: Create a new Compose Multiplatform UI component for the miuix libra
 
 ### 文件位置
 
-- basic 组件：`miuix/src/commonMain/kotlin/site/unclefish/yubeix/basic/{ComponentName}.kt`
-- extra 组件：`miuix/src/commonMain/kotlin/site/unclefish/yubeix/extra/{ComponentName}.kt`
+- basic 组件：`yubeix/src/commonMain/kotlin/site/unclefish/yubeix/basic/{ComponentName}.kt`
+- extra 组件：`yubeix/src/commonMain/kotlin/site/unclefish/yubeix/extra/{ComponentName}.kt`
 
 ### 文件结构（严格按以下顺序）
 
 #### 3.1 版权头
 
 ```kotlin
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 ```
 
@@ -247,13 +247,13 @@ data class ChipColors(
 
 ## 可用主题颜色
 
-通过 `MiuixTheme.colorScheme.xxx` 访问。完整定义见 `miuix/src/commonMain/kotlin/site/unclefish/yubeix/theme/Colors.kt`。
+通过 `MiuixTheme.colorScheme.xxx` 访问。完整定义见 `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/theme/Colors.kt`。
 
 常用颜色：`primary`、`onPrimary`、`secondary`、`onSecondary`、`surface`、`onSurface`、`surfaceContainer`、`onSurfaceContainer`、`onSurfaceVariantActions`、`onSurfaceVariantSummary`、`dividerLine`。
 
 ## 可用文本样式
 
-通过 `MiuixTheme.textStyles.xxx` 访问。完整定义见 `miuix/src/commonMain/kotlin/site/unclefish/yubeix/theme/TextStyles.kt`。
+通过 `MiuixTheme.textStyles.xxx` 访问。完整定义见 `yubeix/src/commonMain/kotlin/site/unclefish/yubeix/theme/TextStyles.kt`。
 
 可用样式：`main`、`paragraph`、`body1`、`body2`、`button`、`footnote1`、`footnote2`、`headline1`、`headline2`、`subtitle`、`title1`、`title2`、`title3`、`title4`
 
