@@ -4,7 +4,6 @@
 package site.unclefish.yubeix.basic
 
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -21,14 +19,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.theme.LocalContentColor
 import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.yubeixShape
+import site.unclefish.yubeix.utils.ButtonHapticFeedback
 import site.unclefish.yubeix.utils.PressFeedbackType
 import site.unclefish.yubeix.utils.SinkFeedback
 import site.unclefish.yubeix.utils.TiltFeedback
@@ -79,6 +82,8 @@ fun Card(
  * @param colors [CardColors] that will be used to resolve the color(s) used for the [Card].
  * @param pressFeedbackType The press feedback type of the [Card].
  * @param showIndication Whether to show indication of the [Card].
+ * @param buttonHapticFeedbackEnabled Whether to play button haptics (press tick, delayed release
+ *   confirm tick) while the [Card] is pressed.
  * @param onClick The callback to be invoked when the [Card] is clicked.
  * @param onLongPress The callback to be invoked when the [Card] is long pressed.
  * @param content The [Composable] content of the [Card].
@@ -91,6 +96,7 @@ fun Card(
     colors: CardColors = CardDefaults.defaultColors(),
     pressFeedbackType: PressFeedbackType = PressFeedbackType.None,
     showIndication: Boolean = false,
+    buttonHapticFeedbackEnabled: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongPress: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -109,6 +115,13 @@ fun Card(
 
     val usedInteractionSource = if (pressFeedback != null) interactionSource else null
     val indicationToUse = if (showIndication) LocalIndication.current else null
+
+    if (buttonHapticFeedbackEnabled) {
+        ButtonHapticFeedback(
+            interactionSource = interactionSource,
+            enabled = onClick != null
+        )
+    }
 
     BasicCard(
         modifier = modifier.pressable(
@@ -148,7 +161,7 @@ private fun BasicCard(
     cornerRadius: Dp = CardDefaults.CornerRadius,
     content: @Composable () -> Unit,
 ) {
-    val clipShape = remember(cornerRadius) { RoundedCornerShape(cornerRadius) }
+    val shape = yubeixShape(cornerRadius)
 
     CompositionLocalProvider(
         LocalContentColor provides colors.contentColor,
@@ -158,8 +171,27 @@ private fun BasicCard(
                 .semantics(mergeDescendants = false) {
                     isTraversalGroup = true
                 }
-                .clip(clipShape) // For touch feedback, there is a problem when using G2Continuity.
-                .background(color = colors.color),
+                .drawWithCache {
+                    val outline = shape.createOutline(size, layoutDirection, this)
+                    val path = when (outline) {
+                        is Outline.Rectangle -> null
+                        is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
+                        is Outline.Generic -> outline.path
+                    }
+
+                    onDrawWithContent {
+                        if (path == null) {
+                            drawRect(colors.color)
+                            drawContent()
+                        } else {
+                            val contentDrawScope = this
+                            drawPath(path = path, color = colors.color)
+                            clipPath(path) {
+                                contentDrawScope.drawContent()
+                            }
+                        }
+                    }
+                },
             propagateMinConstraints = true,
         ) {
             content()

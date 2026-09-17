@@ -119,7 +119,9 @@ fun LinearProgressIndicator(
 fun CircularProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float? = null,
-    colors: ProgressIndicatorColors = ProgressIndicatorDefaults.progressIndicatorColors(),
+    colors: ProgressIndicatorColors = ProgressIndicatorDefaults.progressIndicatorColors(
+        backgroundColor = YubeixTheme.colorScheme.primary.copy(alpha = 0.18f),
+    ),
     strokeWidth: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorStrokeWidth,
     size: Dp = ProgressIndicatorDefaults.DefaultCircularProgressIndicatorSize,
 ) {

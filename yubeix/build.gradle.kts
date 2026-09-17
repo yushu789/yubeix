@@ -44,7 +44,11 @@ kotlin {
 
             implementation(libs.jetbrains.androidx.navigationevent)
             implementation(libs.jetbrains.compose.window.size)
+            implementation(libs.jetbrains.lifecycle.viewmodel)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
 
+            implementation(libs.cupertino.icons.extended) // Cupertino icon set used by the iOS-style controls
+            implementation(libs.haze) // Haze blur for glassy chrome surfaces
             implementation(libs.kyant.shapes) // Capsule for Multiplatform
             implementation(libs.materialKolor.utilities) // Material Color for Multiplatform
         }

@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kyant.shapes.Capsule
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixShape
 
@@ -34,6 +35,7 @@ import site.unclefish.yubeix.theme.yubeixShape
  * @param modifier The modifier to be applied to the [Button].
  * @param enabled Whether the [Button] is enabled.
  * @param cornerRadius The corner radius of the [Button].
+ * @param capsule Whether to use a capsule (stadium) shape instead of the rounded corner shape.
  * @param minWidth The minimum width of the [Button].
  * @param minHeight The minimum height of the [Button].
  * @param colors The [ButtonColors] of the [Button].
@@ -49,6 +51,7 @@ fun Button(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     cornerRadius: Dp = ButtonDefaults.CornerRadius,
+    capsule: Boolean = false,
     minWidth: Dp = ButtonDefaults.MinWidth,
     minHeight: Dp = ButtonDefaults.MinHeight,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
@@ -57,7 +60,7 @@ fun Button(
     indication: Indication? = LocalIndication.current,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val shape = yubeixShape(cornerRadius)
+    val shape = if (capsule) Capsule() else yubeixShape(cornerRadius)
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -87,6 +90,7 @@ fun Button(
  * @param modifier The modifier to be applied to the [TextButton].
  * @param enabled Whether the [TextButton] is enabled.
  * @param cornerRadius The corner radius of the [TextButton].
+ * @param capsule Whether to use a capsule (stadium) shape instead of the rounded corner shape.
  * @param minWidth The minimum width of the [TextButton].
  * @param minHeight The minimum height of the [TextButton].
  * @param colors The [TextButtonColors] of the [TextButton].
@@ -102,6 +106,7 @@ fun TextButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     cornerRadius: Dp = ButtonDefaults.CornerRadius,
+    capsule: Boolean = false,
     minWidth: Dp = ButtonDefaults.MinWidth,
     minHeight: Dp = ButtonDefaults.MinHeight,
     colors: TextButtonColors = ButtonDefaults.textButtonColors(),
@@ -114,6 +119,7 @@ fun TextButton(
         modifier = modifier,
         enabled = enabled,
         cornerRadius = cornerRadius,
+        capsule = capsule,
         minWidth = minWidth,
         minHeight = minHeight,
         colors = ButtonColors(

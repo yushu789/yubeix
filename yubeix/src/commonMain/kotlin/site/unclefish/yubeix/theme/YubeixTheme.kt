@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
+import site.unclefish.yubeix.utils.CupertinoOverscrollState
+import site.unclefish.yubeix.utils.LocalCupertinoOverscrollState
 import site.unclefish.yubeix.utils.YubeixIndication
-import site.unclefish.yubeix.utils.YubeixOverscrollFactory
+import site.unclefish.yubeix.utils.rememberCupertinoOverscrollFactory
 
 /**
  * The Yubeix theme that provides color and text styles for the Yubeix components.
@@ -21,6 +23,8 @@ import site.unclefish.yubeix.utils.YubeixOverscrollFactory
  * @param smoothRounding Whether to use G2-continuity smooth rounded corners. Set to `false`
  *  to fall back to standard [androidx.compose.foundation.shape.RoundedCornerShape] for better
  *  HWUI performance on lower-end devices.
+ * @param overscrollState Optional [CupertinoOverscrollState] to observe the live overscroll
+ *  offset; pass one explicitly to share it, otherwise the provider-scoped one is used.
  * @param content The content of the Yubeix theme.
  */
 @Composable
@@ -28,18 +32,22 @@ fun YubeixTheme(
     controller: ThemeController,
     textStyles: TextStyles = YubeixTheme.textStyles,
     smoothRounding: Boolean = true,
+    overscrollState: CupertinoOverscrollState? = null,
     content: @Composable () -> Unit,
 ) {
     val rawColors = controller.currentColors()
     val yubeixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
     val yubeixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
     val yubeixIndication = remember(yubeixColors.onBackground) { YubeixIndication(color = yubeixColors.onBackground) }
+    val overscrollFactory = rememberCupertinoOverscrollFactory(
+        state = overscrollState ?: LocalCupertinoOverscrollState.current,
+    )
     CompositionLocalProvider(
         LocalColors provides yubeixColors,
         LocalTextStyles provides yubeixTextStyles,
         LocalIndication provides yubeixIndication,
         LocalColorSchemeMode provides controller.colorSchemeMode,
-        LocalOverscrollFactory provides YubeixOverscrollFactory,
+        LocalOverscrollFactory provides overscrollFactory,
         LocalSmoothRounding provides smoothRounding,
     ) {
         content()
@@ -55,6 +63,8 @@ fun YubeixTheme(
  * @param smoothRounding Whether to use G2-continuity smooth rounded corners. Set to `false`
  *  to fall back to standard [androidx.compose.foundation.shape.RoundedCornerShape] for better
  *  HWUI performance on lower-end devices.
+ * @param overscrollState Optional [CupertinoOverscrollState] to observe the live overscroll
+ *  offset; pass one explicitly to share it, otherwise the provider-scoped one is used.
  * @param content The content of the Yubeix theme.
  */
 @Composable
@@ -62,16 +72,20 @@ fun YubeixTheme(
     colors: Colors = YubeixTheme.colorScheme,
     textStyles: TextStyles = YubeixTheme.textStyles,
     smoothRounding: Boolean = true,
+    overscrollState: CupertinoOverscrollState? = null,
     content: @Composable () -> Unit,
 ) {
     val yubeixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
     val yubeixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
     val yubeixIndication = remember(yubeixColors.onBackground) { YubeixIndication(color = yubeixColors.onBackground) }
+    val overscrollFactory = rememberCupertinoOverscrollFactory(
+        state = overscrollState ?: LocalCupertinoOverscrollState.current,
+    )
     CompositionLocalProvider(
         LocalColors provides yubeixColors,
         LocalTextStyles provides yubeixTextStyles,
         LocalIndication provides yubeixIndication,
-        LocalOverscrollFactory provides YubeixOverscrollFactory,
+        LocalOverscrollFactory provides overscrollFactory,
         LocalSmoothRounding provides smoothRounding,
     ) {
         content()

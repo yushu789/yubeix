@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.interfaces.HoldDownInteraction
 import site.unclefish.yubeix.theme.YubeixTheme
@@ -65,6 +66,7 @@ fun BasicComponent(
     endActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    minHeight: Dp = BasicComponentDefaults.MinHeight,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true,
@@ -76,6 +78,7 @@ fun BasicComponent(
         bottomAction = bottomAction,
         modifier = modifier,
         insideMargin = insideMargin,
+        minHeight = minHeight,
         onClick = onClick,
         holdDownState = holdDownState,
         enabled = enabled,
@@ -120,6 +123,7 @@ fun BasicComponent(
     endActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
     insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    minHeight: Dp = BasicComponentDefaults.MinHeight,
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true,
@@ -162,7 +166,7 @@ fun BasicComponent(
 
     Column(
         modifier = modifier
-            .heightIn(min = 56.dp)
+            .heightIn(min = minHeight)
             .fillMaxWidth()
             .then(clickableModifier)
             .padding(insideMargin),
@@ -405,6 +409,11 @@ object BasicComponentDefaults {
      * The default margin inside the [BasicComponent].
      */
     val InsideMargin = PaddingValues(16.dp)
+
+    /**
+     * The default min height of the [BasicComponent].
+     */
+    val MinHeight = 56.dp
 
     /**
      * The default color of the title.
