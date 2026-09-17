@@ -23,7 +23,7 @@ fun main() = application {
         state = state,
         onCloseRequest = ::exitApplication,
         alwaysOnTop = isHotReloadMode,
-        title = "Miuix",
+        title = "Yubeix",
         icon = painterResource(Res.drawable.icon),
     ) {
         window.minimumSize = Dimension(300, 600)

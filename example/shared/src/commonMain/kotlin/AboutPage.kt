@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import component.BackNavigationIcon
 import misc.VersionInfo
-import navigation3.Route
+import appnavigation.Route
 import org.jetbrains.compose.resources.painterResource
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.YubeixScrollBehavior
@@ -136,7 +136,7 @@ private fun AboutContent(
                     }
                     Text(
                         modifier = Modifier.padding(top = 12.dp),
-                        text = "Miuix",
+                        text = "Yubeix",
                         fontWeight = FontWeight.Medium,
                         fontSize = 26.sp,
                     )

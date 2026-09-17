@@ -1,4 +1,4 @@
-// Copyright 2025, compose-miuix-ui contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import androidx.compose.foundation.background
@@ -12,17 +12,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.ui.NavDisplay
 import site.unclefish.yubeix.basic.ButtonDefaults
 import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.navigation.NavigationPath
+import site.unclefish.yubeix.navigation.SceneDisplay
+import site.unclefish.yubeix.navigation.entryProvider
 import site.unclefish.yubeix.theme.ColorSchemeMode
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.ThemeController
@@ -88,9 +86,9 @@ private val availableComponents = listOf(
 
 @Composable
 private fun DemoSelection() {
-    val backStack = remember { mutableStateListOf<NavKey>(DemoScreen.Home) }
-    val entryProvider = remember(backStack) {
-        entryProvider<NavKey> {
+    val navigationPath = remember { NavigationPath<DemoScreen>(DemoScreen.Home) }
+    val entryProvider = remember {
+        entryProvider<DemoScreen> {
             entry(DemoScreen.Home) {
                 Box(
                     modifier = Modifier
@@ -110,7 +108,7 @@ private fun DemoSelection() {
                         availableComponents.forEach { demo ->
                             TextButton(
                                 text = demo.name,
-                                onClick = { backStack.add(DemoScreen.Component(demo.id)) },
+                                onClick = { navigationPath.push(DemoScreen.Component(demo.id)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.textButtonColorsPrimary(),
                             )
@@ -129,18 +127,14 @@ private fun DemoSelection() {
         }
     }
 
-    val entries = rememberDecoratedNavEntries(
-        backStack = backStack,
+    SceneDisplay(
+        navigationPath = navigationPath,
         entryProvider = entryProvider,
-    )
-
-    NavDisplay(
-        entries = entries,
-        onBack = { backStack.removeLast() },
+        predictiveBackEnabled = true,
     )
 }
 
-private sealed interface DemoScreen : NavKey {
+private sealed interface DemoScreen : site.unclefish.yubeix.navigation.NavKey {
     data object Home : DemoScreen
     data class Component(val id: String) : DemoScreen
 }

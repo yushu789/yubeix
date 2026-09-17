@@ -41,7 +41,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,12 +54,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.NavDisplayTransitionEffects
+import site.unclefish.yubeix.navigation.NavigationPath
+import site.unclefish.yubeix.navigation.SceneDisplay
+import site.unclefish.yubeix.navigation.entryProvider
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
@@ -68,8 +64,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import navigation3.Navigator
-import navigation3.Route
+import appnavigation.Navigator
+import appnavigation.Route
 import site.unclefish.yubeix.basic.FabPosition
 import site.unclefish.yubeix.basic.FloatingActionButton
 import site.unclefish.yubeix.basic.FloatingNavigationBar
@@ -142,8 +138,8 @@ fun AppContent(
         mainPagerState.syncPage()
     }
 
-    val backStack = remember { mutableStateListOf<NavKey>().apply { add(Route.Main) } }
-    val navigator = remember { Navigator(backStack) }
+    val navigationPath = remember { NavigationPath(Route.Main) }
+    val navigator = remember { Navigator(navigationPath) }
 
     val navigationItems = remember {
         listOf(
@@ -164,8 +160,8 @@ fun AppContent(
         LocalMainPagerState provides mainPagerState,
         LocalIsWideScreen provides isWideScreen,
     ) {
-        val entryProvider = remember(backStack) {
-            entryProvider<NavKey> {
+        val entryProvider = remember {
+            entryProvider<Route> {
                 entry<Route.Main> {
                     Home(
                         padding = padding,
@@ -180,7 +176,9 @@ fun AppContent(
                     LicensePage(padding = padding)
                 }
                 entry<Route.NavTest> { route ->
-                    val index = backStack.filterIsInstance<Route.NavTest>().indexOf(route) + 1
+                    val index = navigationPath.activeRoutes
+                        .filterIsInstance<Route.NavTest>()
+                        .indexOf(route) + 1
                     NavTestPage(
                         index = index,
                         padding = padding,
@@ -192,30 +190,10 @@ fun AppContent(
             }
         }
 
-        val entries = rememberDecoratedNavEntries(
-            backStack = backStack,
-            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
+        SceneDisplay(
+            navigationPath = navigationPath,
             entryProvider = entryProvider,
-        )
-
-        val transitionEffects = remember(
-            appState.enableCornerClip,
-            appState.enableDim,
-            appState.blockInputDuringTransition,
-            appState.popDirectionFollowsSwipeEdge,
-        ) {
-            NavDisplayTransitionEffects(
-                enableCornerClip = appState.enableCornerClip,
-                dimAmount = if (appState.enableDim) 0.5f else 0f,
-                blockInputDuringTransition = appState.blockInputDuringTransition,
-                popDirectionFollowsSwipeEdge = appState.popDirectionFollowsSwipeEdge,
-            )
-        }
-
-        NavDisplay(
-            entries = entries,
-            onBack = { navigator.pop() },
-            transitionEffects = transitionEffects,
+            predictiveBackEnabled = true,
         )
     }
 

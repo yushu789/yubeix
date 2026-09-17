@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import component.BackNavigationIcon
-import navigation3.Route
+import appnavigation.Route
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.DropdownImpl
 import site.unclefish.yubeix.basic.Icon
