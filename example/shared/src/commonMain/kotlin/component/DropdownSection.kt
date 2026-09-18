@@ -40,8 +40,8 @@ fun LazyListScope.dropdownSection() {
         SmallTitle(text = "Dropdown")
         SuperGroup(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 8.dp),
         ) {
             SuperDropdown(
                 title = "SuperDropdown",

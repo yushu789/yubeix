@@ -204,9 +204,9 @@ private val EmptyClickAction: () -> Unit = {}
 object CardDefaults {
 
     /**
-     * The default corner radius of the [Card].
+     * The default corner radius of the [Card], matching the preference-group card look.
      */
-    val CornerRadius = 16.dp
+    val CornerRadius = 12.dp
 
     /**
      * The default margin inside the [Card].
