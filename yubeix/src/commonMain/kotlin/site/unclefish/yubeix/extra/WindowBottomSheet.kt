@@ -368,7 +368,7 @@ fun WindowBottomSheetHeaderAction(
         modifier = modifier.size(WindowBottomSheetHeaderActionSize),
         enabled = enabled,
         backgroundColor = containerColor,
-        cornerRadius = WindowBottomSheetHeaderActionSize,
+        cornerRadius = WindowBottomSheetHeaderActionCornerRadius,
         minWidth = WindowBottomSheetHeaderActionSize,
         minHeight = WindowBottomSheetHeaderActionSize,
     ) {
@@ -1127,6 +1127,7 @@ private val WindowBottomSheetDefaultCornerRadius = 32.dp
 private val WindowBottomSheetDefaultMaxWidth = 560.dp
 private val WindowBottomSheetDefaultInsideMargin = DpSize(16.dp, 14.dp)
 private val WindowBottomSheetHeaderActionSize: Dp = 44.dp
+private val WindowBottomSheetHeaderActionCornerRadius: Dp = 12.dp
 private val WindowBottomSheetHeaderActionIconSize: Dp = 20.dp
 private const val WINDOW_BOTTOM_SHEET_ANIMATION_VISIBILITY_THRESHOLD = 0.0001f
 

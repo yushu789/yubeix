@@ -1,17 +1,19 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,14 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import appnavigation.Route
 import component.SectionCaption
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import site.unclefish.yubeix.basic.Card
-import site.unclefish.yubeix.basic.Scaffold
-import site.unclefish.yubeix.basic.ScrollBehavior
+import site.unclefish.yubeix.basic.ScreenScaffold
+import site.unclefish.yubeix.basic.ScreenTitleMode
 import site.unclefish.yubeix.basic.VerticalScrollBar
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperDropdown
@@ -34,9 +33,6 @@ import site.unclefish.yubeix.extra.SuperSwitch
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.ThemeColorSpec
 import site.unclefish.yubeix.theme.ThemePaletteStyle
-import utils.AdaptiveTopAppBar
-import utils.pageContentPadding
-import utils.pageScrollModifiers
 import kotlin.random.Random
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
@@ -58,280 +54,262 @@ fun SettingsPage(
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = YubeixScrollBehavior()
-    // Marks the scrolling content so the top bar can blur it via haze.
-    val hazeState = rememberHazeState()
-
-    Scaffold(
-        topBar = {
-            AdaptiveTopAppBar(
-                title = "Settings",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-                hazeState = hazeState,
-            )
-        },
-    ) { innerPadding ->
-        SettingsContent(
-            padding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = padding.calculateBottomPadding(),
-            ),
-            topAppBarScrollBehavior = topAppBarScrollBehavior,
-            hazeState = hazeState,
-        )
-    }
-}
-
-@Composable
-private fun SettingsContent(
-    padding: PaddingValues,
-    topAppBarScrollBehavior: ScrollBehavior,
-    hazeState: HazeState,
-) {
-    val appState = LocalAppState.current
-    val isWideScreen = LocalIsWideScreen.current
     val updateAppState = LocalUpdateAppState.current
     val navigator = LocalNavigator.current
     val lazyListState = rememberLazyListState()
+    // ScreenScaffold marks the scrolling content as the haze source itself, so the chrome bar can
+    // frost it without a manual hazeSource on the list.
+    val hazeState = rememberHazeState()
+    // The compact shell's bottom bar floats over the page, so its height joins the content's
+    // bottom padding; the wide pane has no bottom bar and the scaffold's own inset is enough.
+    val bottomBarOverlayHeight = if (isWideScreen) 0.dp else padding.calculateBottomPadding()
+    // Keeps the scrollbar track between the chrome bar at the top and the page bottom.
+    val scrollBarTrackPadding = PaddingValues(
+        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+        bottom = if (isWideScreen) {
+            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        } else {
+            bottomBarOverlayHeight
+        },
+    )
 
-    val contentPadding = pageContentPadding(padding, padding, isWideScreen)
-    Box {
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.pageScrollModifiers(
-                appState.enableScrollEndHaptic,
-                appState.showTopAppBar,
-                topAppBarScrollBehavior,
-            ).hazeSource(state = hazeState),
-            contentPadding = contentPadding,
-        ) {
-            item(key = "settingsUi") {
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                ) {
-                    SuperSwitch(
-                        title = "Show FPS Monitor",
-                        checked = appState.showFPSMonitor,
-                        onCheckedChange = { updateAppState { state -> state.copy(showFPSMonitor = it) } },
+    // The settings list is long, so ScrollAware keeps the collapsed centered title hidden until
+    // the content scrolls instead of spending a hero row on it.
+    ScreenScaffold(
+        title = "Settings",
+        onBack = null,
+        titleMode = ScreenTitleMode.ScrollAware,
+        listState = lazyListState,
+        hazeState = hazeState,
+        itemSpacing = 0.dp,
+        bottomContentPadding = 32.dp + bottomBarOverlayHeight,
+        floatingBottomContent = {
+            VerticalScrollBar(
+                adapter = rememberScrollBarAdapter(lazyListState),
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                trackPadding = scrollBarTrackPadding,
+            )
+        },
+    ) {
+        item(key = "settingsUi") {
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+            ) {
+                SuperSwitch(
+                    title = "Show FPS Monitor",
+                    checked = appState.showFPSMonitor,
+                    onCheckedChange = { updateAppState { state -> state.copy(showFPSMonitor = it) } },
+                )
+                SuperSwitch(
+                    title = "Show TopAppBar",
+                    checked = appState.showTopAppBar,
+                    onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
+                )
+                SuperSwitch(
+                    title = if (isWideScreen) "Show NavigationRail" else "Show NavigationBar",
+                    checked = appState.showNavigationBar,
+                    onCheckedChange = { updateAppState { state -> state.copy(showNavigationBar = it) } },
+                )
+                AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar) {
+                    SuperDropdown(
+                        title = "NavigationBar Mode",
+                        items = NavigationBarDisplayModeOptions,
+                        selectedIndex = appState.navigationBarMode,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(navigationBarMode = it) } },
                     )
-                    SuperSwitch(
-                        title = "Show TopAppBar",
-                        checked = appState.showTopAppBar,
-                        onCheckedChange = { updateAppState { state -> state.copy(showTopAppBar = it) } },
+                }
+                AnimatedVisibility(visible = appState.showNavigationBar && isWideScreen) {
+                    SuperDropdown(
+                        title = "NavigationRail Mode",
+                        items = NavigationRailDisplayModeOptions,
+                        selectedIndex = appState.navigationRailMode,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailMode = it) } },
                     )
-                    SuperSwitch(
-                        title = if (isWideScreen) "Show NavigationRail" else "Show NavigationBar",
-                        checked = appState.showNavigationBar,
-                        onCheckedChange = { updateAppState { state -> state.copy(showNavigationBar = it) } },
-                    )
-                    AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen && !appState.useFloatingNavigationBar) {
-                        SuperDropdown(
-                            title = "NavigationBar Mode",
-                            items = NavigationBarDisplayModeOptions,
-                            selectedIndex = appState.navigationBarMode,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(navigationBarMode = it) } },
+                }
+                AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen) {
+                    Column {
+                        SuperSwitch(
+                            title = "Use FloatingNavigationBar",
+                            checked = appState.useFloatingNavigationBar,
+                            onCheckedChange = { updateAppState { state -> state.copy(useFloatingNavigationBar = it) } },
                         )
-                    }
-                    AnimatedVisibility(visible = appState.showNavigationBar && isWideScreen) {
-                        SuperDropdown(
-                            title = "NavigationRail Mode",
-                            items = NavigationRailDisplayModeOptions,
-                            selectedIndex = appState.navigationRailMode,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(navigationRailMode = it) } },
-                        )
-                    }
-                    AnimatedVisibility(visible = appState.showNavigationBar && !isWideScreen) {
-                        Column {
-                            SuperSwitch(
-                                title = "Use FloatingNavigationBar",
-                                checked = appState.useFloatingNavigationBar,
-                                onCheckedChange = { updateAppState { state -> state.copy(useFloatingNavigationBar = it) } },
-                            )
-                            AnimatedVisibility(visible = appState.useFloatingNavigationBar) {
-                                Column {
-                                    SuperDropdown(
-                                        title = "FloatingNavigationBar Mode",
-                                        items = FloatingNavigationBarDisplayModeOptions,
-                                        selectedIndex = appState.floatingNavigationBarMode,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarMode = it) } },
-                                    )
-                                    SuperDropdown(
-                                        title = "FloatingNavigationBar Position",
-                                        items = FloatingNavigationBarPositionOptions,
-                                        selectedIndex = appState.floatingNavigationBarPosition,
-                                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarPosition = it) } },
-                                    )
-                                }
+                        AnimatedVisibility(visible = appState.useFloatingNavigationBar) {
+                            Column {
+                                SuperDropdown(
+                                    title = "FloatingNavigationBar Mode",
+                                    items = FloatingNavigationBarDisplayModeOptions,
+                                    selectedIndex = appState.floatingNavigationBarMode,
+                                    onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarMode = it) } },
+                                )
+                                SuperDropdown(
+                                    title = "FloatingNavigationBar Position",
+                                    items = FloatingNavigationBarPositionOptions,
+                                    selectedIndex = appState.floatingNavigationBarPosition,
+                                    onSelectedIndexChange = { updateAppState { state -> state.copy(floatingNavigationBarPosition = it) } },
+                                )
                             }
                         }
                     }
-                    SuperSwitch(
-                        title = "Show FloatingToolbar",
-                        checked = appState.showFloatingToolbar,
-                        onCheckedChange = { updateAppState { state -> state.copy(showFloatingToolbar = it) } },
-                    )
-                    AnimatedVisibility(visible = appState.showFloatingToolbar) {
-                        Column {
-                            SuperDropdown(
-                                title = "FloatingToolbar Position",
-                                items = FloatingToolbarPositionOptions,
-                                selectedIndex = appState.floatingToolbarPosition,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarPosition = it) } },
-                            )
-                            SuperDropdown(
-                                title = "FloatingToolbar Orientation",
-                                items = FloatingToolbarOrientationOptions,
-                                selectedIndex = appState.floatingToolbarOrientation,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarOrientation = it) } },
-                            )
-                        }
-                    }
-                    SuperSwitch(
-                        title = "Show FloatingActionButton",
-                        checked = appState.showFloatingActionButton,
-                        onCheckedChange = { updateAppState { state -> state.copy(showFloatingActionButton = it) } },
-                    )
-                    AnimatedVisibility(visible = appState.showFloatingActionButton) {
+                }
+                SuperSwitch(
+                    title = "Show FloatingToolbar",
+                    checked = appState.showFloatingToolbar,
+                    onCheckedChange = { updateAppState { state -> state.copy(showFloatingToolbar = it) } },
+                )
+                AnimatedVisibility(visible = appState.showFloatingToolbar) {
+                    Column {
                         SuperDropdown(
-                            title = "FloatingActionButton Position",
-                            items = FabPositionOptions,
-                            selectedIndex = appState.floatingActionButtonPosition,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
+                            title = "FloatingToolbar Position",
+                            items = FloatingToolbarPositionOptions,
+                            selectedIndex = appState.floatingToolbarPosition,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarPosition = it) } },
+                        )
+                        SuperDropdown(
+                            title = "FloatingToolbar Orientation",
+                            items = FloatingToolbarOrientationOptions,
+                            selectedIndex = appState.floatingToolbarOrientation,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(floatingToolbarOrientation = it) } },
                         )
                     }
-                    SuperSwitch(
-                        title = "Enable Scroll End Haptic",
-                        checked = appState.enableScrollEndHaptic,
-                        onCheckedChange = { updateAppState { state -> state.copy(enableScrollEndHaptic = it) } },
-                    )
-                    SuperSwitch(
-                        title = "Enable Page User Scroll",
-                        checked = appState.enablePageUserScroll,
-                        onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
-                    )
-                    SuperSwitch(
-                        title = "G2 Smooth Rounded",
-                        checked = appState.smoothRounding,
-                        onCheckedChange = { updateAppState { state -> state.copy(smoothRounding = it) } },
-                    )
+                }
+                SuperSwitch(
+                    title = "Show FloatingActionButton",
+                    checked = appState.showFloatingActionButton,
+                    onCheckedChange = { updateAppState { state -> state.copy(showFloatingActionButton = it) } },
+                )
+                AnimatedVisibility(visible = appState.showFloatingActionButton) {
                     SuperDropdown(
-                        title = "Color Mode",
-                        items = ColorModeOptions,
-                        selectedIndex = appState.colorMode,
-                        onSelectedIndexChange = { updateAppState { state -> state.copy(colorMode = it) } },
+                        title = "FloatingActionButton Position",
+                        items = FabPositionOptions,
+                        selectedIndex = appState.floatingActionButtonPosition,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(floatingActionButtonPosition = it) } },
                     )
-                    AnimatedVisibility(visible = appState.colorMode in 3..5) {
+                }
+                SuperSwitch(
+                    title = "Enable Scroll End Haptic",
+                    checked = appState.enableScrollEndHaptic,
+                    onCheckedChange = { updateAppState { state -> state.copy(enableScrollEndHaptic = it) } },
+                )
+                SuperSwitch(
+                    title = "Enable Page User Scroll",
+                    checked = appState.enablePageUserScroll,
+                    onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
+                )
+                SuperSwitch(
+                    title = "G2 Smooth Rounded",
+                    checked = appState.smoothRounding,
+                    onCheckedChange = { updateAppState { state -> state.copy(smoothRounding = it) } },
+                )
+                SuperDropdown(
+                    title = "Color Mode",
+                    items = ColorModeOptions,
+                    selectedIndex = appState.colorMode,
+                    onSelectedIndexChange = { updateAppState { state -> state.copy(colorMode = it) } },
+                )
+                AnimatedVisibility(visible = appState.colorMode in 3..5) {
+                    SuperDropdown(
+                        title = "Key Color",
+                        items = KeyColorOptions,
+                        selectedIndex = appState.seedIndex,
+                        onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
+                    )
+                }
+                AnimatedVisibility(visible = appState.colorMode in 3..5 && appState.seedIndex > 0) {
+                    Column {
                         SuperDropdown(
-                            title = "Key Color",
-                            items = KeyColorOptions,
-                            selectedIndex = appState.seedIndex,
-                            onSelectedIndexChange = { updateAppState { state -> state.copy(seedIndex = it) } },
+                            title = "Palette Style",
+                            items = PaletteStyleOptions,
+                            selectedIndex = appState.paletteStyle,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
+                        )
+                        SuperDropdown(
+                            title = "Color Spec",
+                            items = ColorSpecOptions,
+                            selectedIndex = appState.colorSpec,
+                            onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
                         )
                     }
-                    AnimatedVisibility(visible = appState.colorMode in 3..5 && appState.seedIndex > 0) {
-                        Column {
-                            SuperDropdown(
-                                title = "Palette Style",
-                                items = PaletteStyleOptions,
-                                selectedIndex = appState.paletteStyle,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(paletteStyle = it) } },
-                            )
-                            SuperDropdown(
-                                title = "Color Spec",
-                                items = ColorSpecOptions,
-                                selectedIndex = appState.colorSpec,
-                                onSelectedIndexChange = { updateAppState { state -> state.copy(colorSpec = it) } },
-                            )
-                        }
-                    }
                 }
             }
-            item(key = "settingsTransition") {
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                ) {
-                    SuperSwitch(
-                        title = "Enable Corner Clip",
-                        checked = appState.enableCornerClip,
-                        onCheckedChange = { updateAppState { state -> state.copy(enableCornerClip = it) } },
-                    )
-                    SuperSwitch(
-                        title = "Enable Dim",
-                        checked = appState.enableDim,
-                        onCheckedChange = { updateAppState { state -> state.copy(enableDim = it) } },
-                    )
-                    SuperSwitch(
-                        title = "Block Input During Transition",
-                        checked = appState.blockInputDuringTransition,
-                        onCheckedChange = { updateAppState { state -> state.copy(blockInputDuringTransition = it) } },
-                    )
-                    SuperSwitch(
-                        title = "Pop Follows Swipe Edge",
-                        checked = appState.popDirectionFollowsSwipeEdge,
-                        onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
-                    )
-                }
-                // Row descriptions moved out of the rows, one caption per row in row order.
-                SectionCaption(
-                    text = "Clip the top scene with rounded corners during transitions",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                SectionCaption(
-                    text = "Dim the scene behind during transitions",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                SectionCaption(
-                    text = "Block touch input on the non-target scene",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                SectionCaption(
-                    text = "Pop animation direction follows the finger swipe edge",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-            }
-            item(key = "settingsNavigation") {
-                Card(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                ) {
-                    SuperArrow(
-                        title = "Navigate Test",
-                        onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
-                    )
-                    SuperArrow(
-                        title = "Multi-Scaffold Test",
-                        onClick = { navigator.push(Route.MultiScaffoldTest) },
-                    )
-                }
-                // Row descriptions moved out of the rows, one caption per row in row order.
-                SectionCaption(
-                    text = "Navigate to a Navigate Test Page",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-                SectionCaption(
-                    text = "Test popup positioning with side-by-side Scaffolds",
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-            }
-            item(key = "settingsAbout") {
-                Card(
-                    modifier = Modifier,
-                ) {
-                    SuperArrow(
-                        title = "About",
-                        onClick = { navigator.push(Route.About) },
-                    )
-                }
-                // Row description moved out of the row; the trailing spacer keeps the list padding.
-                SectionCaption(text = "About this example App")
-            }
-            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
-        VerticalScrollBar(
-            adapter = rememberScrollBarAdapter(lazyListState),
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-            trackPadding = contentPadding,
-        )
+        item(key = "settingsTransition") {
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+            ) {
+                SuperSwitch(
+                    title = "Enable Corner Clip",
+                    checked = appState.enableCornerClip,
+                    onCheckedChange = { updateAppState { state -> state.copy(enableCornerClip = it) } },
+                )
+                SuperSwitch(
+                    title = "Enable Dim",
+                    checked = appState.enableDim,
+                    onCheckedChange = { updateAppState { state -> state.copy(enableDim = it) } },
+                )
+                SuperSwitch(
+                    title = "Block Input During Transition",
+                    checked = appState.blockInputDuringTransition,
+                    onCheckedChange = { updateAppState { state -> state.copy(blockInputDuringTransition = it) } },
+                )
+                SuperSwitch(
+                    title = "Pop Follows Swipe Edge",
+                    checked = appState.popDirectionFollowsSwipeEdge,
+                    onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
+                )
+            }
+            // Row descriptions moved out of the rows, one caption per row in row order.
+            SectionCaption(
+                text = "Clip the top scene with rounded corners during transitions",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            SectionCaption(
+                text = "Dim the scene behind during transitions",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            SectionCaption(
+                text = "Block touch input on the non-target scene",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            SectionCaption(
+                text = "Pop animation direction follows the finger swipe edge",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+        }
+        item(key = "settingsNavigation") {
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+            ) {
+                SuperArrow(
+                    title = "Navigate Test",
+                    onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
+                )
+                SuperArrow(
+                    title = "Multi-Scaffold Test",
+                    onClick = { navigator.push(Route.MultiScaffoldTest) },
+                )
+            }
+            // Row descriptions moved out of the rows, one caption per row in row order.
+            SectionCaption(
+                text = "Navigate to a Navigate Test Page",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            SectionCaption(
+                text = "Test popup positioning with side-by-side Scaffolds",
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+        }
+        item(key = "settingsAbout") {
+            Card(
+                modifier = Modifier,
+            ) {
+                SuperArrow(
+                    title = "About",
+                    onClick = { navigator.push(Route.About) },
+                )
+            }
+            // Row description moved out of the row; the trailing spacer keeps the list padding.
+            SectionCaption(text = "About this example App")
+        }
+        item { Spacer(modifier = Modifier.height(12.dp)) }
     }
 }

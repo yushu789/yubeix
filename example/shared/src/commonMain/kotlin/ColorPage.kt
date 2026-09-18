@@ -1,4 +1,4 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -26,16 +29,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.CardDefaults
-import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.ScreenScaffold
+import site.unclefish.yubeix.basic.ScreenTitleMode
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.Surface
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.Colors
@@ -43,9 +45,6 @@ import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.darkColorScheme
 import site.unclefish.yubeix.theme.lightColorScheme
 import site.unclefish.yubeix.theme.platformDynamicColors
-import utils.AdaptiveTopAppBar
-import utils.pageContentPadding
-import utils.pageScrollModifiers
 
 private val CamelCaseRegex = Regex("([A-Z])")
 private val ColorBlockShape = RoundedCornerShape(12.dp)
@@ -62,103 +61,101 @@ private data class ColorBlockData(
 fun ColorPage(
     padding: PaddingValues,
 ) {
-    val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
-    val topAppBarScrollBehavior = YubeixScrollBehavior()
-    // Marks the scrolling content so the top bar can blur it via haze.
+    val lazyListState = rememberLazyListState()
+    // ScreenScaffold marks the scrolling content as the haze source itself, so the chrome bar can
+    // frost it without a manual hazeSource on the list.
     val hazeState = rememberHazeState()
+    // The compact shell's bottom bar floats over the page, so its height joins the content's
+    // bottom padding; the wide pane has no bottom bar and the scaffold's own inset is enough.
+    val bottomBarOverlayHeight = if (isWideScreen) 0.dp else padding.calculateBottomPadding()
+    // Keeps the scrollbar track between the chrome bar at the top and the page bottom.
+    val scrollBarTrackPadding = PaddingValues(
+        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+        bottom = if (isWideScreen) {
+            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        } else {
+            bottomBarOverlayHeight
+        },
+    )
 
     val lightColors = remember { lightColorScheme() }
     val darkColors = remember { darkColorScheme() }
     val dynLight = platformDynamicColors(dark = false)
     val dynDark = platformDynamicColors(dark = true)
 
-    Scaffold(
-        topBar = {
-            AdaptiveTopAppBar(
-                title = "Color",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-                hazeState = hazeState,
-            )
-        },
-    ) { innerPadding ->
-        val lazyListState = rememberLazyListState()
-        val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen)
-        Box {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier.pageScrollModifiers(
-                    appState.enableScrollEndHaptic,
-                    appState.showTopAppBar,
-                    topAppBarScrollBehavior,
-                ).hazeSource(state = hazeState),
-                contentPadding = contentPadding,
-            ) {
-                item(key = "current") {
-                    SmallTitle("Current Theme Colors")
-                    Card(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = YubeixTheme.colorScheme.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(YubeixTheme.colorScheme)
-                    }
-                }
-                item(key = "light") {
-                    SmallTitle("Light Theme Colors")
-                    Card(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(lightColors)
-                    }
-                }
-                item(key = "dynamic_light") {
-                    SmallTitle("Dynamic Light Colors")
-                    Card(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(dynLight)
-                    }
-                }
-                item(key = "dark") {
-                    SmallTitle("Dark Theme Colors")
-                    Card(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(darkColors)
-                    }
-                }
-                item(key = "dynamic_dark") {
-                    SmallTitle("Dynamic Dark Colors")
-                    Card(
-                        modifier = Modifier,
-                        colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
-                        cornerRadius = 16.dp,
-                        insideMargin = PaddingValues(horizontal = 16.dp),
-                    ) {
-                        ColorsPreview(dynDark)
-                    }
-                }
-                item { Spacer(modifier = Modifier.height(12.dp)) }
-            }
+    ScreenScaffold(
+        title = "Color",
+        onBack = null,
+        titleMode = ScreenTitleMode.ScrollAware,
+        listState = lazyListState,
+        hazeState = hazeState,
+        itemSpacing = 0.dp,
+        bottomContentPadding = 32.dp + bottomBarOverlayHeight,
+        floatingBottomContent = {
             VerticalScrollBar(
                 adapter = rememberScrollBarAdapter(lazyListState),
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                trackPadding = contentPadding,
+                trackPadding = scrollBarTrackPadding,
             )
+        },
+    ) {
+        item(key = "current") {
+            SmallTitle("Current Theme Colors")
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(color = YubeixTheme.colorScheme.surfaceContainer),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp),
+            ) {
+                ColorsPreview(YubeixTheme.colorScheme)
+            }
         }
+        item(key = "light") {
+            SmallTitle("Light Theme Colors")
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp),
+            ) {
+                ColorsPreview(lightColors)
+            }
+        }
+        item(key = "dynamic_light") {
+            SmallTitle("Dynamic Light Colors")
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp),
+            ) {
+                ColorsPreview(dynLight)
+            }
+        }
+        item(key = "dark") {
+            SmallTitle("Dark Theme Colors")
+            Card(
+                modifier = Modifier.padding(bottom = 12.dp),
+                colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp),
+            ) {
+                ColorsPreview(darkColors)
+            }
+        }
+        item(key = "dynamic_dark") {
+            SmallTitle("Dynamic Dark Colors")
+            Card(
+                modifier = Modifier,
+                colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
+                cornerRadius = 16.dp,
+                insideMargin = PaddingValues(horizontal = 16.dp),
+            ) {
+                ColorsPreview(dynDark)
+            }
+        }
+        item { Spacer(modifier = Modifier.height(12.dp)) }
     }
 }
 
