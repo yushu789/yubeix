@@ -33,6 +33,8 @@ import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperBottomSheet
 import site.unclefish.yubeix.extra.SuperDropdown
 import site.unclefish.yubeix.extra.SuperSwitch
+import site.unclefish.yubeix.extra.WindowBottomSheetCancelAction
+import site.unclefish.yubeix.extra.WindowBottomSheetConfirmAction
 import site.unclefish.yubeix.extra.WindowBottomSheet
 import site.unclefish.yubeix.extra.WindowDropdown
 import site.unclefish.yubeix.icon.YubeixIcons
@@ -119,26 +121,16 @@ private fun SuperBottomSheetDemo(
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
         startAction = {
-            IconButton(
+            WindowBottomSheetCancelAction(
+                contentDescription = "Cancel",
                 onClick = onDismissRequest,
-            ) {
-                Icon(
-                    imageVector = YubeixIcons.Close,
-                    contentDescription = "Cancel",
-                    tint = YubeixTheme.colorScheme.onBackground,
-                )
-            }
+            )
         },
         endAction = {
-            IconButton(
+            WindowBottomSheetConfirmAction(
+                contentDescription = "Confirm",
                 onClick = onDismissRequest,
-            ) {
-                Icon(
-                    imageVector = YubeixIcons.Ok,
-                    contentDescription = "Confirm",
-                    tint = YubeixTheme.colorScheme.onBackground,
-                )
-            }
+            )
         },
     ) {
         LazyColumn(
@@ -231,27 +223,17 @@ private fun WindowBottomSheetDemo(
         onDismissFinished = onDismissFinished,
         startAction = {
             val dismissState = LocalDismissState.current
-            IconButton(
+            WindowBottomSheetCancelAction(
+                contentDescription = "Cancel",
                 onClick = { dismissState?.invoke() },
-            ) {
-                Icon(
-                    imageVector = YubeixIcons.Close,
-                    contentDescription = "Cancel",
-                    tint = YubeixTheme.colorScheme.onBackground,
-                )
-            }
+            )
         },
         endAction = {
             val dismissState = LocalDismissState.current
-            IconButton(
+            WindowBottomSheetConfirmAction(
+                contentDescription = "Confirm",
                 onClick = { dismissState?.invoke() },
-            ) {
-                Icon(
-                    imageVector = YubeixIcons.Ok,
-                    contentDescription = "Confirm",
-                    tint = YubeixTheme.colorScheme.onBackground,
-                )
-            }
+            )
         },
     ) {
         LazyColumn(
