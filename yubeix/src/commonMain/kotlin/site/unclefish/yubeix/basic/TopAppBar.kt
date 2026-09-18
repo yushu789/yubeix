@@ -418,7 +418,7 @@ class TopAppBarState(
 /** Contains default values used by [TopAppBar] and [SmallTopAppBar]. */
 object TopAppBarDefaults {
     /** The default horizontal padding of the large title, matching the hero title inset. */
-    val HorizontalPadding = 28.dp
+    val HorizontalPadding = 16.dp
 
     /** The default collapsed height of the [TopAppBar], matching the flat title bar row height. */
     val CollapsedHeight = 58.dp

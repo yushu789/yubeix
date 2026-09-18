@@ -30,7 +30,6 @@ fun LazyListScope.buttonSection() {
         SmallTitle(text = "Button")
         Row(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -55,7 +54,6 @@ fun LazyListScope.buttonSection() {
         }
         Row(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {

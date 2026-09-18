@@ -57,7 +57,6 @@ fun LazyListScope.bottomSheetSection() {
         SmallTitle(text = "BottomSheet")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             SuperArrow(

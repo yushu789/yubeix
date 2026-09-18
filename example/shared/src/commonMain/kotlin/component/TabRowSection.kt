@@ -38,13 +38,11 @@ fun LazyListScope.tabRowSection() {
                 selectedTabIndex = it
             },
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         )
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp),
         ) {

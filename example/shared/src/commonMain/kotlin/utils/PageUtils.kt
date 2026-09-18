@@ -34,8 +34,8 @@ fun pageContentPadding(
     outerPadding: PaddingValues,
     isWideScreen: Boolean,
     extraTop: Dp = 0.dp,
-    extraStart: Dp = 0.dp,
-    extraEnd: Dp = 0.dp,
+    extraStart: Dp = 16.dp,
+    extraEnd: Dp = 16.dp,
 ): PaddingValues {
     val topPadding = innerPadding.calculateTopPadding() + extraTop
     val bottomPadding = if (isWideScreen) {

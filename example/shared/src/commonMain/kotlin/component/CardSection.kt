@@ -26,7 +26,6 @@ fun LazyListScope.cardSection() {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             colors = CardDefaults.defaultColors(
                 color = YubeixTheme.colorScheme.primaryVariant,
@@ -50,8 +49,7 @@ fun LazyListScope.cardSection() {
         }
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Card(

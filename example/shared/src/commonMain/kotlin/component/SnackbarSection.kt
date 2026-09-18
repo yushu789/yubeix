@@ -31,12 +31,10 @@ fun LazyListScope.snackbarSection(snackbarHostState: SnackbarHostState) {
         val scope = rememberCoroutineScope()
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {

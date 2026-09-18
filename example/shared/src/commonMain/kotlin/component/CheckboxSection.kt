@@ -29,7 +29,6 @@ fun LazyListScope.checkboxSection() {
         SmallTitle(text = "Checkbox")
         SuperGroup(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .padding(bottom = 8.dp),
         ) {
             CheckboxRow()

@@ -63,7 +63,6 @@ fun LazyListScope.colorPickerSection() {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             insideMargin = PaddingValues(16.dp),
         ) {
@@ -105,7 +104,6 @@ private fun ColorPickerCard(colorSpace: ColorSpace) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
             .padding(bottom = 12.dp),
         insideMargin = PaddingValues(16.dp),
     ) {

@@ -348,7 +348,6 @@ fun SearchBar(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
             .padding(top = searchBarTopPadding, bottom = 6.dp)
             .focusRequester(focusRequester),
         onSearch = {},
@@ -393,7 +392,6 @@ fun SearchBarFake(
         modifier = Modifier
             .background(YubeixTheme.colorScheme.surface)
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
             .padding(
                 start = innerPadding.calculateStartPadding(layoutDirection),
                 end = innerPadding.calculateEndPadding(layoutDirection),

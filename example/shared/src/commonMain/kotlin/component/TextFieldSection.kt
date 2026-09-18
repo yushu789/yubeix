@@ -34,7 +34,6 @@ fun LazyListScope.textFieldSection() {
             value = text1,
             onValueChange = { text1 = it },
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -44,7 +43,6 @@ fun LazyListScope.textFieldSection() {
             onValueChange = { text2 = it },
             label = "With title",
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -53,7 +51,6 @@ fun LazyListScope.textFieldSection() {
             state = text3,
             label = "State-based",
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             onKeyboardAction = { focusManager.clearFocus() },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -65,7 +62,6 @@ fun LazyListScope.textFieldSection() {
             useLabelAsPlaceholder = true,
             singleLine = true,
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

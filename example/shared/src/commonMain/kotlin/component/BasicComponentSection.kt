@@ -20,7 +20,6 @@ fun LazyListScope.basicComponentSection() {
         SmallTitle(text = "Basic Component")
         SuperGroup(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .padding(bottom = 8.dp),
         ) {
             BasicComponent(

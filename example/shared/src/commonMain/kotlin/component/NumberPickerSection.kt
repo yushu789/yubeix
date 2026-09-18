@@ -27,7 +27,6 @@ fun LazyListScope.numberPickerSection() {
         SmallTitle(text = "NumberPicker")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             var hourValue by remember { mutableIntStateOf(16) }
@@ -35,7 +34,6 @@ fun LazyListScope.numberPickerSection() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,

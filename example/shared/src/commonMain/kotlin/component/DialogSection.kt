@@ -35,7 +35,6 @@ fun LazyListScope.dialogSection() {
         SmallTitle(text = "Dialog")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             SuperArrow(

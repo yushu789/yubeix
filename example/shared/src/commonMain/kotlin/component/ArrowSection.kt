@@ -42,7 +42,6 @@ fun LazyListScope.arrowSection() {
         SmallTitle(text = "Arrow")
         SuperGroup(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .padding(bottom = 8.dp),
         ) {
             SuperArrow(

@@ -38,6 +38,6 @@ fun SmallTitle(
 
 /** Contains default values used by [SmallTitle]. */
 object SmallTitleDefaults {
-    /** The default inside margin of the [SmallTitle]. */
-    val InsideMargin = PaddingValues(28.dp, 8.dp)
+    /** The default inside margin of the [SmallTitle]: section titles align with row content. */
+    val InsideMargin = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
 }

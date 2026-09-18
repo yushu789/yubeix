@@ -300,7 +300,7 @@ fun InputField(
 /** Contains default values used by [SearchBar] and [InputField]. */
 object SearchBarDefaults {
     /** The default inside margin of the [SearchBar]. */
-    val InsideMargin = DpSize(12.dp, 0.dp)
+    val InsideMargin = DpSize(0.dp, 0.dp)
 
     /** The default minimum height of the [InputField]. Kept for compatibility; the field now uses [SearchFieldDefaults.Height]. */
     val InputFieldMinHeight = 45.dp

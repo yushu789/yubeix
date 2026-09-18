@@ -84,7 +84,6 @@ fun LazyListScope.spinnerSection() {
         SmallTitle(text = "Spinner")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             SuperSpinner(

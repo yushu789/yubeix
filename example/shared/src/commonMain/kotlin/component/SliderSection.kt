@@ -33,7 +33,6 @@ fun LazyListScope.sliderSection() {
         SmallTitle(text = "Slider")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             var sliderValue by remember { mutableFloatStateOf(0.3f) }
@@ -41,14 +40,12 @@ fun LazyListScope.sliderSection() {
                 text = "Normal: ${(sliderValue * 100).toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(top = 12.dp, bottom = 4.dp),
             )
             Slider(
                 value = sliderValue,
                 onValueChange = { sliderValue = it },
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             var stepsValue by remember { mutableFloatStateOf(100f) }
@@ -56,7 +53,6 @@ fun LazyListScope.sliderSection() {
                 text = "Steps: ${stepsValue.toInt()}/200",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             Slider(
@@ -66,7 +62,6 @@ fun LazyListScope.sliderSection() {
                 steps = 199,
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             var stepsWithKeyPointsValue by remember { mutableFloatStateOf(5f) }
@@ -74,7 +69,6 @@ fun LazyListScope.sliderSection() {
                 text = "Steps with Key Points: ${stepsWithKeyPointsValue.toInt()}/8",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             Slider(
@@ -85,7 +79,6 @@ fun LazyListScope.sliderSection() {
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 showKeyPoints = true,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             var customKeyPointsValue by remember { mutableFloatStateOf(25f) }
@@ -93,7 +86,6 @@ fun LazyListScope.sliderSection() {
                 text = "Custom Key Points: ${customKeyPointsValue.toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             Slider(
@@ -104,7 +96,6 @@ fun LazyListScope.sliderSection() {
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 keyPoints = listOf(0f, 25f, 50f, 75f, 100f),
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             val disabledValue by remember { mutableFloatStateOf(0.7f) }
@@ -112,7 +103,6 @@ fun LazyListScope.sliderSection() {
                 text = "Disabled: ${(disabledValue * 100).toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             Slider(
@@ -120,7 +110,6 @@ fun LazyListScope.sliderSection() {
                 onValueChange = {},
                 enabled = false,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
         }
@@ -129,7 +118,6 @@ fun LazyListScope.sliderSection() {
         SmallTitle(text = "RangeSlider")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             var rangeValue by remember { mutableStateOf(0.2f..0.8f) }
@@ -137,14 +125,12 @@ fun LazyListScope.sliderSection() {
                 text = "Range: ${(rangeValue.start * 100).toInt()}% - ${(rangeValue.endInclusive * 100).toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(top = 12.dp, bottom = 4.dp),
             )
             RangeSlider(
                 value = rangeValue,
                 onValueChange = { rangeValue = it },
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             var rangeStepsValue by remember { mutableStateOf(2f..8f) }
@@ -152,7 +138,6 @@ fun LazyListScope.sliderSection() {
                 text = "Range with Key Points: ${rangeStepsValue.start.toInt()} - ${rangeStepsValue.endInclusive.toInt()}",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             RangeSlider(
@@ -163,7 +148,6 @@ fun LazyListScope.sliderSection() {
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 showKeyPoints = true,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             var customRangeValue by remember { mutableStateOf(20f..80f) }
@@ -171,7 +155,6 @@ fun LazyListScope.sliderSection() {
                 text = "Custom Range Points: ${customRangeValue.start.toInt()}% - ${customRangeValue.endInclusive.toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             RangeSlider(
@@ -182,7 +165,6 @@ fun LazyListScope.sliderSection() {
                 hapticEffect = SliderDefaults.SliderHapticEffect.Step,
                 keyPoints = listOf(0f, 20f, 40f, 60f, 80f, 100f),
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
             var disabledRangeValue by remember { mutableStateOf(0.3f..0.7f) }
@@ -190,7 +172,6 @@ fun LazyListScope.sliderSection() {
                 text = "Disabled: ${(disabledRangeValue.start * 100).toInt()}% - ${(disabledRangeValue.endInclusive * 100).toInt()}%",
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 4.dp),
             )
             RangeSlider(
@@ -198,7 +179,6 @@ fun LazyListScope.sliderSection() {
                 onValueChange = {},
                 enabled = false,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 12.dp),
             )
         }
@@ -207,13 +187,11 @@ fun LazyListScope.sliderSection() {
         SmallTitle(text = "VerticalSlider")
         Card(
             modifier = Modifier
-                .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
