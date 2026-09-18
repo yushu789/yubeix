@@ -1,4 +1,4 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -21,7 +21,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -42,6 +41,10 @@ import site.unclefish.yubeix.theme.YubeixTheme
 
 /**
  * A spinner component with Yubeix style, rendered at window level without `Scaffold`. (Popup Mode)
+ *
+ * The row and its popup entries follow wordmoment's preference style: the entry row ends with the
+ * selected value and the dropdown arrow, and each popup entry shows a leading checkmark with a
+ * divider between neighboring entries.
  *
  * @param items The list of [SpinnerEntry] to be shown in the [WindowSpinner].
  * @param selectedIndex The index of the selected item in the [WindowSpinner].
@@ -119,11 +122,9 @@ fun WindowSpinner(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .align(Alignment.CenterVertically)
-                        .weight(1f, fill = false),
-                    fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        .align(Alignment.CenterVertically),
+                    style = YubeixTheme.textStyles.body2,
                     color = actionColor,
-                    textAlign = TextAlign.End,
                 )
             }
             DropdownArrowEndAction(
@@ -201,6 +202,10 @@ private fun WindowSpinnerPopup(
 /**
  * A [WindowSpinner] component with Yubeix style, show Spinner as dialog, rendered at window level without `Scaffold`. (Dialog Mode)
  *
+ * The row and its dialog entries follow wordmoment's preference style: the entry row ends with the
+ * selected value and the dropdown arrow, and each dialog entry shows a leading checkmark with a
+ * full-bleed highlight on the selected entry.
+ *
  * @param items the list of [SpinnerEntry] to be shown in the [WindowSpinner].
  * @param selectedIndex the index of the selected item in the [WindowSpinner].
  * @param title the title of the [WindowSpinner].
@@ -276,11 +281,9 @@ fun WindowSpinner(
                     text = items[selectedIndex].title ?: "",
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .align(Alignment.CenterVertically)
-                        .weight(1f, fill = false),
-                    fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        .align(Alignment.CenterVertically),
+                    style = YubeixTheme.textStyles.body2,
                     color = actionColor,
-                    textAlign = TextAlign.End,
                 )
             }
             DropdownArrowEndAction(

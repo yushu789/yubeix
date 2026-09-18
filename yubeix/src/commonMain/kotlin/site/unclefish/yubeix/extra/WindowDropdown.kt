@@ -1,4 +1,4 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.BasicComponent
@@ -34,7 +33,10 @@ import site.unclefish.yubeix.theme.LocalDismissState
 import site.unclefish.yubeix.theme.YubeixTheme
 
 /**
- * A dropdown with a title and a summary, rendered at window level without `Scaffold`.
+ * A dropdown with a title and a summary, rendered at window level without `Scaffold`. The row and
+ * its popup entries follow wordmoment's preference style: the entry row ends with the selected
+ * value and the dropdown arrow, and each popup entry shows a leading checkmark with a divider
+ * between neighboring entries.
  *
  * @param items The options of the [WindowDropdown].
  * @param selectedIndex The index of the selected option.
@@ -115,11 +117,9 @@ fun WindowDropdown(
                     text = items[selectedIndex],
                     modifier = Modifier
                         .padding(end = 8.dp)
-                        .align(Alignment.CenterVertically)
-                        .weight(1f, fill = false),
-                    fontSize = YubeixTheme.textStyles.body2.fontSize,
+                        .align(Alignment.CenterVertically),
+                    style = YubeixTheme.textStyles.body2,
                     color = actionColor,
-                    textAlign = TextAlign.End,
                 )
             }
             DropdownArrowEndAction(
