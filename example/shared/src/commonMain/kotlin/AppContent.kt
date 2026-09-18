@@ -3,8 +3,7 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.tween
+import site.unclefish.yubeix.component.NavigationPageTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -31,9 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -98,7 +94,6 @@ import site.unclefish.yubeix.navigation.entryProvider
 import site.unclefish.yubeix.theme.YubeixTheme
 import utils.FPSMonitor
 import utils.shouldShowSplitPane
-import kotlin.math.abs
 
 private object UIConstants {
     const val MAIN_PAGE_INDEX = 0
@@ -132,12 +127,7 @@ fun AppContent(
 ) {
     val appState = LocalAppState.current
 
-    val pagerState = rememberPagerState(pageCount = { UIConstants.PAGE_COUNT })
-    val mainPagerState = rememberMainPagerState(pagerState)
-    LaunchedEffect(mainPagerState.pagerState.currentPage) {
-        mainPagerState.syncPage()
-    }
-
+    val mainPagerState = rememberMainPagerState()
     val navigationPath = remember { NavigationPath<Route>(Route.Main) }
     val navigator = remember { Navigator(navigationPath) }
 
@@ -294,7 +284,7 @@ private fun WideScreenContent(
             AppPager(
                 snackbarHostState = snackbarHostState,
                 padding = PaddingValues(top = padding.calculateTopPadding()),
-                pagerState = mainPagerState.pagerState,
+                selectedPage = mainPagerState.selectedPage,
                 modifier = Modifier
                     .imePadding()
                     .padding(end = padding.calculateEndPadding(layoutDirection)),
@@ -338,7 +328,7 @@ private fun CompactScreenLayout(
         AppPager(
             snackbarHostState = snackbarHostState,
             padding = innerPadding,
-            pagerState = mainPagerState.pagerState,
+            selectedPage = mainPagerState.selectedPage,
             modifier = Modifier
                 .padding(
                     top = padding.calculateTopPadding(),
@@ -530,17 +520,15 @@ private fun FloatingNavigationBarAlignment.toAlignment(): Alignment.Horizontal =
 fun AppPager(
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
-    pagerState: PagerState,
+    selectedPage: Int,
     modifier: Modifier = Modifier,
 ) {
     val appState = LocalAppState.current
-    HorizontalPager(
-        state = pagerState,
+    NavigationPageTransition(
+        targetState = selectedPage,
         modifier = modifier,
-        userScrollEnabled = appState.enablePageUserScroll,
-        verticalAlignment = Alignment.Top,
-        pageContent = { page ->
-            when (page) {
+    ) { page ->
+        when (page) {
                 UIConstants.MAIN_PAGE_INDEX -> MainPage(
                     snackbarHostState = snackbarHostState,
                     padding = padding,
@@ -552,10 +540,9 @@ fun AppPager(
 
                 UIConstants.DROPDOWN_PAGE_INDEX -> DropdownPage(padding = padding)
 
-                else -> SettingsPage(padding = padding)
-            }
-        },
-    )
+            else -> SettingsPage(padding = padding)
+        }
+}
 }
 
 @Composable
@@ -582,61 +569,19 @@ private fun MainScreenBackHandler(
 
 @Stable
 class MainPagerState(
-    val pagerState: PagerState,
-    private val coroutineScope: CoroutineScope,
+    initialPage: Int,
 ) {
-    var selectedPage by mutableIntStateOf(pagerState.currentPage)
+    var selectedPage by mutableIntStateOf(initialPage)
         private set
 
-    var isNavigating by mutableStateOf(false)
-        private set
-
-    private var navJob: Job? = null
-
+    /**
+     * Tab switches run through [NavigationPageTransition]'s scale-and-fade hand-off, so
+     * "animating" to a page is just publishing the new target.
+     */
     fun animateToPage(targetIndex: Int) {
-        if (targetIndex == selectedPage) return
-
-        navJob?.cancel()
-
         selectedPage = targetIndex
-        isNavigating = true
-
-        val distance = abs(targetIndex - pagerState.currentPage).coerceAtLeast(2)
-        val duration = 100 * distance + 100
-        val layoutInfo = pagerState.layoutInfo
-        val pageSize = layoutInfo.pageSize + layoutInfo.pageSpacing
-        val currentDistanceInPages = targetIndex - pagerState.currentPage - pagerState.currentPageOffsetFraction
-        val scrollPixels = currentDistanceInPages * pageSize
-
-        navJob = coroutineScope.launch {
-            val myJob = coroutineContext.job
-            try {
-                pagerState.animateScrollBy(
-                    value = scrollPixels,
-                    animationSpec = tween(easing = EaseInOut, durationMillis = duration),
-                )
-            } finally {
-                if (navJob == myJob) {
-                    isNavigating = false
-                    if (pagerState.currentPage != targetIndex) {
-                        selectedPage = pagerState.currentPage
-                    }
-                }
-            }
-        }
-    }
-
-    fun syncPage() {
-        if (!isNavigating && selectedPage != pagerState.currentPage) {
-            selectedPage = pagerState.currentPage
-        }
     }
 }
 
 @Composable
-fun rememberMainPagerState(
-    pagerState: PagerState,
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
-): MainPagerState = remember(pagerState, coroutineScope) {
-    MainPagerState(pagerState, coroutineScope)
-}
+fun rememberMainPagerState(): MainPagerState = remember { MainPagerState(initialPage = 0) }

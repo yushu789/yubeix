@@ -6,6 +6,7 @@ package site.unclefish.yubeix.basic
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -26,41 +27,36 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastCoerceIn
-import androidx.compose.ui.util.lerp
 import com.kyant.shapes.RoundedCornerStyle
 import com.kyant.shapes.RoundedRectangle
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
-import site.unclefish.yubeix.anim.DampedDragAnimation
+import kotlinx.coroutines.flow.filterNotNull
 import site.unclefish.yubeix.theme.YubeixTheme
 
 /**
  * A Cupertino style [Switch].
  *
- * The thumb is driven by a damped drag animation, so drags carry the flick velocity of the finger
- * and settle with a spring, while plain taps toggle through the same spring. The commit decision
- * happens on release: the switch ends on whichever side of the midpoint the thumb was left at
- * (or animates to the flipped state for taps). A haptic tick plays on every [checked] change.
+ * The thumb slides between the track's two ends through an alignment spring; pressing or hovering
+ * widens the thumb to 1.25x its resting aspect ratio, the way UISwitch does. A horizontal drag
+ * follows the finger directly (no liquid spring) and commits the toggle the moment the thumb
+ * crosses the track's midpoint threshold. A haptic tick plays on every [checked] change.
  *
  * @param checked The checked state of the [Switch].
  * @param onCheckedChange The callback to be called when the state of the [Switch] changes.
@@ -79,158 +75,109 @@ fun Switch(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    val currentOnCheckedChange by rememberUpdatedState(onCheckedChange)
-    val currentChecked by rememberUpdatedState(checked)
-    val currentHapticFeedback by rememberUpdatedState(LocalHapticFeedback.current)
+    val switchColors = colors
     val isPressed by interactionSource.collectIsPressedAsState()
     val isHovered by interactionSource.collectIsHoveredAsState()
-
-    // The thumb widens (not grows) under press/hover so the squeeze stays inside the track.
     val animatedAspectRatio by animateFloatAsState(
         targetValue = if (isPressed || isHovered) 1.25f else 1f,
         label = "YubeixSwitchAspectRatio",
     )
     val animatedBackground by animateColorAsState(
-        targetValue = colors.trackColor(enabled, checked),
+        targetValue = switchColors.trackColor(enabled, checked),
         label = "YubeixSwitchTrackColor",
     )
-
+    val animatedAlignment by animateFloatAsState(
+        targetValue = if (checked) 1f else -1f,
+        label = "YubeixSwitchAlignment",
+    )
+    val haptic = LocalHapticFeedback.current
     val density = LocalDensity.current
-    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
-    // Travel of the thumb: track inner width minus the resting thumb width (height minus padding).
-    val dragWidth = with(density) { (CupertinoSwitchWidth - CupertinoSwitchHeight).toPx() }
-    val animationScope = rememberCoroutineScope()
-    var didDrag by remember { mutableStateOf(false) }
-    var fraction by remember { mutableFloatStateOf(if (checked) 1f else 0f) }
-    val dampedDragAnimation = remember(dragWidth) {
-        DampedDragAnimation(
-            animationScope = animationScope,
-            initialValue = fraction,
-            valueRange = 0f..1f,
-            visibilityThreshold = 0.001f,
-            initialScale = 1f,
-            // No press scale: the thumb is clipped to the track, so feedback is the aspect squeeze.
-            pressedScale = 1f,
-            consumeDragChanges = true,
-            onDragStarted = {},
-            onDragStopped = {
-                if (didDrag) {
-                    val target = if (targetValue >= 0.5f) 1f else 0f
-                    fraction = target
-                    currentOnCheckedChange?.invoke(target == 1f)
-                    didDrag = false
-                }
-                // Without a real drag the tap falls through to [Modifier.toggleable] below.
-            },
-            onDrag = { _, dragAmount ->
-                if (!didDrag) {
-                    didDrag = dragAmount.x != 0f
-                }
-                if (didDrag) {
-                    val delta = dragAmount.x / dragWidth
-                    fraction =
-                        if (isLtr) {
-                            (fraction + delta).fastCoerceIn(0f, 1f)
-                        } else {
-                            (fraction - delta).fastCoerceIn(0f, 1f)
-                        }
-                }
-            },
-        )
+    val updatedChecked by rememberUpdatedState(checked)
+    val updatedOnCheckedChange by rememberUpdatedState(onCheckedChange)
+    val dragThreshold = with(density) {
+        (CUPERTINO_SWITCH_WIDTH - CUPERTINO_SWITCH_THUMB_PADDING * 2 - CUPERTINO_SWITCH_HEIGHT).toPx()
+    }
+    var dragDistance by remember { mutableFloatStateOf(0f) }
+    val switchShape = remember {
+        RoundedRectangle(CUPERTINO_SWITCH_HEIGHT / 2, style = RoundedCornerStyle.Continuous)
     }
 
-    LaunchedEffect(dampedDragAnimation) {
-        snapshotFlow { fraction }
-            .collectLatest { fraction ->
-                dampedDragAnimation.updateValue(fraction)
-            }
-    }
-    LaunchedEffect(dampedDragAnimation) {
-        snapshotFlow { currentChecked }
-            .collectLatest { isChecked ->
-                val target = if (isChecked) 1f else 0f
-                if (target != fraction) {
-                    fraction = target
-                    dampedDragAnimation.animateToValue(target)
-                }
-            }
-    }
     LaunchedEffect(Unit) {
-        snapshotFlow { currentChecked }
+        snapshotFlow { updatedChecked }
             .drop(1)
             .collect {
-                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
             }
     }
 
-    val switchShape = remember {
-        RoundedRectangle(CupertinoSwitchHeight / 2, style = RoundedCornerStyle.Continuous)
-    }
-    val hasCallback = onCheckedChange != null
-    val toggleableModifier = if (hasCallback) {
-        Modifier.toggleable(
-            value = checked,
-            onValueChange = { value -> currentOnCheckedChange?.invoke(value) },
-            enabled = enabled,
-            role = Role.Switch,
-            interactionSource = interactionSource,
-            indication = null,
-        )
-    } else {
-        Modifier
+    LaunchedEffect(dragThreshold) {
+        snapshotFlow {
+            when {
+                dragDistance < 0f -> false
+                dragDistance > dragThreshold -> true
+                else -> null
+            }
+        }
+            .filterNotNull()
+            .collect { value -> updatedOnCheckedChange?.invoke(value) }
     }
 
     Column(
         modifier
-            .then(toggleableModifier)
-            .hoverable(
-                interactionSource = interactionSource,
-                enabled = enabled,
-            )
             .wrapContentSize(Alignment.Center)
-            .requiredSize(CupertinoSwitchWidth, CupertinoSwitchHeight)
+            .requiredSize(CUPERTINO_SWITCH_WIDTH, CUPERTINO_SWITCH_HEIGHT)
             .clip(switchShape)
             .drawBehind {
                 drawRect(animatedBackground)
             }
-            .padding(CupertinoSwitchThumbPadding),
+            .padding(CUPERTINO_SWITCH_THUMB_PADDING)
+            .toggleable(
+                value = checked,
+                onValueChange = { value -> updatedOnCheckedChange?.invoke(value) },
+                enabled = enabled,
+                role = Role.Switch,
+                interactionSource = interactionSource,
+                indication = null,
+            )
+            .hoverable(
+                interactionSource = interactionSource,
+                enabled = enabled,
+            ),
     ) {
         Box(
             Modifier
                 .fillMaxHeight()
                 .aspectRatio(animatedAspectRatio)
-                .align(Alignment.Start)
-                .graphicsLayer {
-                    val value = dampedDragAnimation.value
-                    // Start-anchored when unchecked, end-anchored when checked, so the press
-                    // widening grows toward the track interior instead of past its clipped edge.
-                    val widening = (size.width - size.height).coerceAtLeast(0f)
-                    translationX =
-                        if (isLtr) {
-                            lerp(0f, dragWidth, value) - widening * value
-                        } else {
-                            lerp(0f, -dragWidth, value) + widening * value
-                        }
-                    // Squash the thumb against the direction of travel while it moves fast.
-                    val velocity = dampedDragAnimation.velocity / 50f
-                    scaleX = 1f / (1f - (velocity * 0.75f).fastCoerceIn(-0.2f, 0.2f))
-                    scaleY = 1f - (velocity * 0.25f).fastCoerceIn(-0.2f, 0.2f)
+                .pointerInput(dragThreshold) {
+                    detectHorizontalDragGestures(
+                        onDragStart = {
+                            dragDistance = if (updatedChecked) dragThreshold else 0f
+                        },
+                        onHorizontalDrag = { _, dragAmount ->
+                            dragDistance += dragAmount
+                        },
+                    )
                 }
+                .align(BiasAlignment.Horizontal(animatedAlignment))
                 .then(
                     if (enabled) {
                         Modifier.shadow(
-                            elevation = CupertinoSwitchThumbElevation,
+                            elevation = CUPERTINO_SWITCH_THUMB_ELEVATION,
                             shape = switchShape,
                         )
                     } else {
                         Modifier.clip(switchShape)
                     },
                 )
-                .background(colors.thumbColor(enabled), switchShape)
-                .then(if (enabled) dampedDragAnimation.modifier else Modifier),
+                .background(switchColors.thumbColor(enabled), switchShape),
         )
     }
 }
+
+private val CUPERTINO_SWITCH_WIDTH = 51.dp
+private val CUPERTINO_SWITCH_HEIGHT = 31.dp
+private val CUPERTINO_SWITCH_THUMB_PADDING = 2.dp
+private val CUPERTINO_SWITCH_THUMB_ELEVATION = 4.dp
 
 object SwitchDefaults {
 

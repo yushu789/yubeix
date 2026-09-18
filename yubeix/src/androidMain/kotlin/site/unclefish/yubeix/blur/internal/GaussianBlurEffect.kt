@@ -150,7 +150,7 @@ internal fun BackdropEffectScope.gaussianBlur(
     val clampedRadiusY = radiusY.coerceAtLeast(0f)
     if (clampedRadiusX <= 0f && clampedRadiusY <= 0f) return
 
-    val normalizedMaxDownscale = normalizeMAX_DOWNSCALE_FACTOR(maxDownscaleFactor)
+    val normalizedMaxDownscale = normalizeMaxDownscaleFactor(maxDownscaleFactor)
     if (!isRuntimeShaderSupported()) {
         applyPlatformBlur(clampedRadiusX, clampedRadiusY)
         return
@@ -181,7 +181,7 @@ internal fun BackdropEffectScope.gaussianBlur(
     renderEffect = renderEffect?.chain(result.renderEffect) ?: result.renderEffect
 }
 
-private fun normalizeMAX_DOWNSCALE_FACTOR(value: Int): Int = when {
+private fun normalizeMaxDownscaleFactor(value: Int): Int = when {
     value <= 1 -> 1
     value <= 2 -> 2
     value <= 4 -> 4

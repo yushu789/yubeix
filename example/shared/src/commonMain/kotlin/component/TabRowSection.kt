@@ -3,6 +3,8 @@
 
 package component
 
+import site.unclefish.yubeix.component.animatePagerToPage
+import site.unclefish.yubeix.component.rememberPagerFlingBehavior
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -53,7 +55,7 @@ fun LazyListScope.tabRowSection() {
                 selectedTabIndex = pagerState.currentPage,
                 onTabSelected = {
                     scope.launch {
-                        pagerState.animateScrollToPage(it)
+                        pagerState.animatePagerToPage(it)
                     }
                 },
             )
@@ -62,6 +64,7 @@ fun LazyListScope.tabRowSection() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
+                flingBehavior = rememberPagerFlingBehavior(pagerState),
                 userScrollEnabled = true,
                 key = { it },
                 pageContent = { page ->

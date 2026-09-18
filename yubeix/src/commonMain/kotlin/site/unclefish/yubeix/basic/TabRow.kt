@@ -103,7 +103,11 @@ private const val TAB_ROW_INDICATOR_GRAB_SLOP_FACTOR = 0.35f
 // switches without dragging the whole way across.
 private const val TAB_ROW_STEP_STRIDE_FACTOR = 0.45f
 private const val TAB_ROW_SHADOW_LAYER_COUNT = 5
-private val TabRowLabelWeight = FontWeight.Medium
+
+// Per-layer alpha weights, innermost first: most of the shadow's weight hugs the indicator edge
+// and falls off fast, approximating a Gaussian blur instead of a flat halo.
+private val TAB_ROW_SHADOW_LAYER_ALPHAS = floatArrayOf(0.14f, 0.12f, 0.10f, 0.07f, 0.04f)
+private val TAB_ROW_LABEL_WEIGHT = FontWeight.Medium
 
 // Every tab row shares this curve so the indicator reads the same everywhere. Callers that want a
 // different pace should not hand-roll one - change it here.
@@ -888,7 +892,7 @@ private fun TabItem(
             // family only ships discrete faces, so anything that animates the weight either steps
             // between the nearest real ones or has to cross-fade two of them, and neither is worth
             // the cost of what it conveys.
-            fontWeight = TabRowLabelWeight,
+            fontWeight = TAB_ROW_LABEL_WEIGHT,
             fontSize = textStyle.fontSize,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -921,11 +925,12 @@ private fun Modifier.tabRowIndicatorShadow(
         expandPx to outline
     }
     onDrawBehind {
-        expandedOutlines.forEach { (expandPx, outline) ->
+        expandedOutlines.forEachIndexed { index, (expandPx, outline) ->
+            val weight = TAB_ROW_SHADOW_LAYER_ALPHAS[TAB_ROW_SHADOW_LAYER_COUNT - 1 - index]
             translate(-expandPx, offsetYPx - expandPx) {
                 drawOutline(
                     outline = outline,
-                    color = color.copy(alpha = color.alpha / TAB_ROW_SHADOW_LAYER_COUNT),
+                    color = color.copy(alpha = color.alpha * weight),
                 )
             }
         }
@@ -948,7 +953,7 @@ private fun rememberTabRowConfig(
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
     val measurementTextStyle = textStyle.copy(
-        fontWeight = TabRowLabelWeight,
+        fontWeight = TAB_ROW_LABEL_WEIGHT,
     )
     val tabWidths = remember(
         tabs,
