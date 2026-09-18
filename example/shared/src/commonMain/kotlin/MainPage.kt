@@ -43,6 +43,8 @@ import component.spinnerSection
 import component.switchSection
 import component.tabRowSection
 import component.textFieldSection
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.InputField
 import site.unclefish.yubeix.basic.Scaffold
@@ -79,6 +81,8 @@ fun MainPage(
 
     val topAppBarScrollBehavior = YubeixScrollBehavior()
     val lazyListState = rememberLazyListState()
+    // Marks the scrolling content so the top bar can blur it via haze.
+    val hazeState = rememberHazeState()
 
     Scaffold(
         topBar = {
@@ -87,6 +91,7 @@ fun MainPage(
                 showTopAppBar = appState.showTopAppBar,
                 isWideScreen = isWideScreen,
                 scrollBehavior = topAppBarScrollBehavior,
+                hazeState = hazeState,
             )
         },
     ) { innerPadding ->
@@ -98,7 +103,7 @@ fun MainPage(
                     appState.enableScrollEndHaptic,
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
-                ),
+                ).hazeSource(state = hazeState),
                 contentPadding = contentPadding,
             ) {
                 item(key = "searchbar") {

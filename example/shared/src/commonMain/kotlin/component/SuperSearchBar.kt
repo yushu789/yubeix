@@ -286,8 +286,8 @@ fun SearchStatus.SearchPager(
 
                 SearchStatus.ResultStatus.SHOW -> LazyColumn(
                     Modifier
-                        .fillMaxSize()
-                                        ) {
+                        .fillMaxSize(),
+                ) {
                     result()
                 }
             }

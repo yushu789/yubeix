@@ -143,8 +143,8 @@ private fun SuperBottomSheetDemo(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
-                .scrollEndHaptic()
-                        ) {
+                .scrollEndHaptic(),
+        ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
                 Card(
@@ -256,8 +256,8 @@ private fun WindowBottomSheetDemo(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
-                .scrollEndHaptic()
-                        ) {
+                .scrollEndHaptic(),
+        ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
                 Card(

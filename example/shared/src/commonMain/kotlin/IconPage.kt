@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.kyant.shapes.UnevenRoundedRectangle
 import component.SearchBox
 import component.SearchPager
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import site.unclefish.yubeix.basic.BasicComponent
@@ -104,6 +106,8 @@ fun IconsPage(
     // Scroll state
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    // Marks the scrolling content so the top bar can blur it via haze.
+    val hazeState = rememberHazeState()
 
     Scaffold(
         topBar = {
@@ -113,6 +117,7 @@ fun IconsPage(
                     showTopAppBar = appState.showTopAppBar,
                     isWideScreen = isWideScreen,
                     scrollBehavior = topAppBarScrollBehavior,
+                    hazeState = hazeState,
                 )
             }
         },
@@ -180,7 +185,7 @@ fun IconsPage(
                         appState.enableScrollEndHaptic,
                         appState.showTopAppBar,
                         topAppBarScrollBehavior,
-                    ),
+                    ).hazeSource(state = hazeState),
                     contentPadding = contentPadding,
                 ) {
                     item(key = "iconsHeader") {

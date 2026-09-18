@@ -30,6 +30,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.kyant.shapes.UnevenRoundedRectangle
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import site.unclefish.yubeix.basic.PullToRefresh
 import site.unclefish.yubeix.basic.Scaffold
@@ -57,6 +59,8 @@ fun DropdownPage(
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
     val pullToRefreshState = rememberPullToRefreshState()
     val topAppBarScrollBehavior = YubeixScrollBehavior()
+    // Marks the scrolling content so the top bar can blur it via haze.
+    val hazeState = rememberHazeState()
 
     val dropdownOptions = remember { listOf("Option 1", "Option 2", "Option 3", "Option 4") }
     var dropdownSelectedOption by remember { mutableIntStateOf(0) }
@@ -77,6 +81,7 @@ fun DropdownPage(
                 showTopAppBar = appState.showTopAppBar,
                 isWideScreen = isWideScreen,
                 scrollBehavior = topAppBarScrollBehavior,
+                hazeState = hazeState,
             )
         },
     ) { innerPadding ->
@@ -103,7 +108,7 @@ fun DropdownPage(
                         appState.enableScrollEndHaptic,
                         appState.showTopAppBar,
                         topAppBarScrollBehavior,
-                    ),
+                    ).hazeSource(state = hazeState),
                     contentPadding = contentPadding,
                 ) {
                     items(

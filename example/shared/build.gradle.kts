@@ -52,6 +52,7 @@ kotlin {
             kotlin.srcDir(generatedSrcDir.map { it.dir("kotlin") })
             dependencies {
                 api(projects.yubeix)
+                implementation(libs.haze) // HazeState for the top bar glass wiring
                 api(libs.jetbrains.compose.components.resources)
                 implementation(projects.yubeixIcons)
                 implementation(libs.androidx.navigation3.runtime)

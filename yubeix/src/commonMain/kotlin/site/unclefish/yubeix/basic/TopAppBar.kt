@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -124,7 +125,9 @@ import kotlin.math.roundToInt
  * The bar collapses when the content is scrolled up and expands back when the content is
  * scrolled down: the nested-scroll collapse progress drives the background layer's and the
  * centered collapsed title's opacity, the collapsed title's enter offset and blur, and the bar
- * height shrink, while the large title fades out.
+ * height shrink, while the large title keeps full opacity and is carried 1:1 up and out of the
+ * bar bounds, clipped by the bar. While the content is pulled down into overscroll, the large
+ * title grows from its top edge, mirroring the OverscrollTitle hero title treatment.
  *
  * @param title The title of the [TopAppBar].
  * @param modifier The modifier to be applied to the  [TopAppBar].
@@ -138,6 +141,8 @@ import kotlin.math.roundToInt
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [TopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [TopAppBar].
  * @param horizontalPadding The horizontal padding of the [TopAppBar]'s large title.
+ * @param hazeState When set (and render effects are supported), the bar's background blurs the
+ *   content marked with this state via haze instead of drawing a flat translucent fill.
  */
 @Composable
 fun TopAppBar(
@@ -152,6 +157,7 @@ fun TopAppBar(
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
     horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
+    hazeState: HazeState? = null,
 ) {
     val largeTitleHeight = remember { mutableIntStateOf(0) }
     val expandedHeightPx by remember {
@@ -179,8 +185,8 @@ fun TopAppBar(
 
     // Compose a Surface with a TopAppBarLayout content.
     // The bar renders the flat title bar chrome: its layered background and centered collapsed
-    // title fade in with the nested-scroll collapse progress while the large title fades out and
-    // the bar height shrinks to the collapsed row height.
+    // title fade in with the nested-scroll collapse progress while the large title is carried 1:1
+    // out of the bar bounds and the bar height shrinks to the collapsed row height.
     TopAppBarLayout(
         title = title,
         color = color,
@@ -195,6 +201,7 @@ fun TopAppBar(
         modifier = modifier,
         largeTitle = largeTitle,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
+        hazeState = hazeState,
     )
 }
 
@@ -620,11 +627,16 @@ private const val TOP_BAR_LARGE_TITLE_LAYOUT_ID = "largeTitle"
 // Nested-scroll progress at which the collapsed centered title starts fading in.
 private const val TOP_BAR_COLLAPSED_TITLE_REVEAL_PROGRESS = 1f / 3f
 
-// How much faster the large title fades out than the bar collapses.
-private const val TOP_BAR_LARGE_TITLE_FADE_SCALE = 3f
-
 // Vertical padding around the large title, matching the hero title padding.
 private val TOP_BAR_LARGE_TITLE_VERTICAL_PADDING = 4.dp
+
+// Pull-down overscroll growth of the large title, mirroring the OverscrollTitle hero title
+// treatment: the title grows from its top edge up to the max scale over the scale distance.
+private const val TOP_BAR_LARGE_TITLE_MAX_OVERSCROLL_SCALE = 1.1f
+private val TOP_BAR_LARGE_TITLE_OVERSCROLL_SCALE_DISTANCE = 150.dp
+
+// Blur radius of the bar's haze frosted glass background.
+private val TOP_BAR_HAZE_BLUR_RADIUS = 18.dp
 
 // The flat title bar chrome metrics: the row's side padding, the square reserved for the edge
 // content (the standard back button and action buttons), and the gap between that square and the
@@ -716,7 +728,7 @@ private fun CollapsedTitleBarRow(
  * The base [Layout] for [TopAppBar]. Renders the flat title bar chrome (see [LargeTopAppBar]):
  * a layered translucent background that fades in with the collapse progress, a collapsed row with
  * the start slot, the centered title and the trailing actions, and the large title below the row
- * that fades out and clips away as the bar collapses.
+ * that is carried 1:1 up and out of the bar bounds, clipping away as the bar collapses.
  *
  * @param title the [TopAppBar] title (header).
  * @param color the background surface color of the [TopAppBar].
@@ -731,7 +743,10 @@ private fun CollapsedTitleBarRow(
  * @param modifier the [Modifier] to be applied to this layout.
  * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
+ * @param hazeState when set (and render effects are supported), the bar's background blurs the
+ *   content marked with this state via haze instead of drawing the flat translucent fill.
  */
+@OptIn(ExperimentalHazeApi::class)
 @Composable
 private fun TopAppBarLayout(
     title: String,
@@ -747,6 +762,7 @@ private fun TopAppBarLayout(
     modifier: Modifier = Modifier,
     largeTitle: String = title,
     defaultWindowInsetsPadding: Boolean = true,
+    hazeState: HazeState? = null,
 ) {
     // Subtract the scrolledOffset from the maxHeight
     val heightOffset by remember(scrolledOffset) {
@@ -763,11 +779,48 @@ private fun TopAppBarLayout(
     } else {
         0f
     }
-    val largeTitleAlpha = 1f - (collapseProgress * TOP_BAR_LARGE_TITLE_FADE_SCALE).coerceIn(0f, 1f)
+    // The large title never fades: it keeps full opacity and is carried 1:1 up and out of the bar
+    // by the collapse offset, clipped by the bar's clipToBounds.
 
     // The collapsed title fades in once the collapse crosses the reveal threshold, then runs to
     // completion independently with the flat title bar's enter offset and blur treatment.
     val reducedDynamicEffectsEnabled = LocalReducedDynamicEffectsEnabled.current
+
+    // Pull-down overscroll grows the large title from its top edge, mirroring the OverscrollTitle
+    // hero title treatment: up to the max scale over the scale distance. A null overscroll state
+    // (or an upward overscroll) keeps the title at its natural scale.
+    val overscrollState = LocalCupertinoOverscrollState.current
+    val overscrollScaleDistancePx = with(LocalDensity.current) {
+        TOP_BAR_LARGE_TITLE_OVERSCROLL_SCALE_DISTANCE.toPx()
+    }
+    val largeTitleScale by remember(overscrollState, overscrollScaleDistancePx) {
+        derivedStateOf {
+            val pullDistancePx = overscrollState?.offset?.y ?: 0f
+            if (overscrollScaleDistancePx <= 0f) {
+                1f
+            } else {
+                1f + (
+                    pullDistancePx / overscrollScaleDistancePx
+                    ).coerceIn(0f, 1f) * (TOP_BAR_LARGE_TITLE_MAX_OVERSCROLL_SCALE - 1f)
+            }
+        }
+    }
+
+    // Frosted glass mode: when a haze state is provided and render effects are available, blur the
+    // content marked with that state behind the bar; otherwise keep the flat translucent fill.
+    val useHazeBackground =
+        hazeState != null &&
+            isRenderEffectSupported() &&
+            !reducedDynamicEffectsEnabled
+    val hazeStyle = remember(color) {
+        HazeStyle(
+            backgroundColor = color.copy(alpha = 1f),
+            tints = emptyList(),
+            blurRadius = TOP_BAR_HAZE_BLUR_RADIUS,
+            noiseFactor = 0f,
+            fallbackTint = HazeTint(color.copy(alpha = 0.58f)),
+        )
+    }
     val titleVisibilityProgress by animateFloatAsState(
         targetValue = if (collapseProgress >= TOP_BAR_COLLAPSED_TITLE_REVEAL_PROGRESS) 1f else 0f,
         animationSpec = tween(durationMillis = 220),
@@ -794,11 +847,24 @@ private fun TopAppBarLayout(
                 .clipToBounds()
                 .graphicsLayer { alpha = backgroundVisibility },
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color.copy(alpha = 0.5f)),
-            )
+            if (useHazeBackground) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeEffect(
+                            state = requireNotNull(hazeState),
+                            style = hazeStyle,
+                        ) {
+                            inputScale = HazeInputScale.Auto
+                        },
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color.copy(alpha = 0.5f)),
+                )
+            }
             FlatTitleBarSurfaceLayer(
                 surfaceColor = color,
                 dividerColor = YubeixTheme.colorScheme.dividerLine,
@@ -823,7 +889,13 @@ private fun TopAppBarLayout(
                         .layoutId(TOP_BAR_LARGE_TITLE_LAYOUT_ID)
                         .padding(horizontal = horizontalPadding)
                         .padding(vertical = TOP_BAR_LARGE_TITLE_VERTICAL_PADDING)
-                        .graphicsLayer { alpha = largeTitleAlpha },
+                        // The large title keeps full opacity: pull-down overscroll grows it from
+                        // its top edge while the collapse offset below carries it out of the bar.
+                        .graphicsLayer {
+                            scaleX = largeTitleScale
+                            scaleY = largeTitleScale
+                            transformOrigin = TransformOrigin(0f, 0f)
+                        },
                 ) {
                     Text(
                         modifier = Modifier.offset { IntOffset(0, heightOffset) },
@@ -884,11 +956,13 @@ private fun TopAppBarLayout(
             ).toFloat().roundToInt()
 
             layout(constraints.maxWidth, layoutHeight) {
-                // Collapsed title bar row
-                collapsedRowPlaceable.placeRelative(0, 0)
-
-                // Large title
+                // Large title first, so it slides beneath the collapsed row's chrome (back button,
+                // centered title, actions) while moving out, the way the hero title passes under
+                // the flat title bar.
                 largeTitlePlaceable.placeRelative(0, collapsedRowPlaceable.height)
+
+                // Collapsed title bar row on top
+                collapsedRowPlaceable.placeRelative(0, 0)
             }
         }
     }

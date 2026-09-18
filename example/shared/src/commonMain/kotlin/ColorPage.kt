@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.CardDefaults
 import site.unclefish.yubeix.basic.Scaffold
@@ -63,6 +65,8 @@ fun ColorPage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = YubeixScrollBehavior()
+    // Marks the scrolling content so the top bar can blur it via haze.
+    val hazeState = rememberHazeState()
 
     val lightColors = remember { lightColorScheme() }
     val darkColors = remember { darkColorScheme() }
@@ -76,6 +80,7 @@ fun ColorPage(
                 showTopAppBar = appState.showTopAppBar,
                 isWideScreen = isWideScreen,
                 scrollBehavior = topAppBarScrollBehavior,
+                hazeState = hazeState,
             )
         },
     ) { innerPadding ->
@@ -88,7 +93,7 @@ fun ColorPage(
                     appState.enableScrollEndHaptic,
                     appState.showTopAppBar,
                     topAppBarScrollBehavior,
-                ),
+                ).hazeSource(state = hazeState),
                 contentPadding = contentPadding,
             ) {
                 item(key = "current") {

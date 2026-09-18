@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
 import site.unclefish.yubeix.basic.ScrollBehavior
 import site.unclefish.yubeix.basic.TopAppBar
 
@@ -59,16 +60,20 @@ fun AdaptiveTopAppBar(
     scrollBehavior: ScrollBehavior,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
+    hazeState: HazeState? = null,
 ) {
     if (showTopAppBar) {
         // Both layouts use the yubeix collapsing large-title bar; the wide layout just drops
         // the default window-insets padding because the split pane already pads the top.
+        // When [hazeState] is set the bar blurs the content marked with it instead of drawing
+        // a flat translucent fill.
         TopAppBar(
             title = title,
             scrollBehavior = scrollBehavior,
             defaultWindowInsetsPadding = !isWideScreen,
             navigationIcon = navigationIcon,
             actions = actions,
+            hazeState = hazeState,
         )
     }
 }

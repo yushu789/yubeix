@@ -18,6 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import appnavigation.Route
+import component.SectionCaption
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.ScrollBehavior
@@ -55,6 +59,8 @@ fun SettingsPage(
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
     val topAppBarScrollBehavior = YubeixScrollBehavior()
+    // Marks the scrolling content so the top bar can blur it via haze.
+    val hazeState = rememberHazeState()
 
     Scaffold(
         topBar = {
@@ -63,6 +69,7 @@ fun SettingsPage(
                 showTopAppBar = appState.showTopAppBar,
                 isWideScreen = isWideScreen,
                 scrollBehavior = topAppBarScrollBehavior,
+                hazeState = hazeState,
             )
         },
     ) { innerPadding ->
@@ -72,6 +79,7 @@ fun SettingsPage(
                 bottom = padding.calculateBottomPadding(),
             ),
             topAppBarScrollBehavior = topAppBarScrollBehavior,
+            hazeState = hazeState,
         )
     }
 }
@@ -80,6 +88,7 @@ fun SettingsPage(
 private fun SettingsContent(
     padding: PaddingValues,
     topAppBarScrollBehavior: ScrollBehavior,
+    hazeState: HazeState,
 ) {
     val appState = LocalAppState.current
     val isWideScreen = LocalIsWideScreen.current
@@ -95,7 +104,7 @@ private fun SettingsContent(
                 appState.enableScrollEndHaptic,
                 appState.showTopAppBar,
                 topAppBarScrollBehavior,
-            ),
+            ).hazeSource(state = hazeState),
             contentPadding = contentPadding,
         ) {
             item(key = "settingsUi") {
@@ -245,29 +254,42 @@ private fun SettingsContent(
                 ) {
                     SuperSwitch(
                         title = "Enable Corner Clip",
-                        summary = "Clip the top scene with rounded corners during transitions",
                         checked = appState.enableCornerClip,
                         onCheckedChange = { updateAppState { state -> state.copy(enableCornerClip = it) } },
                     )
                     SuperSwitch(
                         title = "Enable Dim",
-                        summary = "Dim the scene behind during transitions",
                         checked = appState.enableDim,
                         onCheckedChange = { updateAppState { state -> state.copy(enableDim = it) } },
                     )
                     SuperSwitch(
                         title = "Block Input During Transition",
-                        summary = "Block touch input on the non-target scene",
                         checked = appState.blockInputDuringTransition,
                         onCheckedChange = { updateAppState { state -> state.copy(blockInputDuringTransition = it) } },
                     )
                     SuperSwitch(
                         title = "Pop Follows Swipe Edge",
-                        summary = "Pop animation direction follows the finger swipe edge",
                         checked = appState.popDirectionFollowsSwipeEdge,
                         onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
                     )
                 }
+                // Row descriptions moved out of the rows, one caption per row in row order.
+                SectionCaption(
+                    text = "Clip the top scene with rounded corners during transitions",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+                SectionCaption(
+                    text = "Dim the scene behind during transitions",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+                SectionCaption(
+                    text = "Block touch input on the non-target scene",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+                SectionCaption(
+                    text = "Pop animation direction follows the finger swipe edge",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
             }
             item(key = "settingsNavigation") {
                 Card(
@@ -275,15 +297,22 @@ private fun SettingsContent(
                 ) {
                     SuperArrow(
                         title = "Navigate Test",
-                        summary = "Navigate to a Navigate Test Page",
                         onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                     )
                     SuperArrow(
                         title = "Multi-Scaffold Test",
-                        summary = "Test popup positioning with side-by-side Scaffolds",
                         onClick = { navigator.push(Route.MultiScaffoldTest) },
                     )
                 }
+                // Row descriptions moved out of the rows, one caption per row in row order.
+                SectionCaption(
+                    text = "Navigate to a Navigate Test Page",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+                SectionCaption(
+                    text = "Test popup positioning with side-by-side Scaffolds",
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
             }
             item(key = "settingsAbout") {
                 Card(
@@ -291,10 +320,11 @@ private fun SettingsContent(
                 ) {
                     SuperArrow(
                         title = "About",
-                        summary = "About this example App",
                         onClick = { navigator.push(Route.About) },
                     )
                 }
+                // Row description moved out of the row; the trailing spacer keeps the list padding.
+                SectionCaption(text = "About this example App")
             }
             item { Spacer(modifier = Modifier.height(12.dp)) }
         }
