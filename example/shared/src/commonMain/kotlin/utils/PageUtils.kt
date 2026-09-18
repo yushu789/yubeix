@@ -1,56 +1,13 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package utils
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import site.unclefish.yubeix.basic.ScrollBehavior
 import site.unclefish.yubeix.basic.TopAppBar
-
-fun Modifier.pageScrollModifiers(
-    enableScrollEndHaptic: Boolean,
-    showTopAppBar: Boolean,
-    topAppBarScrollBehavior: ScrollBehavior,
-): Modifier = this
-    .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
-    .fillMaxHeight()
-
-@Composable
-fun pageContentPadding(
-    innerPadding: PaddingValues,
-    outerPadding: PaddingValues,
-    isWideScreen: Boolean,
-    extraTop: Dp = 0.dp,
-    extraStart: Dp = 16.dp,
-    extraEnd: Dp = 16.dp,
-): PaddingValues {
-    val topPadding = innerPadding.calculateTopPadding() + extraTop
-    val bottomPadding = if (isWideScreen) {
-        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + outerPadding.calculateBottomPadding()
-    } else {
-        outerPadding.calculateBottomPadding()
-    }
-    return remember(topPadding, bottomPadding, extraStart, extraEnd) {
-        PaddingValues(
-            top = topPadding,
-            start = extraStart,
-            end = extraEnd,
-            bottom = bottomPadding,
-        )
-    }
-}
 
 @Composable
 fun AdaptiveTopAppBar(

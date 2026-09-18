@@ -62,6 +62,8 @@ fun LicensePage(
         }
     }
 
+    val uriHandler = LocalUriHandler.current
+
     ScreenScaffold(
         title = "Third Party Licenses",
         onBack = { navigator.pop() },
@@ -77,7 +79,6 @@ fun LicensePage(
             )
         },
     ) {
-        val uriHandler = LocalUriHandler.current
         libraries?.let { libs ->
             items(libs, key = { it.uniqueId }) { library ->
                 Card(
