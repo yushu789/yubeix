@@ -24,7 +24,6 @@ fun LazyListScope.basicComponentSection() {
         ) {
             BasicComponent(
                 title = "Title",
-                summary = "Summary",
                 startAction = {
                     Text(
                         text = "Start",
@@ -47,7 +46,6 @@ fun LazyListScope.basicComponentSection() {
             )
             BasicComponent(
                 title = "Title",
-                summary = "Summary",
                 startAction = {
                     Text(
                         text = "Start",
@@ -70,5 +68,6 @@ fun LazyListScope.basicComponentSection() {
                 enabled = false,
             )
         }
+        SectionCaption("Title rows with start and end actions; the second row is disabled")
     }
 }

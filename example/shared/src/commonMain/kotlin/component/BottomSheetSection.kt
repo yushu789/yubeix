@@ -40,7 +40,6 @@ import site.unclefish.yubeix.icon.extended.Close
 import site.unclefish.yubeix.icon.extended.Ok
 import site.unclefish.yubeix.theme.LocalDismissState
 import site.unclefish.yubeix.theme.YubeixTheme
-import site.unclefish.yubeix.utils.overScrollVertical
 import site.unclefish.yubeix.utils.scrollEndHaptic
 
 private val BottomSheetDropdownOptions = listOf("Option 1", "Option 2")
@@ -61,7 +60,6 @@ fun LazyListScope.bottomSheetSection() {
         ) {
             SuperArrow(
                 title = "SuperBottomSheet",
-                summary = "Click to show a SuperBottomSheet",
                 onClick = {
                     showSuperBottomSheet = true
                     superBottomSheetHoldDown = true
@@ -70,7 +68,6 @@ fun LazyListScope.bottomSheetSection() {
             )
             SuperArrow(
                 title = "WindowBottomSheet",
-                summary = "Click to show a WindowBottomSheet",
                 onClick = {
                     showWindowBottomSheet = true
                     windowBottomSheetHoldDown = true
@@ -78,6 +75,7 @@ fun LazyListScope.bottomSheetSection() {
                 holdDownState = windowBottomSheetHoldDown,
             )
         }
+        SectionCaption("Tap a row to present its bottom sheet")
 
         SuperBottomSheetDemo(
             show = showSuperBottomSheet,
@@ -146,8 +144,7 @@ private fun SuperBottomSheetDemo(
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
                 .scrollEndHaptic()
-                .overScrollVertical(),
-        ) {
+                        ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
                 Card(
@@ -158,17 +155,16 @@ private fun SuperBottomSheetDemo(
                 ) {
                     SuperSwitch(
                         title = "Allow Dismiss",
-                        summary = "Drag or Back to dismiss",
                         checked = allowDismiss,
                         onCheckedChange = { allowDismiss = it },
                     )
                     SuperSwitch(
                         title = "Enable NestedScroll",
-                        summary = "Scroll content vs Drag sheet",
                         checked = enableNestedScroll,
                         onCheckedChange = { enableNestedScroll = it },
                     )
                 }
+                SectionCaption("Drag or back dismisses; content scrolls against the drag")
             }
             item {
                 var sliderValue by remember { mutableFloatStateOf(0.5f) }
@@ -261,8 +257,7 @@ private fun WindowBottomSheetDemo(
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
                 .scrollEndHaptic()
-                .overScrollVertical(),
-        ) {
+                        ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
                 Card(
@@ -273,17 +268,16 @@ private fun WindowBottomSheetDemo(
                 ) {
                     SuperSwitch(
                         title = "Allow Dismiss",
-                        summary = "Drag or Back to dismiss",
                         checked = allowDismiss,
                         onCheckedChange = { allowDismiss = it },
                     )
                     SuperSwitch(
                         title = "Enable NestedScroll",
-                        summary = "Scroll content vs Drag sheet",
                         checked = enableNestedScroll,
                         onCheckedChange = { enableNestedScroll = it },
                     )
                 }
+                SectionCaption("Drag or back dismisses; content scrolls against the drag")
             }
             item {
                 var sliderValue by remember { mutableFloatStateOf(0.5f) }

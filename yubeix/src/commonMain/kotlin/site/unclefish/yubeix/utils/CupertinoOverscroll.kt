@@ -117,7 +117,7 @@ private data class CupertinoOverscrollAvailableDelta(
 /**
  * Android adaptation of Compose Multiplatform's Cupertino overscroll effect.
  */
-private class CupertinoOverscrollEffect(
+internal class CupertinoOverscrollEffect(
     private val density: Float,
     layoutDirection: LayoutDirection,
     private val applyClip: Boolean,

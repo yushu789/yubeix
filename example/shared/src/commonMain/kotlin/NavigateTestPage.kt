@@ -118,7 +118,6 @@ fun NavTestPage(
                 item(key = "nav_layout") {
                     Card(
                         modifier = Modifier
-                            .padding(horizontal = 12.dp)
                             .padding(bottom = 12.dp),
                     ) {
                         SuperArrow(

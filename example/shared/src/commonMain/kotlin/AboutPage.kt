@@ -149,7 +149,7 @@ private fun AboutContent(
                     )
                 }
                 Card(
-                    modifier = Modifier.padding(horizontal = 12.dp),
+                    modifier = Modifier,
                 ) {
                     SuperArrow(
                         title = "View Source",
@@ -176,7 +176,6 @@ private fun AboutContent(
                 }
                 Card(
                     modifier = Modifier
-                        .padding(horizontal = 12.dp)
                         .padding(top = 12.dp),
                 ) {
                     SuperArrow(

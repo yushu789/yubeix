@@ -94,7 +94,7 @@ fun ColorPage(
                 item(key = "current") {
                     SmallTitle("Current Theme Colors")
                     Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        modifier = Modifier.padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = YubeixTheme.colorScheme.surfaceContainer),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(horizontal = 16.dp),
@@ -105,7 +105,7 @@ fun ColorPage(
                 item(key = "light") {
                     SmallTitle("Light Theme Colors")
                     Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        modifier = Modifier.padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = lightColors.surfaceContainer),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(horizontal = 16.dp),
@@ -116,7 +116,7 @@ fun ColorPage(
                 item(key = "dynamic_light") {
                     SmallTitle("Dynamic Light Colors")
                     Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        modifier = Modifier.padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = dynLight.surfaceContainer),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(horizontal = 16.dp),
@@ -127,7 +127,7 @@ fun ColorPage(
                 item(key = "dark") {
                     SmallTitle("Dark Theme Colors")
                     Card(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        modifier = Modifier.padding(bottom = 12.dp),
                         colors = CardDefaults.defaultColors(color = darkColors.surfaceContainer),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(horizontal = 16.dp),
@@ -138,7 +138,7 @@ fun ColorPage(
                 item(key = "dynamic_dark") {
                     SmallTitle("Dynamic Dark Colors")
                     Card(
-                        modifier = Modifier.padding(horizontal = 12.dp),
+                        modifier = Modifier,
                         colors = CardDefaults.defaultColors(color = dynDark.surfaceContainer),
                         cornerRadius = 16.dp,
                         insideMargin = PaddingValues(horizontal = 16.dp),
@@ -272,7 +272,7 @@ private fun ColorBlock(displayName: String, surfaceColor: Color, textColor: Colo
                 text = displayName,
                 color = textColor,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(bottom = 12.dp),
             )
         }
     }

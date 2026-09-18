@@ -188,10 +188,8 @@ fun IconsPage(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
                                 .clip(IconListTopShape)
                                 .background(colorScheme.surfaceContainer)
-                                .padding(horizontal = 16.dp)
                                 .padding(top = 12.dp, bottom = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -234,10 +232,8 @@ fun IconsPage(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
                                 .clip(shape)
                                 .background(colorScheme.surfaceContainer)
-                                .padding(horizontal = 16.dp)
                                 .padding(vertical = 6.dp)
                                 .padding(bottom = bottomPadding),
                             verticalAlignment = Alignment.CenterVertically,

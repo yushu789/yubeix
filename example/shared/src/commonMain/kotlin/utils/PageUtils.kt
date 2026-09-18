@@ -17,14 +17,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.ScrollBehavior
 import site.unclefish.yubeix.basic.TopAppBar
-import site.unclefish.yubeix.utils.scrollEndHaptic
 
 fun Modifier.pageScrollModifiers(
     enableScrollEndHaptic: Boolean,
     showTopAppBar: Boolean,
     topAppBarScrollBehavior: ScrollBehavior,
 ): Modifier = this
-    .then(if (enableScrollEndHaptic) Modifier.scrollEndHaptic() else Modifier)
     .then(if (showTopAppBar) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier)
     .fillMaxHeight()
 

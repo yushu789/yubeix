@@ -67,7 +67,6 @@ fun LazyListScope.switchSection() {
             }
             SuperSwitch(
                 title = "Switch",
-                summary = "Click to expand a Switch",
                 checked = superSwitchAnimState.value,
                 onCheckedChange = {
                     superSwitchAnimState.value = it
@@ -101,5 +100,6 @@ fun LazyListScope.switchSection() {
                 onCheckedChange = {},
             )
         }
+        SectionCaption("Tap the row to expand the plain Switch demo")
     }
 }

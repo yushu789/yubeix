@@ -96,7 +96,6 @@ fun LicensePage(
                     items(libs, key = { it.uniqueId }) { library ->
                         Card(
                             modifier = Modifier
-                                .padding(horizontal = 12.dp)
                                 .padding(top = 12.dp),
                         ) {
                             SuperArrow(

@@ -99,16 +99,14 @@ fun LazyListScope.spinnerSection() {
                 onSelectedIndexChange = { newOption -> windowSpinnerOptionSelected.value = newOption },
             )
             SuperSpinner(
-                title = "SuperSpinner",
-                summary = "As SuperDialog",
+                title = "SuperSpinner (Dialog)",
                 dialogButtonString = "Cancel",
                 items = spinnerOptions,
                 selectedIndex = superSpinnerOptionSelectedDialog.value,
                 onSelectedIndexChange = { newOption -> superSpinnerOptionSelectedDialog.value = newOption },
             )
             WindowSpinner(
-                title = "WindowSpinner",
-                summary = "As WindowDialog",
+                title = "WindowSpinner (Window)",
                 dialogButtonString = "Cancel",
                 items = spinnerOptions,
                 selectedIndex = windowSpinnerOptionSelectedDialog.value,

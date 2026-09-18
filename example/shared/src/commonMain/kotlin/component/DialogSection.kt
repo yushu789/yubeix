@@ -20,6 +20,8 @@ import site.unclefish.yubeix.basic.ButtonDefaults
 import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.TextButton
+import site.unclefish.yubeix.extra.CupertinoAlertAction
+import site.unclefish.yubeix.extra.CupertinoAlertActionStyle
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperDialog
 import site.unclefish.yubeix.extra.WindowDialog
@@ -39,7 +41,6 @@ fun LazyListScope.dialogSection() {
         ) {
             SuperArrow(
                 title = "SuperDialog",
-                summary = "Click to show a SuperDialog",
                 onClick = {
                     showSuperDialog = true
                     superDialogHoldDown = true
@@ -48,7 +49,6 @@ fun LazyListScope.dialogSection() {
             )
             SuperArrow(
                 title = "WindowDialog",
-                summary = "Click to show a WindowDialog",
                 onClick = {
                     showWindowDialog = true
                     windowDialogHoldDown = true
@@ -56,6 +56,7 @@ fun LazyListScope.dialogSection() {
                 holdDownState = windowDialogHoldDown,
             )
         }
+        SectionCaption("Tap a row to present its dialog")
 
         SuperDialogDemo(
             show = showSuperDialog,
@@ -79,27 +80,20 @@ private fun SuperDialogDemo(
     SuperDialog(
         show = show,
         title = "SuperDialog",
-        summary = "A dialog component inside YubeixPopupHost.",
+        message = "A dialog component inside YubeixPopupHost.",
+        actions = listOf(
+            CupertinoAlertAction(
+                label = "Cancel",
+                role = CupertinoAlertActionStyle.Cancel,
+                onClick = onDismissRequest,
+            ),
+            CupertinoAlertAction(
+                label = "Confirm",
+                onClick = onDismissRequest,
+            ),
+        ),
         onDismissRequest = onDismissRequest,
         onDismissFinished = onDismissFinished,
-        content = {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                TextButton(
-                    text = "Cancel",
-                    onClick = onDismissRequest,
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(20.dp))
-                TextButton(
-                    text = "Confirm",
-                    onClick = onDismissRequest,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.textButtonColorsPrimary(),
-                )
-            }
-        },
     )
 }
 

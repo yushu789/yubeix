@@ -100,7 +100,7 @@ private fun SettingsContent(
         ) {
             item(key = "settingsUi") {
                 Card(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(bottom = 12.dp),
                 ) {
                     SuperSwitch(
                         title = "Show FPS Monitor",
@@ -241,7 +241,7 @@ private fun SettingsContent(
             }
             item(key = "settingsTransition") {
                 Card(
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                    modifier = Modifier.padding(bottom = 12.dp),
                 ) {
                     SuperSwitch(
                         title = "Enable Corner Clip",
@@ -271,7 +271,7 @@ private fun SettingsContent(
             }
             item(key = "settingsNavigation") {
                 Card(
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                    modifier = Modifier.padding(bottom = 12.dp),
                 ) {
                     SuperArrow(
                         title = "Navigate Test",
@@ -287,7 +287,7 @@ private fun SettingsContent(
             }
             item(key = "settingsAbout") {
                 Card(
-                    modifier = Modifier.padding(horizontal = 12.dp),
+                    modifier = Modifier,
                 ) {
                     SuperArrow(
                         title = "About",

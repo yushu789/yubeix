@@ -11,6 +11,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import site.unclefish.yubeix.utils.CupertinoOverscrollState
 import site.unclefish.yubeix.utils.LocalCupertinoOverscrollState
+import site.unclefish.yubeix.utils.rememberCupertinoOverscrollState
 import site.unclefish.yubeix.utils.YubeixIndication
 import site.unclefish.yubeix.utils.rememberCupertinoOverscrollFactory
 
@@ -39,10 +40,12 @@ fun YubeixTheme(
     val yubeixColors = remember { rawColors.copy() }.apply { updateColorsFrom(rawColors) }
     val yubeixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
     val yubeixIndication = remember(yubeixColors.onBackground) { YubeixIndication(color = yubeixColors.onBackground) }
-    val overscrollFactory = rememberCupertinoOverscrollFactory(
-        state = overscrollState ?: LocalCupertinoOverscrollState.current,
-    )
+    val resolvedOverscrollState = overscrollState
+        ?: LocalCupertinoOverscrollState.current
+        ?: rememberCupertinoOverscrollState()
+    val overscrollFactory = rememberCupertinoOverscrollFactory(state = resolvedOverscrollState)
     CompositionLocalProvider(
+        LocalCupertinoOverscrollState provides resolvedOverscrollState,
         LocalColors provides yubeixColors,
         LocalTextStyles provides yubeixTextStyles,
         LocalIndication provides yubeixIndication,
@@ -78,10 +81,12 @@ fun YubeixTheme(
     val yubeixColors = remember { colors.copy() }.apply { updateColorsFrom(colors) }
     val yubeixTextStyles = remember { textStyles.copy() }.apply { updateTextStylesFrom(textStyles) }
     val yubeixIndication = remember(yubeixColors.onBackground) { YubeixIndication(color = yubeixColors.onBackground) }
-    val overscrollFactory = rememberCupertinoOverscrollFactory(
-        state = overscrollState ?: LocalCupertinoOverscrollState.current,
-    )
+    val resolvedOverscrollState = overscrollState
+        ?: LocalCupertinoOverscrollState.current
+        ?: rememberCupertinoOverscrollState()
+    val overscrollFactory = rememberCupertinoOverscrollFactory(state = resolvedOverscrollState)
     CompositionLocalProvider(
+        LocalCupertinoOverscrollState provides resolvedOverscrollState,
         LocalColors provides yubeixColors,
         LocalTextStyles provides yubeixTextStyles,
         LocalIndication provides yubeixIndication,

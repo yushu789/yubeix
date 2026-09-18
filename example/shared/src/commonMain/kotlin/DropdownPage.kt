@@ -120,7 +120,6 @@ fun DropdownPage(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
                                 .clip(shape)
                                 .background(colorScheme.surfaceContainer),
                         ) {

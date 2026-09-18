@@ -79,7 +79,6 @@ import site.unclefish.yubeix.icon.YubeixIcons
 import site.unclefish.yubeix.icon.basic.Search
 import site.unclefish.yubeix.icon.basic.SearchCleanup
 import site.unclefish.yubeix.theme.YubeixTheme
-import site.unclefish.yubeix.utils.overScrollVertical
 import utils.SearchStatus
 
 // Search Box Composable
@@ -288,8 +287,7 @@ fun SearchStatus.SearchPager(
                 SearchStatus.ResultStatus.SHOW -> LazyColumn(
                     Modifier
                         .fillMaxSize()
-                        .overScrollVertical(),
-                ) {
+                                        ) {
                     result()
                 }
             }
