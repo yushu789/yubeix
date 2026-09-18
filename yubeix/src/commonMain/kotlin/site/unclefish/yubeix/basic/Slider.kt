@@ -4,10 +4,8 @@
 package site.unclefish.yubeix.basic
 
 import androidx.annotation.IntRange
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -42,12 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -70,8 +66,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.kyant.shapes.RoundedCornerStyle
 import com.kyant.shapes.RoundedRectangle
+import site.unclefish.yubeix.anim.yubeixSpring
 import site.unclefish.yubeix.theme.YubeixTheme
-import site.unclefish.yubeix.theme.yubeixShape
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -411,7 +407,8 @@ fun Slider(
 }
 
 /**
- * A vertical [Slider] component with Yubeix style.
+ * A vertical [Slider] component with Yubeix style: a thin 4dp track with a 20dp floating thumb
+ * (8dp elevation shadow), sharing the color tokens of the horizontal [Slider].
  *
  * @param value The current value of the [Slider]. If outside of [valueRange] provided, value will be coerced to this range.
  * @param onValueChange The callback to be called when the value changes.
@@ -424,11 +421,13 @@ fun Slider(
  *   When true, slider increases from top to bottom.
  * @param width The width of the vertical [Slider].
  * @param colors The [SliderColors] of the [Slider].
- * @param effect Whether to show the effect of the [Slider].
+ * @param effect Unused; kept for backward compatibility.
  * @param hapticEffect The haptic effect of the [Slider].
- * @param showKeyPoints Whether to show the key points (step indicators) on the slider. Only works when [keyPoints] is not null.
+ * @param showKeyPoints Whether to show the key points (step indicators) on the slider. When false
+ *   and [keyPoints] is null, no markers are drawn.
  * @param keyPoints Custom key point values to display on the slider. If null, uses step positions from [steps] parameter.
  *   Values should be within [valueRange].
+ * @param magnetThreshold The magnetic snap threshold as a fraction (0.0 to 1.0). Only applies when [keyPoints] is set.
  */
 @Composable
 fun VerticalSlider(
@@ -451,6 +450,7 @@ fun VerticalSlider(
     require(steps >= 0) { "steps should be >= 0" }
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
 
+    val density = LocalDensity.current
     val hapticFeedback = LocalHapticFeedback.current
     val onValueChangeState by rememberUpdatedState(onValueChange)
     val onValueChangeFinishedState by rememberUpdatedState(onValueChangeFinished)
@@ -459,18 +459,17 @@ fun VerticalSlider(
     var isHoveringThumb by remember { mutableStateOf(false) }
     val hapticState = remember { SliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = yubeixShape(width)
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val coercedValue = value.coerceIn(valueRange.start, valueRange.endInclusive)
 
-    val progressAnimationSpec = remember(isDragging) {
+    val progressAnimationSpec: AnimationSpec<Float> = remember(isDragging) {
         if (isDragging) {
-            spring(dampingRatio = 0.9f, stiffness = 1755f)
+            yubeixSpring(damping = 0.9f, response = 0.15f)
         } else {
-            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+            yubeixSpring(damping = 0.96f, response = 0.35f)
         }
     }
 
@@ -502,8 +501,9 @@ fun VerticalSlider(
     val currentLayoutWidth by rememberUpdatedState(layoutWidth)
     val currentLayoutHeight by rememberUpdatedState(layoutHeight)
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
+            .width(width)
             .then(
                 if (enabled) {
                     Modifier
@@ -591,30 +591,95 @@ fun VerticalSlider(
                     true
                 }
             },
-        contentAlignment = Alignment.BottomCenter,
+        contentAlignment = Alignment.Center,
     ) {
-        SliderTrack(
-            shape = shape,
-            backgroundColor = colors.backgroundColor(enabled),
-            foregroundColor = colors.foregroundColor(enabled),
-            thumbColor = colors.thumbColor(enabled),
-            keyPointColor = colors.keyPointColor(),
-            keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueProvider = { animatedValueState.value },
-            valueRange = valueRange,
-            isDragging = isDragging,
-            isVertical = true,
-            showKeyPoints = showKeyPoints,
-            stepFractions = keyPointFractions,
-            thumbScaleProvider = { thumbScaleState.value },
-            reverseDirection = reverseDirection,
-            modifier = Modifier.width(width).fillMaxHeight(),
+        val trackShape = remember {
+            RoundedRectangle(CupertinoSliderTrackHeight / 2, style = RoundedCornerStyle.Continuous)
+        }
+        val thumbShape = remember {
+            RoundedRectangle(CupertinoSliderThumbSize / 2, style = RoundedCornerStyle.Continuous)
+        }
+        val detentMarkerShape = remember {
+            RoundedRectangle(
+                CupertinoSliderDetentMarkerWidth / 2,
+                style = RoundedCornerStyle.Continuous,
+            )
+        }
+        val thumbSizePx = with(density) { CupertinoSliderThumbSize.toPx() }
+        val containerHeightPx =
+            if (constraints.maxHeight != Constraints.Infinity) constraints.maxHeight.toFloat() else 0f
+        val usableHeightPx = (containerHeightPx - thumbSizePx).coerceAtLeast(1f)
+        val animatedFraction =
+            (animatedValueState.value - valueRange.start) /
+                (valueRange.endInclusive - valueRange.start)
+
+        // Thumb and markers are placed by their distance from the top edge as a fraction of the
+        // thumb travel; the value grows bottom-up unless reverseDirection flips it top-down.
+        fun distanceFromTopFraction(fraction: Float): Float = if (reverseDirection) fraction else 1f - fraction
+        val thumbCenterY = thumbSizePx / 2f + distanceFromTopFraction(animatedFraction) * usableHeightPx
+
+        // Thin track, inset vertically by half a thumb so the fill spans thumb-center to
+        // thumb-center, matching the horizontal slider.
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(vertical = CupertinoSliderThumbSize / 2)
+                .width(CupertinoSliderTrackHeight)
+                .clip(trackShape)
+                .background(colors.backgroundColor(enabled)),
+            contentAlignment = if (reverseDirection) Alignment.TopCenter else Alignment.BottomCenter,
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(animatedFraction)
+                    .background(colors.foregroundColor(enabled)),
+            )
+        }
+
+        if (showKeyPoints) {
+            keyPointFractions.forEach { stepFraction ->
+                val stepCenterY = thumbSizePx / 2f + distanceFromTopFraction(stepFraction) * usableHeightPx
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(0, (stepCenterY - containerHeightPx / 2f).roundToInt()) }
+                        .size(
+                            width = CupertinoSliderDetentMarkerWidth,
+                            height = CupertinoSliderDetentMarkerHeight,
+                        )
+                        .background(
+                            color = if (stepFraction <= animatedFraction) {
+                                colors.keyPointForegroundColor()
+                            } else {
+                                colors.keyPointColor()
+                            },
+                            shape = detentMarkerShape,
+                        ),
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier
+                .offset { IntOffset(0, (thumbCenterY - containerHeightPx / 2f).roundToInt()) }
+                .size(CupertinoSliderThumbSize)
+                .graphicsLayer {
+                    scaleX = thumbScaleState.value
+                    scaleY = thumbScaleState.value
+                }
+                .shadow(
+                    elevation = if (enabled) CupertinoSliderThumbElevation else 0.dp,
+                    shape = thumbShape,
+                    clip = false,
+                )
+                .background(colors.thumbColor(enabled), thumbShape),
         )
     }
 }
 
 /**
- * A [RangeSlider] component with Yubeix style.
+ * A [RangeSlider] component with Yubeix style: a thin 4dp track with two 20dp floating thumbs
+ * (8dp elevation shadow), sharing the color tokens of the horizontal [Slider].
  *
  * Range Sliders expand upon [Slider] using the same concepts but allow the user to select 2 values.
  * The two values are still bounded by the value range but they also cannot cross each other.
@@ -629,7 +694,8 @@ fun VerticalSlider(
  * @param height The height of the [RangeSlider].
  * @param colors The [SliderColors] of the [RangeSlider].
  * @param hapticEffect The haptic effect of the [RangeSlider].
- * @param showKeyPoints Whether to show the key points (step indicators) on the slider. Only works when [keyPoints] is not null.
+ * @param showKeyPoints Whether to show the key points (step indicators) on the slider. When false
+ *   and [keyPoints] is null, no markers are drawn.
  * @param keyPoints Custom key point values to display on the slider. If null, uses step positions from [steps] parameter.
  *   Values should be within [valueRange].
  * @param magnetThreshold The magnetic snap threshold as a fraction (0.0 to 1.0). When the slider value is within this
@@ -654,6 +720,7 @@ fun RangeSlider(
     require(steps >= 0) { "steps should be >= 0" }
     require(valueRange.start < valueRange.endInclusive) { "valueRange start should be less than end" }
 
+    val density = LocalDensity.current
     val hapticFeedback = LocalHapticFeedback.current
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
@@ -668,7 +735,6 @@ fun RangeSlider(
     val isDragging by remember { derivedStateOf { isDraggingStart || isDraggingEnd } }
     val hapticState = remember { RangeSliderHapticState() }
     val interactionSource = remember { MutableInteractionSource() }
-    val shape = yubeixShape(height)
     var lastDraggedIsStart by remember { mutableStateOf(true) }
     var layoutWidth by remember { mutableIntStateOf(0) }
     var layoutHeight by remember { mutableIntStateOf(0) }
@@ -685,11 +751,11 @@ fun RangeSlider(
     val coercedStart = currentStartValue.coerceIn(valueRange.start, valueRange.endInclusive)
     val coercedEnd = currentEndValue.coerceIn(valueRange.start, valueRange.endInclusive)
 
-    val progressAnimationSpec = remember(isDragging) {
+    val progressAnimationSpec: AnimationSpec<Float> = remember(isDragging) {
         if (isDragging) {
-            spring(dampingRatio = 0.9f, stiffness = 1755f)
+            yubeixSpring(damping = 0.9f, response = 0.15f)
         } else {
-            spring<Float>(dampingRatio = 0.96f, stiffness = 322f)
+            yubeixSpring(damping = 0.96f, response = 0.35f)
         }
     }
 
@@ -726,7 +792,7 @@ fun RangeSlider(
     val currentLayoutWidth by rememberUpdatedState(layoutWidth)
     val currentLayoutHeight by rememberUpdatedState(layoutHeight)
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .then(
                 if (enabled) {
@@ -934,229 +1000,116 @@ fun RangeSlider(
             )
             .semantics {
                 stateDescription = "$coercedStart-$coercedEnd"
-            },
+            }
+            .fillMaxWidth()
+            .height(height),
         contentAlignment = Alignment.CenterStart,
     ) {
-        RangeSliderTrack(
-            shape = shape,
-            backgroundColor = colors.backgroundColor(enabled),
-            foregroundColor = colors.foregroundColor(enabled),
-            thumbColor = colors.thumbColor(enabled),
-            keyPointColor = colors.keyPointColor(),
-            keyPointForegroundColor = colors.keyPointForegroundColor(),
-            valueStartProvider = { animatedStartValueState.value },
-            valueEndProvider = { animatedEndValueState.value },
-            startThumbScaleProvider = { startThumbScaleState.value },
-            endThumbScaleProvider = { endThumbScaleState.value },
-            valueRange = valueRange,
-            isDragging = isDragging,
-            showKeyPoints = showKeyPoints,
-            stepFractions = keyPointFractions,
-            isRtl = isRtl,
-            modifier = Modifier.fillMaxWidth().height(height),
-        )
-    }
-}
-
-/**
- * Internal slider track renderer
- */
-@Composable
-private fun SliderTrack(
-    shape: Shape,
-    backgroundColor: Color,
-    foregroundColor: Color,
-    thumbColor: Color,
-    keyPointColor: Color,
-    keyPointForegroundColor: Color,
-    valueProvider: () -> Float,
-    valueRange: ClosedFloatingPointRange<Float>,
-    isDragging: Boolean,
-    isVertical: Boolean,
-    showKeyPoints: Boolean,
-    stepFractions: FloatArray,
-    thumbScaleProvider: () -> Float,
-    reverseDirection: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val backgroundAlpha by animateFloatAsState(
-        targetValue = if (isDragging) 0.044f else 0f,
-        animationSpec = tween(150),
-        label = "SliderTrackAlpha",
-    )
-
-    Canvas(
-        modifier = modifier
-            .clip(shape)
-            .background(backgroundColor)
-            .drawBehind {
-                drawRect(Color.Black, alpha = backgroundAlpha)
-            },
-    ) {
-        val barHeight = size.height
-        val barWidth = size.width
-        val value = valueProvider()
-        val thumbScale = thumbScaleProvider()
-        val fraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-
-        if (isVertical) {
-            val thumbRadius = barWidth / 2f
-            val availableHeight = (barHeight - 2f * thumbRadius).coerceAtLeast(0f)
-            val effectiveFraction = if (reverseDirection) fraction else (1f - fraction)
-            val centerY = thumbRadius + effectiveFraction * availableHeight
-
-            drawLine(
-                color = foregroundColor,
-                start = Offset(barWidth / 2f, barHeight),
-                end = Offset(barWidth / 2f, centerY),
-                strokeWidth = barWidth,
-                cap = StrokeCap.Round,
-            )
-
-            if (showKeyPoints && stepFractions.isNotEmpty()) {
-                val keyPointRadius = barWidth / 7.5f
-                for (i in stepFractions.indices) {
-                    val stepFraction = stepFractions[i]
-                    val effectiveStep = if (reverseDirection) stepFraction else (1f - stepFraction)
-                    val y = thumbRadius + effectiveStep * availableHeight
-                    val kpColor = if (y >= centerY) keyPointForegroundColor else keyPointColor
-                    drawCircle(
-                        color = kpColor,
-                        radius = keyPointRadius,
-                        center = Offset(barWidth / 2f, y),
-                    )
-                }
-            }
-            drawCircle(
-                color = thumbColor,
-                radius = thumbRadius * 0.72f * thumbScale,
-                center = Offset(barWidth / 2f, centerY),
-            )
-        } else {
-            val thumbRadius = barHeight / 2f
-            val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
-            val effectiveFraction = if (reverseDirection) 1f - fraction else fraction
-            val centerX = thumbRadius + effectiveFraction * availableWidth
-            val startX = if (reverseDirection) barWidth else 0f
-
-            drawLine(
-                color = foregroundColor,
-                start = Offset(startX, barHeight / 2f),
-                end = Offset(centerX, barHeight / 2f),
-                strokeWidth = barHeight,
-                cap = StrokeCap.Round,
-            )
-
-            if (showKeyPoints && stepFractions.isNotEmpty()) {
-                val keyPointRadius = barHeight / 7.5f
-                for (i in stepFractions.indices) {
-                    val stepFraction = stepFractions[i]
-                    val effectiveStep = if (reverseDirection) 1f - stepFraction else stepFraction
-                    val x = thumbRadius + effectiveStep * availableWidth
-                    val isSelected = if (reverseDirection) x >= centerX else x <= centerX
-                    val kpColor = if (isSelected) keyPointForegroundColor else keyPointColor
-                    drawCircle(
-                        color = kpColor,
-                        radius = keyPointRadius,
-                        center = Offset(x, barHeight / 2f),
-                    )
-                }
-            }
-            drawCircle(
-                color = thumbColor,
-                radius = thumbRadius * 0.72f * thumbScale,
-                center = Offset(centerX, barHeight / 2f),
+        val trackShape = remember {
+            RoundedRectangle(CupertinoSliderTrackHeight / 2, style = RoundedCornerStyle.Continuous)
+        }
+        val thumbShape = remember {
+            RoundedRectangle(CupertinoSliderThumbSize / 2, style = RoundedCornerStyle.Continuous)
+        }
+        val detentMarkerShape = remember {
+            RoundedRectangle(
+                CupertinoSliderDetentMarkerWidth / 2,
+                style = RoundedCornerStyle.Continuous,
             )
         }
-    }
-}
+        val thumbSizePx = with(density) { CupertinoSliderThumbSize.toPx() }
+        val markerWidthPx = with(density) { CupertinoSliderDetentMarkerWidth.toPx() }
+        val containerWidthPx =
+            if (constraints.maxWidth != Constraints.Infinity) constraints.maxWidth.toFloat() else 0f
+        val usableWidthPx = (containerWidthPx - thumbSizePx).coerceAtLeast(1f)
+        val startFraction =
+            (animatedStartValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+        val endFraction =
+            (animatedEndValueState.value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+        // Visual fractions flip in RTL so the thumb travel stays left-to-right on screen.
+        val startVisualFraction = if (isRtl) 1f - startFraction else startFraction
+        val endVisualFraction = if (isRtl) 1f - endFraction else endFraction
+        val rangeStartVisualFraction = minOf(startVisualFraction, endVisualFraction)
+        val rangeWidthVisualFraction = abs(endVisualFraction - startVisualFraction)
 
-/**
- * Internal range slider track renderer
- */
-@Composable
-private fun RangeSliderTrack(
-    shape: Shape,
-    backgroundColor: Color,
-    foregroundColor: Color,
-    thumbColor: Color,
-    keyPointColor: Color,
-    keyPointForegroundColor: Color,
-    valueStartProvider: () -> Float,
-    valueEndProvider: () -> Float,
-    startThumbScaleProvider: () -> Float,
-    endThumbScaleProvider: () -> Float,
-    valueRange: ClosedFloatingPointRange<Float>,
-    isDragging: Boolean,
-    showKeyPoints: Boolean,
-    stepFractions: FloatArray,
-    isRtl: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val backgroundAlpha by animateFloatAsState(
-        targetValue = if (isDragging) 0.044f else 0f,
-        animationSpec = tween(150),
-        label = "RangeSliderTrackAlpha",
-    )
+        // Thin track, inset horizontally by half a thumb so the fill spans thumb-center to
+        // thumb-center, matching the horizontal slider.
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = CupertinoSliderThumbSize / 2)
+                .fillMaxWidth()
+                .height(CupertinoSliderTrackHeight)
+                .clip(trackShape)
+                .background(colors.backgroundColor(enabled)),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset((usableWidthPx * rangeStartVisualFraction).roundToInt(), 0) }
+                    .fillMaxWidth(rangeWidthVisualFraction)
+                    .fillMaxHeight()
+                    .background(colors.foregroundColor(enabled)),
+            )
+        }
 
-    Canvas(
-        modifier = modifier
-            .clip(shape)
-            .background(backgroundColor)
-            .drawBehind {
-                drawRect(Color.Black, alpha = backgroundAlpha)
-            },
-    ) {
-        val barHeight = size.height
-        val barWidth = size.width
-        val valueStart = valueStartProvider()
-        val valueEnd = valueEndProvider()
-        val startThumbScale = startThumbScaleProvider()
-        val endThumbScale = endThumbScaleProvider()
-        val startFraction = (valueStart - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-        val endFraction = (valueEnd - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-        val thumbRadius = barHeight / 2f
-        val availableWidth = (barWidth - 2f * thumbRadius).coerceAtLeast(0f)
-        val effectiveStartFraction = if (isRtl) 1f - startFraction else startFraction
-        val effectiveEndFraction = if (isRtl) 1f - endFraction else endFraction
-        val startX = thumbRadius + effectiveStartFraction * availableWidth
-        val endX = thumbRadius + effectiveEndFraction * availableWidth
-
-        val centerY = barHeight / 2f
-
-        drawLine(
-            color = foregroundColor,
-            start = Offset(startX, centerY),
-            end = Offset(endX, centerY),
-            strokeWidth = barHeight,
-            cap = StrokeCap.Round,
-        )
-
-        if (showKeyPoints && stepFractions.isNotEmpty()) {
-            val keyPointRadius = SliderDefaults.KeyPointRadius.toPx()
-            for (i in stepFractions.indices) {
-                val stepFraction = stepFractions[i]
-                val effectiveStep = if (isRtl) 1f - stepFraction else stepFraction
-                val x = thumbRadius + effectiveStep * availableWidth
-                val isSelected = if (isRtl) x in endX..startX else x in startX..endX
-                val kpColor = if (isSelected) keyPointForegroundColor else keyPointColor
-                drawCircle(
-                    color = kpColor,
-                    radius = keyPointRadius,
-                    center = Offset(x, barHeight / 2f),
+        if (showKeyPoints) {
+            keyPointFractions.forEach { stepFraction ->
+                val stepVisualFraction = if (isRtl) 1f - stepFraction else stepFraction
+                val stepCenterX = thumbSizePx / 2f + stepVisualFraction * usableWidthPx
+                val isInsideRange = stepFraction >= minOf(startFraction, endFraction) &&
+                    stepFraction <= maxOf(startFraction, endFraction)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset { IntOffset((stepCenterX - markerWidthPx / 2f).roundToInt(), 0) }
+                        .size(
+                            width = CupertinoSliderDetentMarkerWidth,
+                            height = CupertinoSliderDetentMarkerHeight,
+                        )
+                        .background(
+                            color = if (isInsideRange) {
+                                colors.keyPointForegroundColor()
+                            } else {
+                                colors.keyPointColor()
+                            },
+                            shape = detentMarkerShape,
+                        ),
                 )
             }
         }
 
-        drawCircle(
-            color = thumbColor,
-            radius = thumbRadius * 0.72f * startThumbScale,
-            center = Offset(startX, centerY),
+        Spacer(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset { IntOffset((usableWidthPx * startVisualFraction).roundToInt(), 0) }
+                .size(CupertinoSliderThumbSize)
+                .graphicsLayer {
+                    scaleX = startThumbScaleState.value
+                    scaleY = startThumbScaleState.value
+                }
+                .shadow(
+                    elevation = if (enabled) CupertinoSliderThumbElevation else 0.dp,
+                    shape = thumbShape,
+                    clip = false,
+                )
+                .background(colors.thumbColor(enabled), thumbShape),
         )
-        drawCircle(
-            color = thumbColor,
-            radius = thumbRadius * 0.72f * endThumbScale,
-            center = Offset(endX, centerY),
+        Spacer(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset { IntOffset((usableWidthPx * endVisualFraction).roundToInt(), 0) }
+                .size(CupertinoSliderThumbSize)
+                .graphicsLayer {
+                    scaleX = endThumbScaleState.value
+                    scaleY = endThumbScaleState.value
+                }
+                .shadow(
+                    elevation = if (enabled) CupertinoSliderThumbElevation else 0.dp,
+                    shape = thumbShape,
+                    clip = false,
+                )
+                .background(colors.thumbColor(enabled), thumbShape),
         )
     }
 }
@@ -1427,7 +1380,8 @@ private fun resolveValueFromFraction(
     }
 }
 
-private val ThumbScaleAnimationSpec = spring<Float>(dampingRatio = 0.6f, stiffness = 987f)
+// Thumb press/hover/drag scale spring; equivalent to the previous stiffness 987f, damping 0.6f.
+private val ThumbScaleAnimationSpec = yubeixSpring<Float>(damping = 0.6f, response = 0.2f)
 
 private fun horizontalVisualFraction(offsetX: Float, sizeWidth: Int, sizeHeight: Int): Float {
     val thumbRadius = sizeHeight / 2f
