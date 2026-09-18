@@ -105,6 +105,7 @@ import kotlin.math.roundToInt
  * @param reverseDirection Controls the direction of this slider. When false (default), the slider
  *   increases from left to right in LTR layouts (mirrored in RTL). When true, the direction flips.
  * @param height The height of the interactive [Slider] container; the thin track and thumb are centered inside it.
+ *   Defaults to [SliderDefaults.MinHeight] (32.dp), the Cupertino reference container height.
  * @param colors The [SliderColors] of the [Slider]. The foreground/background, thumb and key point
  *   colors double as the Cupertino active/inactive track, thumb and detent marker colors.
  * @param hapticEffect The haptic effect of the [Slider].
@@ -168,9 +169,13 @@ fun Slider(
         keyPoints?.distinct()?.filter { keyPoint -> keyPoint in valueRange } ?: emptyList()
     }
 
-    var engagedDetent by remember(detentValues) {
-        mutableStateOf<Float?>(
-            effectiveDetents.firstOrNull { detent -> abs(coercedValue - detent) <= coercedDetentThreshold },
+    // Tracks which detent the value is currently locked onto as an index, mirroring the
+    // Cupertino reference; -1 means no detent is engaged.
+    var engagedDetentIndex by remember(effectiveDetents) {
+        mutableIntStateOf(
+            effectiveDetents.indexOfFirst { detent ->
+                abs(coercedValue - detent) <= coercedDetentThreshold
+            },
         )
     }
 
@@ -196,6 +201,7 @@ fun Slider(
 
     BoxWithConstraints(
         modifier = modifier
+            .fillMaxWidth()
             .semantics {
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     coercedValue,
@@ -240,30 +246,41 @@ fun Slider(
 
         fun emitValueForPosition(position: Offset) {
             val rawValue = valueForPosition(position)
-            var emittedValue = rawValue
-            if (effectiveDetents.isNotEmpty()) {
-                val nearestDetent = effectiveDetents.minByOrNull { detent -> abs(detent - rawValue) }
-                if (nearestDetent != null && abs(rawValue - nearestDetent) <= coercedDetentThreshold) {
-                    if (nearestDetent != engagedDetent) {
-                        if (detentHapticsEnabled) {
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        }
-                        engagedDetent = nearestDetent
-                    }
-                    emittedValue = nearestDetent
-                } else if (engagedDetent != null) {
-                    engagedDetent = null
+            // Detent engagement follows the Cupertino reference: lock onto the nearest detent
+            // within the threshold and tick once per engagement change.
+            val detentIndex = effectiveDetents.indices
+                .minByOrNull { index -> abs(rawValue - effectiveDetents[index]) }
+                ?.takeIf { index ->
+                    abs(rawValue - effectiveDetents[index]) <= coercedDetentThreshold
                 }
-            } else if (stepValues.isNotEmpty()) {
-                emittedValue = stepValues.minByOrNull { step -> abs(step - rawValue) } ?: rawValue
-            } else if (keyPointValues.isNotEmpty()) {
-                val range = valueRange.endInclusive - valueRange.start
-                val rawFraction = if (range == 0f) 0f else (rawValue - valueRange.start) / range
-                val nearest = keyPointValues.minByOrNull { keyPoint -> abs(keyPoint - rawValue) }
-                if (nearest != null) {
-                    val nearestFraction = if (range == 0f) 0f else (nearest - valueRange.start) / range
-                    if (abs(nearestFraction - rawFraction) <= magnetThreshold) {
-                        emittedValue = nearest
+                ?: -1
+            if (detentIndex != engagedDetentIndex) {
+                if (detentIndex >= 0 && detentHapticsEnabled) {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                }
+                engagedDetentIndex = detentIndex
+            }
+            // The legacy discrete parameters fold into the same position-driven model: with no
+            // detents engaged, steps snap to evenly spaced values and key points magnetize when
+            // within magnetThreshold (as a fraction of the range).
+            var emittedValue = if (detentIndex >= 0) effectiveDetents[detentIndex] else rawValue
+            if (detentIndex < 0) {
+                when {
+                    stepValues.isNotEmpty() -> {
+                        emittedValue =
+                            stepValues.minByOrNull { step -> abs(step - emittedValue) } ?: emittedValue
+                    }
+
+                    keyPointValues.isNotEmpty() -> {
+                        val range = valueRange.endInclusive - valueRange.start
+                        val rawFraction = if (range == 0f) 0f else (emittedValue - valueRange.start) / range
+                        val nearest = keyPointValues.minByOrNull { keyPoint -> abs(keyPoint - emittedValue) }
+                        if (nearest != null) {
+                            val nearestFraction = if (range == 0f) 0f else (nearest - valueRange.start) / range
+                            if (abs(nearestFraction - rawFraction) <= magnetThreshold) {
+                                emittedValue = nearest
+                            }
+                        }
                     }
                 }
             }
@@ -1370,27 +1387,6 @@ internal class RangeSliderHapticState {
 
 private fun stepsToTickFractions(steps: Int): FloatArray = if (steps == 0) floatArrayOf() else FloatArray(steps + 2) { it.toFloat() / (steps + 1) }
 
-private fun snapValueToTick(
-    current: Float,
-    tickFractions: FloatArray,
-    minPx: Float,
-    maxPx: Float,
-): Float {
-    if (tickFractions.isEmpty()) return current
-    var bestFraction = tickFractions[0]
-    var bestDist = abs(lerp(minPx, maxPx, bestFraction) - current)
-    for (i in 1 until tickFractions.size) {
-        val f = tickFractions[i]
-        val px = lerp(minPx, maxPx, f)
-        val dist = abs(px - current)
-        if (dist < bestDist) {
-            bestDist = dist
-            bestFraction = f
-        }
-    }
-    return lerp(minPx, maxPx, bestFraction)
-}
-
 private fun resolveValueFromFraction(
     fraction: Float,
     valueRange: ClosedFloatingPointRange<Float>,
@@ -1487,9 +1483,10 @@ private fun computeAllKeyPointFractions(
 
 object SliderDefaults {
     /**
-     * The minimum height of the [Slider] and [RangeSlider].
+     * The default height of the [Slider] and [RangeSlider] containers. Matches the Cupertino
+     * reference: a 20.dp floating thumb plus 12.dp of breathing room around the 4.dp track.
      */
-    val MinHeight = 28.dp
+    val MinHeight = 32.dp
 
     /**
      * The radius of the key points on the [Slider] and [RangeSlider].

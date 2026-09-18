@@ -25,6 +25,9 @@ spotless {
                     "ktlint_compose_compositionlocal-allowlist" to "disabled",
                     "ktlint_compose_mutable-state-param-check" to "disabled",
                     "ktlint_compose_parameter-naming" to "disabled",
+                    // SuperDialog/WindowDialog forward their modifier into the popup host's
+                    // card, which the heuristic cannot see through.
+                    "ktlint_compose_modifier-not-used-at-root" to "disabled",
                     "ktlint_compose_modifier-naming" to "disabled",
                 ),
             )

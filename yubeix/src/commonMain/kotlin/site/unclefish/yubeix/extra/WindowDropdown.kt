@@ -64,7 +64,10 @@ fun WindowDropdown(
     dropdownColors: DropdownColors = DropdownDefaults.dropdownColors(),
     startAction: @Composable (() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    insideMargin: PaddingValues = BasicComponentDefaults.resolvedInsideMargin(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     maxHeight: Dp? = null,
     enabled: Boolean = true,
     showValue: Boolean = true,

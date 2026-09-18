@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 
 /**
  * The iOS system-grouped-background color the app chrome draws grouped content on, as opposed to
@@ -14,12 +15,11 @@ import androidx.compose.ui.graphics.Color
  * large-title scroll views install this alongside [YubeixTheme] so every component that needs the
  * "page behind the cards" color resolves it the same way.
  */
-val LocalSystemGroupedBackground = staticCompositionLocalOf { CupertinoColor.LightSystemGroupedBackground }
+val LocalSystemGroupedBackground = staticCompositionLocalOf { Color.Unspecified }
 
 val Colors.systemGroupedBackground: Color
     @Composable
-    @ReadOnlyComposable
-    get() = LocalSystemGroupedBackground.current
+    get() = LocalSystemGroupedBackground.current.takeOrElse { background }
 
 /**
  * Set to true by hosts that need to tone down decorative motion (blurs, fluid backgrounds,

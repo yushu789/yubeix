@@ -17,10 +17,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.Switch
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.extra.SuperSwitch
 import site.unclefish.yubeix.theme.YubeixTheme
 
@@ -33,7 +33,7 @@ fun LazyListScope.switchSection() {
         val superSwitchAnimState = remember { mutableStateOf(false) }
 
         SmallTitle(text = "Switch")
-        Card(
+        SuperGroup(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),

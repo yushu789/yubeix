@@ -3,7 +3,6 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import site.unclefish.yubeix.component.NavigationPageTransition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -78,6 +77,7 @@ import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.SnackbarHost
 import site.unclefish.yubeix.basic.SnackbarHostState
 import site.unclefish.yubeix.basic.ToolbarPosition
+import site.unclefish.yubeix.component.NavigationPageTransition
 import site.unclefish.yubeix.icon.YubeixIcons
 import site.unclefish.yubeix.icon.extended.Create
 import site.unclefish.yubeix.icon.extended.Delete
@@ -529,20 +529,20 @@ fun AppPager(
         modifier = modifier,
     ) { page ->
         when (page) {
-                UIConstants.MAIN_PAGE_INDEX -> MainPage(
-                    snackbarHostState = snackbarHostState,
-                    padding = padding,
-                )
+            UIConstants.MAIN_PAGE_INDEX -> MainPage(
+                snackbarHostState = snackbarHostState,
+                padding = padding,
+            )
 
-                UIConstants.ICON_PAGE_INDEX -> IconsPage(padding = padding)
+            UIConstants.ICON_PAGE_INDEX -> IconsPage(padding = padding)
 
-                UIConstants.COLOR_PAGE_INDEX -> ColorPage(padding = padding)
+            UIConstants.COLOR_PAGE_INDEX -> ColorPage(padding = padding)
 
-                UIConstants.DROPDOWN_PAGE_INDEX -> DropdownPage(padding = padding)
+            UIConstants.DROPDOWN_PAGE_INDEX -> DropdownPage(padding = padding)
 
             else -> SettingsPage(padding = padding)
         }
-}
+    }
 }
 
 @Composable

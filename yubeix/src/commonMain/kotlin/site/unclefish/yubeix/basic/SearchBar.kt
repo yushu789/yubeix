@@ -4,10 +4,8 @@
 package site.unclefish.yubeix.basic
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -27,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -36,10 +33,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +49,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
@@ -58,7 +57,6 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
@@ -70,15 +68,11 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.kyant.shapes.RoundedRectangle
 import kotlinx.coroutines.delay
-import site.unclefish.yubeix.icon.YubeixIcons
-import site.unclefish.yubeix.icon.basic.Search
-import site.unclefish.yubeix.icon.basic.SearchCleanup
+import site.unclefish.yubeix.anim.bounceSpring
 import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
 import site.unclefish.yubeix.icon.cupertino.outlined.MagnifyingGlass
 import site.unclefish.yubeix.icon.cupertino.outlined.Xmark
-import site.unclefish.yubeix.theme.LocalContentColor
 import site.unclefish.yubeix.theme.YubeixTheme
-import site.unclefish.yubeix.theme.yubeixCapsuleShape
 import site.unclefish.yubeix.utils.hasFocusReassignBug
 
 /**
@@ -146,7 +140,9 @@ fun SearchBar(
 }
 
 /**
- * A text field to input a query in a search bar with Yubeix style.
+ * A text field to input a query in a search bar, rendered like the iOS system search field: a grey
+ * rounded container with a leading magnifying glass, a placeholder that rests centered and slides
+ * to the start edge while the bar expands, and a circular clear chip once a query is typed.
  *
  * @param query the query text to be shown in the input field.
  * @param onQueryChange the callback to be invoked when the input service updates the query. An
@@ -157,7 +153,7 @@ fun SearchBar(
  * @param onExpandedChange the callback to be invoked when the search bar's expanded state is
  *   changed.
  * @param modifier the [Modifier] to be applied to this input field.
- * @param label the label to be shown when the input field is not focused.
+ * @param label the placeholder to be shown while the query is empty.
  * @param enabled the enabled state of this input field. When `false`, this component will not
  *   respond to user input, and it will appear visually disabled and disabled to accessibility
  *   services.
@@ -187,54 +183,51 @@ fun InputField(
     val currentOnQueryChange by rememberUpdatedState(onQueryChange)
     val currentOnSearch by rememberUpdatedState(onSearch)
     val currentOnExpandedChange by rememberUpdatedState(onExpandedChange)
+    val currentQuery by rememberUpdatedState(query)
     val internalInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
-    val capsuleShape = yubeixCapsuleShape()
-
-    val actualLeadingIcon = leadingIcon ?: {
-        Icon(
-            modifier = Modifier.padding(start = SearchBarDefaults.LeadingIconStartPadding, end = SearchBarDefaults.LeadingIconEndPadding),
-            imageVector = YubeixIcons.Basic.Search,
-            tint = YubeixTheme.colorScheme.onSurfaceContainerHigh,
-            contentDescription = "Search",
-        )
-    }
-
-    val actualTrailingIcon = trailingIcon ?: {
-        AnimatedVisibility(
-            visible = query.isNotEmpty(),
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            Box(
-                modifier = Modifier.padding(start = SearchBarDefaults.TrailingIconStartPadding, end = SearchBarDefaults.TrailingIconEndPadding),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .clip(capsuleShape)
-                        .clickable { currentOnQueryChange("") },
-                    imageVector = YubeixIcons.Basic.SearchCleanup,
-                    tint = YubeixTheme.colorScheme.onSurfaceContainerHighest,
-                    contentDescription = "Search Cleanup",
-                )
-            }
-        }
-    }
-
     val focused = internalInteractionSource.collectIsFocusedAsState().value
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-    val textAlpha = remember { Animatable(1f) }
+    val density = LocalDensity.current
 
-    val textColor = LocalContentColor.current
-    val inputTextStyle = YubeixTheme.textStyles.main
-        .copy(fontWeight = FontWeight.Medium)
-        .merge(textStyle)
-        .copy(color = textColor)
+    val baseTextStyle = YubeixTheme.textStyles.main
+    val resolvedTextStyle = remember(textStyle, baseTextStyle) {
+        if (textStyle == null) {
+            baseTextStyle
+        } else {
+            baseTextStyle.merge(textStyle)
+        }
+    }
 
-    val cursorBrush = SolidColor(YubeixTheme.colorScheme.primary)
-    val labelText by remember(query, expanded, label) {
-        derivedStateOf { if (!(query.isNotEmpty() || expanded)) label else "" }
+    // Like the iOS system search field, the placeholder rests centered while the bar is collapsed
+    // and slides to the start edge while it expands.
+    val placeholderStartProgress by animateFloatAsState(
+        targetValue = if (expanded) 1f else 0f,
+        animationSpec = bounceSpring(durationMillis = PLACEHOLDER_SLIDE_DURATION_MILLIS),
+        label = "searchBarPlaceholderStartProgress",
+    )
+
+    val resolvedLeading: @Composable () -> Unit = leadingIcon ?: {
+        Icon(
+            imageVector = CupertinoIcons.Outlined.MagnifyingGlass,
+            contentDescription = null,
+            tint = YubeixTheme.colorScheme.onSurfaceVariantSummary,
+            modifier = Modifier.size(SearchFieldDefaults.IconSize),
+        )
+    }
+    var measuredLeadingWidth by remember { mutableStateOf(SearchFieldDefaults.IconSize) }
+    val resolvedTrailing: (@Composable () -> Unit)? = trailingIcon ?: if (query.isNotEmpty()) {
+        {
+            SearchFieldClearButton(
+                onClick = { currentOnQueryChange("") },
+                contentDescription = "Clear",
+                touchSize = SearchFieldDefaults.ClearButtonTouchSize,
+                chipSize = SearchFieldDefaults.ClearButtonChipSize,
+                iconSize = SearchFieldDefaults.ClearButtonIconSize,
+            )
+        }
+    } else {
+        null
     }
 
     // On API 26-27, focus is incorrectly reassigned after clearFocus(), preventing the
@@ -247,10 +240,11 @@ fun InputField(
         Modifier.pointerInput(Unit) { detectTapGestures { currentOnExpandedChange(true) } }
     }
 
-    BasicTextField(
-        value = query,
-        onValueChange = currentOnQueryChange,
-        modifier = modifier
+    CupertinoSearchField(
+        query = query,
+        onQueryChange = { currentOnQueryChange(it) },
+        placeholder = label,
+        fieldModifier = modifier
             .then(expandOnTapModifier)
             .focusRequester(focusRequester)
             .onFocusChanged { if (it.isFocused) currentOnExpandedChange(true) }
@@ -261,48 +255,30 @@ fun InputField(
                 }
             },
         enabled = enabled && workaroundEnabled,
-        singleLine = true,
-        textStyle = inputTextStyle,
-        cursorBrush = cursorBrush,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { currentOnSearch(query) }),
-        interactionSource = internalInteractionSource,
-        decorationBox = { innerTextField ->
+        onSearch = { currentOnSearch(query) },
+        leadingContent = {
             Box(
-                modifier = Modifier
-                    .background(
-                        color = YubeixTheme.colorScheme.surfaceContainerHigh,
-                        shape = capsuleShape,
-                    ),
-                contentAlignment = Alignment.CenterStart,
+                modifier = Modifier.onSizeChanged {
+                    measuredLeadingWidth = with(density) { it.width.toDp() }
+                },
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    actualLeadingIcon()
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = SearchBarDefaults.InputFieldMinHeight),
-                        contentAlignment = Alignment.CenterStart,
-                    ) {
-                        val mergedLabelStyle = remember(textStyle) {
-                            TextStyle(fontSize = SearchBarDefaults.InputFieldFontSize, fontWeight = FontWeight.Medium).merge(textStyle)
-                        }
-                        Text(
-                            text = labelText,
-                            style = mergedLabelStyle,
-                            color = YubeixTheme.colorScheme.onSurfaceContainerHigh,
-                        )
-                        Box(modifier = Modifier.graphicsLayer { alpha = textAlpha.value }) {
-                            innerTextField()
-                        }
-                    }
-                    actualTrailingIcon()
-                }
+                resolvedLeading()
             }
         },
+        leadingWidth = if (leadingIcon != null) measuredLeadingWidth else SearchFieldDefaults.IconSize,
+        trailingContent = resolvedTrailing,
+        placeholderStartProgress = placeholderStartProgress,
+        queryContentVisible = query.isNotBlank(),
+        containerColor = SearchFieldDefaults.containerColor(),
+        textStyle = resolvedTextStyle,
+        textColor = YubeixTheme.colorScheme.onSurface,
+        placeholderColor = YubeixTheme.colorScheme.onSurfaceVariantSummary,
+        cursorColor = YubeixTheme.colorScheme.primary,
+        interactionSource = internalInteractionSource,
+        height = SearchFieldDefaults.Height,
+        shape = SearchFieldDefaults.Shape,
+        horizontalPadding = SearchFieldDefaults.HorizontalPadding,
+        placeholderGap = SearchFieldDefaults.PlaceholderGap,
     )
 
     LaunchedEffect(expanded) {
@@ -313,10 +289,8 @@ fun InputField(
             focusRequester.requestFocus()
         } else if (focused) {
             delay(100)
-            if (query.isNotEmpty()) {
-                textAlpha.animateTo(0f)
+            if (currentQuery.isNotEmpty()) {
                 currentOnQueryChange("")
-                textAlpha.snapTo(1f)
             }
             focusManager.clearFocus()
         }
@@ -328,22 +302,22 @@ object SearchBarDefaults {
     /** The default inside margin of the [SearchBar]. */
     val InsideMargin = DpSize(12.dp, 0.dp)
 
-    /** The default minimum height of the [InputField]. */
+    /** The default minimum height of the [InputField]. Kept for compatibility; the field now uses [SearchFieldDefaults.Height]. */
     val InputFieldMinHeight = 45.dp
 
-    /** The default font size for the [InputField] label. */
+    /** The default font size for the [InputField] label. Kept for compatibility. */
     val InputFieldFontSize = 17.sp
 
-    /** The start padding for the default leading icon. */
+    /** The start padding for the default leading icon. Kept for compatibility. */
     val LeadingIconStartPadding = 16.dp
 
-    /** The end padding for the default leading icon. */
+    /** The end padding for the default leading icon. Kept for compatibility. */
     val LeadingIconEndPadding = 8.dp
 
-    /** The start padding for the default trailing icon. */
+    /** The start padding for the default trailing icon. Kept for compatibility. */
     val TrailingIconStartPadding = 8.dp
 
-    /** The end padding for the default trailing icon. */
+    /** The end padding for the default trailing icon. Kept for compatibility. */
     val TrailingIconEndPadding = 16.dp
 }
 
@@ -412,7 +386,9 @@ object SearchFieldDefaults {
  *   updated text comes as a parameter of the callback.
  * @param placeholder the placeholder shown while the query is empty.
  * @param modifier the [Modifier] to be applied to the field.
- * @param enabled the enabled state of this field. When `false`, this component will not respond to
+ * @param textFieldModifier the [Modifier] applied to the inner text field, after the fill and
+ *   padding of the field content.
+ * @param enabled the enabled state of this field. When `false`, this field will not respond to
  *   user input, and it will appear visually disabled and disabled to accessibility services.
  * @param onSearch the callback to be invoked when the input service triggers the search action.
  * @param onClear the callback invoked when the clear button is tapped. When `null` the clear button
@@ -437,8 +413,6 @@ object SearchFieldDefaults {
  * @param cursorColor the color of the text cursor.
  * @param clearButtonContentDescription the content description of the clear button, for
  *   accessibility services.
- * @param textFieldModifier the [Modifier] applied to the inner text field, after the fill and
- *   padding of the field content.
  */
 @Composable
 fun SearchField(
@@ -466,6 +440,118 @@ fun SearchField(
     cursorColor: Color = YubeixTheme.colorScheme.primary,
     clearButtonContentDescription: String = "Clear",
 ) {
+    val currentOnClear by rememberUpdatedState(onClear)
+    val showClearButton = onClear != null && query.isNotEmpty() && queryContentVisible
+
+    CupertinoSearchField(
+        query = query,
+        onQueryChange = onQueryChange,
+        placeholder = placeholder,
+        modifier = modifier,
+        textFieldModifier = textFieldModifier,
+        enabled = enabled,
+        onSearch = onSearch,
+        leadingContent = {
+            Icon(
+                imageVector = CupertinoIcons.Outlined.MagnifyingGlass,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(iconSize),
+            )
+        },
+        leadingWidth = iconSize,
+        trailingContent = if (showClearButton) {
+            {
+                SearchFieldClearButton(
+                    onClick = { currentOnClear?.invoke() },
+                    contentDescription = clearButtonContentDescription,
+                    touchSize = SearchFieldDefaults.ClearButtonTouchSize,
+                    chipSize = SearchFieldDefaults.ClearButtonChipSize,
+                    iconSize = SearchFieldDefaults.ClearButtonIconSize,
+                )
+            }
+        } else {
+            null
+        },
+        placeholderStartProgress = placeholderStartProgress,
+        queryContentVisible = queryContentVisible,
+        height = height,
+        shape = shape,
+        horizontalPadding = horizontalPadding,
+        placeholderGap = placeholderGap,
+        containerColor = containerColor,
+        textStyle = textStyle,
+        textColor = textColor,
+        placeholderColor = placeholderColor,
+        cursorColor = cursorColor,
+        interactionSource = remember { MutableInteractionSource() },
+    )
+}
+
+/**
+ * The shared drawing engine behind [SearchField] and [InputField]: a grey rounded container with a
+ * leading icon, a placeholder that can rest centered and slide to the start edge, the query text,
+ * and optional trailing content such as the circular clear chip.
+ *
+ * @param query the query text to be shown in the field.
+ * @param onQueryChange the callback to be invoked when the input service updates the query.
+ * @param placeholder the placeholder shown while the query is empty.
+ * @param modifier the [Modifier] to be applied to the field container, which owns the field's
+ *   visual size, shape and color.
+ * @param fieldModifier the [Modifier] applied to the inner text field before it fills the
+ *   container; hosts that let callers own the field's layout put their sizing and focus modifiers
+ *   here.
+ * @param textFieldModifier the [Modifier] applied to the inner text field, after the fill and
+ *   padding of the field content.
+ * @param enabled the enabled state of the inner text field.
+ * @param onSearch the callback invoked when the input service triggers the search action.
+ * @param leadingContent the content drawn at the start of both the placeholder row and the query
+ *   row, typically the magnifying glass icon.
+ * @param leadingWidth the estimated width of [leadingContent], used to center the placeholder group
+ *   and to indent the hidden query text.
+ * @param trailingContent the optional content drawn at the end of the query row, e.g. the clear
+ *   chip; when present the query row reserves [SearchFieldDefaults.ClearButtonEndPadding] for it.
+ * @param placeholderStartProgress the placeholder position from centered (0f) to start-aligned
+ *   (1f).
+ * @param queryContentVisible whether the query text is drawn; when false the placeholder row is
+ *   drawn instead and the query text is hidden.
+ * @param height the height of the field container.
+ * @param shape the shape of the field container.
+ * @param horizontalPadding the horizontal padding of the field content.
+ * @param placeholderGap the gap between the leading content and the placeholder or query text.
+ * @param containerColor the background color of the field container.
+ * @param textStyle the text style of the query and the placeholder.
+ * @param textColor the color of the query text.
+ * @param placeholderColor the color of the placeholder text.
+ * @param cursorColor the color of the text cursor.
+ * @param interactionSource the [MutableInteractionSource] of the inner text field.
+ */
+@Composable
+private fun CupertinoSearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    placeholder: String,
+    enabled: Boolean,
+    onSearch: () -> Unit,
+    leadingContent: @Composable () -> Unit,
+    leadingWidth: Dp,
+    trailingContent: (@Composable () -> Unit)?,
+    placeholderStartProgress: Float,
+    queryContentVisible: Boolean,
+    height: Dp,
+    shape: Shape,
+    horizontalPadding: Dp,
+    placeholderGap: Dp,
+    containerColor: Color,
+    textStyle: TextStyle,
+    textColor: Color,
+    placeholderColor: Color,
+    cursorColor: Color,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
+    fieldModifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
+) {
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
     val clampedPlaceholderStartProgress = placeholderStartProgress.coerceIn(0f, 1f)
@@ -477,11 +563,9 @@ fun SearchField(
         ).size.width.toFloat()
     }
     val placeholderGroupWidthPx = with(density) {
-        iconSize.toPx() + placeholderGap.toPx() + placeholderTextWidthPx
+        leadingWidth.toPx() + placeholderGap.toPx() + placeholderTextWidthPx
     }
-    val showClearButton = onClear != null && query.isNotEmpty() && queryContentVisible
-    val currentOnClear by rememberUpdatedState(onClear)
-    val endPadding = if (showClearButton) {
+    val endPadding = if (trailingContent != null) {
         SearchFieldDefaults.ClearButtonEndPadding
     } else {
         horizontalPadding
@@ -498,6 +582,7 @@ fun SearchField(
             value = query,
             onValueChange = onQueryChange,
             modifier = Modifier
+                .then(fieldModifier)
                 .fillMaxSize()
                 .then(textFieldModifier)
                 .padding(start = horizontalPadding, end = endPadding),
@@ -507,6 +592,7 @@ fun SearchField(
             cursorBrush = SolidColor(cursorColor),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { onSearch() }),
+            interactionSource = interactionSource,
             decorationBox = { innerTextField ->
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     val placeholderTranslationX = with(density) {
@@ -514,60 +600,51 @@ fun SearchField(
                             .coerceAtLeast(0f) * (1f - clampedPlaceholderStartProgress)
                     }
 
-                    if (!queryContentVisible) {
+                    // One Row hosting the leading slot exactly once: while collapsed the
+                    // leading+placeholder group sits translated to the horizontal center and
+                    // slides to the start edge as the field expands.
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(placeholderGap),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .graphicsLayer {
-                                    translationX = placeholderTranslationX
-                                },
+                            modifier = Modifier.graphicsLayer {
+                                translationX = if (!queryContentVisible) {
+                                    placeholderTranslationX
+                                } else {
+                                    0f
+                                }
+                            },
                             horizontalArrangement = Arrangement.spacedBy(placeholderGap),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                imageVector = CupertinoIcons.Outlined.MagnifyingGlass,
-                                contentDescription = null,
-                                tint = iconColor,
-                                modifier = Modifier.size(iconSize),
-                            )
-                            Text(
-                                text = placeholder,
-                                style = textStyle,
-                                color = placeholderColor,
-                                maxLines = 1,
-                            )
+                            leadingContent()
+                            if (!queryContentVisible) {
+                                Text(
+                                    text = placeholder,
+                                    style = textStyle,
+                                    color = placeholderColor,
+                                    maxLines = 1,
+                                )
+                            }
                         }
-                    }
-
-                    if (queryContentVisible) {
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.spacedBy(placeholderGap),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = CupertinoIcons.Outlined.MagnifyingGlass,
-                                contentDescription = null,
-                                tint = iconColor,
-                                modifier = Modifier.size(iconSize),
-                            )
+                        if (queryContentVisible) {
                             Box(
                                 modifier = Modifier.weight(1f),
                                 contentAlignment = Alignment.CenterStart,
                             ) {
                                 innerTextField()
                             }
-                            if (showClearButton) {
-                                SearchFieldClearButton(
-                                    onClick = { currentOnClear?.invoke() },
-                                    contentDescription = clearButtonContentDescription,
-                                    touchSize = SearchFieldDefaults.ClearButtonTouchSize,
-                                    chipSize = SearchFieldDefaults.ClearButtonChipSize,
-                                    iconSize = SearchFieldDefaults.ClearButtonIconSize,
-                                )
+                            if (trailingContent != null) {
+                                trailingContent()
                             }
                         }
-                    } else {
+                    }
+
+                    // The field stays composed while collapsed (invisible when the query is
+                    // blank) so the expanded flow can request focus on it immediately.
+                    if (!queryContentVisible) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -575,7 +652,7 @@ fun SearchField(
                                     translationX = placeholderTranslationX
                                     alpha = if (query.isBlank()) 1f else 0f
                                 }
-                                .padding(start = iconSize + placeholderGap),
+                                .padding(start = leadingWidth + placeholderGap),
                             contentAlignment = Alignment.CenterStart,
                         ) {
                             innerTextField()
@@ -628,3 +705,6 @@ private fun SearchFieldClearButton(
         }
     }
 }
+
+/** How long the [InputField] placeholder takes to slide from centered to the start edge. */
+private const val PLACEHOLDER_SLIDE_DURATION_MILLIS = 250

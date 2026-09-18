@@ -113,8 +113,9 @@ import site.unclefish.yubeix.utils.YubeixPopupUtils.Companion.YubeixPopupHost
  *   [SnackbarHostState.showSnackbar], typically a [SnackbarHost].
  * @param popupHost component to host [SuperDropdown]s & [SuperDialog]s that are pushed to
  * be show, typically a [YubeixPopupHost].
- * @param containerColor the color used for the background of this scaffold. Use [Color.Transparent]
- *   to have no color.
+ * @param containerColor the color used for the background of this scaffold. Defaults to the
+ *   theme's grouped page background, matching [ScreenScaffold]'s visual language. Use
+ *   [Color.Transparent] to have no color.
  * @param contentWindowInsets window insets to be passed to [content] slot via [PaddingValues]
  *   params. Scaffold will take the insets into account from the top/bottom only if the [topBar]/
  *   [bottomBar] are not present, as the scaffold expect [topBar]/[bottomBar] to handle insets
@@ -136,7 +137,7 @@ fun Scaffold(
     floatingToolbarPosition: ToolbarPosition = ToolbarPosition.BottomCenter,
     snackbarHost: @Composable () -> Unit = {},
     popupHost: @Composable () -> Unit = { YubeixPopupHost() },
-    containerColor: Color = YubeixTheme.colorScheme.surface,
+    containerColor: Color = YubeixTheme.colorScheme.background,
     contentWindowInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
     content: @Composable (PaddingValues) -> Unit,
 ) {

@@ -66,6 +66,7 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import site.unclefish.yubeix.anim.yubeixSpring
+import site.unclefish.yubeix.blur.isRenderEffectSupported
 import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixShape
@@ -190,7 +191,9 @@ private fun CupertinoNavigationBar(
             fallbackTint = HazeTint(color),
         )
     }
-    val useHaze = hazeState != null && !reducedDynamicEffectsEnabled
+    // Without RenderEffect support (e.g. Android below API 31) hazeEffect is a silent no-op and
+    // would leave the bar fully transparent, so fall back to the translucent background there.
+    val useHaze = hazeState != null && isRenderEffectSupported() && !reducedDynamicEffectsEnabled
 
     Box(
         modifier = modifier

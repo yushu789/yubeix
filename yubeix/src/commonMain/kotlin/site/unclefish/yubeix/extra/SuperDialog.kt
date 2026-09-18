@@ -84,20 +84,29 @@ import site.unclefish.yubeix.utils.YubeixPopupUtils.Companion.DialogLayout
 import site.unclefish.yubeix.utils.platformDialogProperties
 
 /**
- * A dialog with a title, a summary, and other contents.
+ * A dialog with a title, a summary, and other contents, rendered as an iOS-style alert card.
+ *
+ * The default rendering follows the cupertino alert: a 270.dp wide card with continuous rounded
+ * corners, centered iOS typography, and a soft shadow, presented with a scale-up-from-120% +
+ * fade-in transition over a fading black scrim. [backgroundColor] defaults to the alert container
+ * grey that follows the dark/light appearance, and [insideMargin] defaults to the alert's 18.dp
+ * content padding. When [show] turns false the card fades out before [onDismissFinished] fires.
+ *
+ * Use [LocalDismissState] inside `content` to request dismissal from inner composables.
  *
  * @param show Whether the [SuperDialog] is shown.
- * @param modifier The modifier to be applied to the [SuperDialog].
+ * @param modifier The modifier to be applied to the [SuperDialog] card.
  * @param title The title of the [SuperDialog].
  * @param titleColor The color of the title.
  * @param summary The summary of the [SuperDialog].
  * @param summaryColor The color of the summary.
- * @param backgroundColor The background color of the [SuperDialog].
- * @param enableWindowDim Whether to enable window dimming when the [SuperDialog] is shown.
+ * @param backgroundColor The background color of the [SuperDialog] card. Defaults to the cupertino
+ *   alert container color, which resolves from the dark/light appearance.
+ * @param enableWindowDim Whether to draw the cupertino scrim over the content behind the [SuperDialog].
  * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
  * @param onDismissFinished The callback when the [SuperDialog] is completely dismissed.
- * @param outsideMargin The margin outside the [SuperDialog].
- * @param insideMargin The margin inside the [SuperDialog].
+ * @param outsideMargin The margin outside the [SuperDialog] card.
+ * @param insideMargin The margin inside the [SuperDialog] card, around the title, the summary, and the content.
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SuperDialog].
  * @param renderInRootScaffold Whether to render the dialog in the root (outermost) Scaffold.
  *   When true (default), the dialog covers the full screen. When false, it renders within the
@@ -105,6 +114,7 @@ import site.unclefish.yubeix.utils.platformDialogProperties
  * @param content The [Composable] content of the [SuperDialog].
  */
 @Composable
+@Suppress("ComposeModifierNotUsedAtRoot")
 fun SuperDialog(
     show: Boolean,
     modifier: Modifier = Modifier,
@@ -112,46 +122,105 @@ fun SuperDialog(
     titleColor: Color = DialogDefaults.titleColor(),
     summary: String? = null,
     summaryColor: Color = DialogDefaults.summaryColor(),
-    backgroundColor: Color = DialogDefaults.backgroundColor(),
+    backgroundColor: Color = superDialogContainerColor(),
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
     outsideMargin: DpSize = DialogDefaults.outsideMargin,
-    insideMargin: DpSize = DialogDefaults.insideMargin,
+    insideMargin: DpSize = SuperDialogInsideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     renderInRootScaffold: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    DialogContentLayout(
-        show = show,
-        titleColor = titleColor,
-        summaryColor = summaryColor,
-        backgroundColor = backgroundColor,
-        outsideMargin = outsideMargin,
-        insideMargin = insideMargin,
-        popupHost = { visible, hostContent ->
-            val visibleState = remember { mutableStateOf(false) }
-            visibleState.value = visible
-            DialogLayout(
-                visible = visibleState,
-                enableWindowDim = false,
-                enterTransition = EnterTransition.None,
-                exitTransition = ExitTransition.None,
-                enableAutoLargeScreen = false,
-                renderInRootScaffold = renderInRootScaffold,
-            ) {
-                hostContent()
+    val dark = YubeixTheme.colorScheme.background.luminance() < 0.5f
+    val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+    val currentOnDismissFinished by rememberUpdatedState(onDismissFinished)
+    // The cupertino alert dims the page behind the card with a plain black scrim rather than the
+    // theme's window-dimming color: lighter in light mode so the dimmed page stays readable.
+    val scrimColor = Color.Black.copy(alpha = if (dark) 0.4f else 0.2f)
+    val visibleState = remember { mutableStateOf(false) }
+    visibleState.value = show
+
+    val requestDismiss: () -> Unit = { currentOnDismissRequest?.invoke() }
+
+    DialogLayout(
+        visible = visibleState,
+        enableWindowDim = false,
+        enterTransition = SuperDialogEnterTransition,
+        exitTransition = SuperDialogExitTransition,
+        enableAutoLargeScreen = false,
+        renderInRootScaffold = renderInRootScaffold,
+        onDismissFinished = { currentOnDismissFinished?.invoke() },
+    ) {
+        val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+        NavigationBackHandler(
+            state = navigationEventState,
+            isBackEnabled = show,
+            onBackCompleted = requestDismiss,
+        )
+
+        CompositionLocalProvider(LocalDismissState provides requestDismiss) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (enableWindowDim) {
+                    // The scrim fades on its own schedule (faster than the card fade so the page
+                    // behind reads through earlier while the card is still settling in).
+                    AnimatedVisibility(
+                        visible = visibleState.value,
+                        enter = fadeIn(
+                            animationSpec = tween(durationMillis = CUPERTINO_ALERT_SCRIM_ENTER_DURATION_MILLIS),
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(durationMillis = CUPERTINO_ALERT_SCRIM_EXIT_DURATION_MILLIS),
+                        ),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .drawBehind { drawRect(scrimColor) }
+                                .pointerInput(Unit) {
+                                    detectTapGestures { requestDismiss() }
+                                },
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures { requestDismiss() }
+                            },
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (defaultWindowInsetsPadding) {
+                                Modifier
+                                    .systemBarsPadding()
+                                    .imePadding()
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .padding(horizontal = outsideMargin.width, vertical = outsideMargin.height),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    SuperDialogAlertCard(
+                        title = title,
+                        titleColor = titleColor,
+                        summary = summary,
+                        summaryColor = summaryColor,
+                        containerColor = backgroundColor,
+                        insideMargin = insideMargin,
+                        modifier = modifier,
+                        content = content,
+                    )
+                }
             }
-        },
-        modifier = modifier,
-        title = title,
-        summary = summary,
-        enableWindowDim = enableWindowDim,
-        onDismissRequest = onDismissRequest,
-        onDismissFinished = onDismissFinished,
-        defaultWindowInsetsPadding = defaultWindowInsetsPadding,
-        content = content,
-    )
+        }
+    }
 }
 
 /**
@@ -164,6 +233,7 @@ fun SuperDialog(
     ),
 )
 @Composable
+@Suppress("ComposeModifierNotUsedAtRoot")
 fun SuperDialog(
     show: MutableState<Boolean>,
     modifier: Modifier = Modifier,
@@ -171,12 +241,12 @@ fun SuperDialog(
     titleColor: Color = DialogDefaults.titleColor(),
     summary: String? = null,
     summaryColor: Color = DialogDefaults.summaryColor(),
-    backgroundColor: Color = DialogDefaults.backgroundColor(),
+    backgroundColor: Color = superDialogContainerColor(),
     enableWindowDim: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     onDismissFinished: (() -> Unit)? = null,
     outsideMargin: DpSize = DialogDefaults.outsideMargin,
-    insideMargin: DpSize = DialogDefaults.insideMargin,
+    insideMargin: DpSize = SuperDialogInsideMargin,
     defaultWindowInsetsPadding: Boolean = true,
     renderInRootScaffold: Boolean = true,
     content: @Composable () -> Unit,
@@ -260,6 +330,7 @@ data class CupertinoAlertAction(
  */
 @OptIn(ExperimentalHazeApi::class)
 @Composable
+@Suppress("ComposeModifierNotUsedAtRoot")
 fun SuperDialog(
     show: Boolean,
     title: String,
@@ -281,7 +352,11 @@ fun SuperDialog(
     val dark = YubeixTheme.colorScheme.background.luminance() < 0.5f
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
     val scrimColor = Color.Black.copy(alpha = if (dark) 0.4f else 0.2f)
-    val containerColor = if (dark) Color(0xFF232323) else Color(0xFFEEEEEE)
+    val containerColor = if (dark) {
+        CupertinoAlertDialogDarkContainerColor
+    } else {
+        CupertinoAlertDialogLightContainerColor
+    }
     val useHazeBackdrop = hazeState != null
     val resolvedContainerColor = if (useHazeBackdrop) {
         containerColor.copy(
@@ -522,6 +597,79 @@ fun CupertinoLinearProgressDialog(
 }
 
 /**
+ * The default [SuperDialog] container color: the cupertino alert's container grey, which stays one
+ * step above the pure system backgrounds so the card reads against the dimmed page behind it.
+ */
+@Composable
+private fun superDialogContainerColor(): Color {
+    val dark = YubeixTheme.colorScheme.background.luminance() < 0.5f
+    return if (dark) {
+        CupertinoAlertDialogDarkContainerColor
+    } else {
+        CupertinoAlertDialogLightContainerColor
+    }
+}
+
+/**
+ * The alert card shown by the content-lambda [SuperDialog]: a fixed-width column with continuous
+ * rounded corners and a soft shadow, holding the title, the summary, and the content in one
+ * centered stack.
+ */
+@Composable
+private fun SuperDialogAlertCard(
+    title: String?,
+    titleColor: Color,
+    summary: String?,
+    summaryColor: Color,
+    containerColor: Color,
+    insideMargin: DpSize,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .width(CupertinoAlertDialogWidth)
+            .heightIn(min = CupertinoAlertDialogMinHeight)
+            .shadow(
+                elevation = CupertinoAlertDialogShadowElevation,
+                shape = CupertinoAlertDialogShape,
+                clip = true,
+            )
+            .background(containerColor)
+            .pointerInput(Unit) {
+                // Consume taps on the card body so they do not fall through to the scrim.
+                detectTapGestures { }
+            },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = insideMargin.width, vertical = insideMargin.height),
+            verticalArrangement = Arrangement.spacedBy(CupertinoAlertDialogTitleMessageSpacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            title?.let {
+                Text(
+                    text = it,
+                    style = CupertinoAlertDialogTitleStyle,
+                    color = titleColor,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            summary?.let {
+                Text(
+                    text = it,
+                    style = CupertinoAlertDialogMessageStyle,
+                    color = summaryColor,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            content()
+        }
+    }
+}
+
+/**
  * The window-level host of the Cupertino alert family.
  *
  * Uses the same window-level Dialog host idea as [WindowDialog] (yubeix platform dialog properties,
@@ -753,11 +901,29 @@ private val CupertinoAlertDialogActionsHorizontalPadding = 10.dp
 private val CupertinoAlertDialogActionsBottomPadding = 10.dp
 private val CupertinoAlertDialogShadowElevation = 18.dp
 private val CupertinoAlertDialogBlurRadius = 24.dp
+private val CupertinoAlertDialogDarkContainerColor = Color(0xFF232323)
+private val CupertinoAlertDialogLightContainerColor = Color(0xFFEEEEEE)
 private val CupertinoProgressDialogWidth = 220.dp
 private val CupertinoProgressDialogContentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
 private val CupertinoProgressDialogIndicatorSize = 24.dp
 private val CupertinoProgressDialogBarHeight = 4.dp
 private val CupertinoProgressDialogBarTopPadding = 14.dp
+private val SuperDialogInsideMargin = DpSize(18.dp, 18.dp)
+private val SuperDialogEnterTransition: EnterTransition = scaleIn(
+    initialScale = 1.2f,
+    animationSpec = tween(
+        durationMillis = CUPERTINO_ALERT_ENTER_DURATION_MILLIS,
+        easing = LinearOutSlowInEasing,
+    ),
+) + fadeIn(
+    animationSpec = tween(
+        durationMillis = CUPERTINO_ALERT_ENTER_DURATION_MILLIS,
+        easing = LinearOutSlowInEasing,
+    ),
+)
+private val SuperDialogExitTransition: ExitTransition = fadeOut(
+    animationSpec = tween(durationMillis = CUPERTINO_ALERT_EXIT_DURATION_MILLIS),
+)
 private const val CUPERTINO_ALERT_DIALOG_LIGHT_BACKDROP_ALPHA = 0.78f
 private const val CUPERTINO_ALERT_DIALOG_DARK_BACKDROP_ALPHA = 0.72f
 private const val CUPERTINO_ALERT_SCRIM_ENTER_DURATION_MILLIS = 300

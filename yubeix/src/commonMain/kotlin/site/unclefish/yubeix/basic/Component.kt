@@ -1,4 +1,4 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.basic
@@ -30,15 +30,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.interfaces.HoldDownInteraction
 import site.unclefish.yubeix.theme.YubeixTheme
 
+// Spacing between the center content and the start/end action slots, matching the preference row
+// primitive this component is ported from.
+private val BASIC_COMPONENT_ACTION_SPACING = 8.dp
+
+// Spacing between the main content and the bottom action slot.
+private val BASIC_COMPONENT_BOTTOM_ACTION_SPACING = 8.dp
+
 /**
- * A basic component with Yubeix style. Widely used in other extension components.
+ * A basic component with Yubeix style, rendering as a preference row. Widely used in other
+ * extension components.
+ *
+ * The row follows the adaptive preference row metrics: the min height and the inside margin grow
+ * with the presence of a summary and a bottom action. While the row is pressed it sinks slightly
+ * (the shared row-family press feedback), and [holdDownState] keeps it visually held down.
  *
  * @param modifier The modifier to be applied to the [BasicComponent].
  * @param title The title of the [BasicComponent].
@@ -48,7 +59,10 @@ import site.unclefish.yubeix.theme.YubeixTheme
  * @param startAction The [Composable] content that on the start side of the [BasicComponent].
  * @param endActions The [Composable] content on the end side of the [BasicComponent].
  * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
- * @param insideMargin The margin inside the [BasicComponent].
+ * @param insideMargin The margin inside the [BasicComponent]. Defaults to the adaptive preference
+ *   row padding, which grows with a summary or a bottom action.
+ * @param minHeight The min height of the [BasicComponent]. Defaults to the adaptive preference row
+ *   min height.
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [BasicComponent] is enabled.
@@ -65,8 +79,14 @@ fun BasicComponent(
     startAction: @Composable (() -> Unit)? = null,
     endActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
-    minHeight: Dp = BasicComponentDefaults.MinHeight,
+    insideMargin: PaddingValues = BasicComponentDefaults.resolvedInsideMargin(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
+    minHeight: Dp = BasicComponentDefaults.resolvedMinHeight(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true,
@@ -87,15 +107,14 @@ fun BasicComponent(
         if (title != null) {
             Text(
                 text = title,
-                fontSize = YubeixTheme.textStyles.headline1.fontSize,
-                fontWeight = FontWeight.Medium,
+                style = YubeixTheme.textStyles.body1,
                 color = titleColor.color(enabled),
             )
         }
         if (summary != null) {
             Text(
                 text = summary,
-                fontSize = YubeixTheme.textStyles.body2.fontSize,
+                style = YubeixTheme.textStyles.footnote1,
                 color = summaryColor.color(enabled),
             )
         }
@@ -103,13 +122,21 @@ fun BasicComponent(
 }
 
 /**
- * A basic component with Yubeix style. Widely used in other extension components.
+ * A basic component with Yubeix style, rendering as a preference row. Widely used in other
+ * extension components.
+ *
+ * The row follows the adaptive preference row metrics: the min height and the inside margin grow
+ * with the presence of a bottom action. While the row is pressed it sinks slightly (the shared
+ * row-family press feedback), and [holdDownState] keeps it visually held down.
  *
  * @param modifier The modifier to be applied to the [BasicComponent].
  * @param startAction The [Composable] content that on the start side of the [BasicComponent].
  * @param endActions The [Composable] content on the end side of the [BasicComponent].
  * @param bottomAction The [Composable] content at the bottom of the [BasicComponent].
- * @param insideMargin The margin inside the [BasicComponent].
+ * @param insideMargin The margin inside the [BasicComponent]. Defaults to the adaptive preference
+ *   row padding, which grows with a bottom action.
+ * @param minHeight The min height of the [BasicComponent]. Defaults to the adaptive preference row
+ *   min height.
  * @param onClick The callback when the [BasicComponent] is clicked.
  * @param holdDownState Used to determine whether it is in the pressed state.
  * @param enabled Whether the [BasicComponent] is enabled.
@@ -122,8 +149,14 @@ fun BasicComponent(
     startAction: @Composable (() -> Unit)? = null,
     endActions: @Composable (RowScope.() -> Unit)? = null,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
-    minHeight: Dp = BasicComponentDefaults.MinHeight,
+    insideMargin: PaddingValues = BasicComponentDefaults.resolvedInsideMargin(
+        hasSummary = false,
+        hasBottomAction = bottomAction != null,
+    ),
+    minHeight: Dp = BasicComponentDefaults.resolvedMinHeight(
+        hasSummary = false,
+        hasBottomAction = bottomAction != null,
+    ),
     onClick: (() -> Unit)? = null,
     holdDownState: Boolean = false,
     enabled: Boolean = true,
@@ -163,7 +196,6 @@ fun BasicComponent(
             Modifier
         }
     }
-
     Column(
         modifier = modifier
             .heightIn(min = minHeight)
@@ -200,12 +232,12 @@ fun BasicComponent(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.End,
                         ) {
-                            Row { it() }
+                            Row(verticalAlignment = Alignment.CenterVertically) { it() }
                         }
                     }
                 },
             ) { measurables, constraints ->
-                val spacerPx = 8.dp.roundToPx()
+                val spacerPx = BASIC_COMPONENT_ACTION_SPACING.roundToPx()
 
                 val startMeasurable = measurables.firstOrNull { it.layoutId == "start" }
                 val centerMeasurable = measurables.first { it.layoutId == "center" }
@@ -397,23 +429,72 @@ fun BasicComponent(
         }
 
         if (bottomAction != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(BASIC_COMPONENT_BOTTOM_ACTION_SPACING))
             bottomAction()
         }
     }
 }
 
+/**
+ * Default values used by [BasicComponent], mirroring the adaptive preference row metrics of
+ * [site.unclefish.yubeix.extra.SuperRowDefaults]: a row with a summary grows taller with vertical
+ * padding, and a row with a bottom action (e.g. a slider) grows taller still.
+ */
 object BasicComponentDefaults {
 
     /**
-     * The default margin inside the [BasicComponent].
+     * The default margin inside a title-only [BasicComponent].
      */
-    val InsideMargin = PaddingValues(16.dp)
+    val InsideMargin = PaddingValues(horizontal = 16.dp, vertical = 0.dp)
 
     /**
-     * The default min height of the [BasicComponent].
+     * The default margin inside a [BasicComponent] with a summary.
      */
-    val MinHeight = 56.dp
+    val SummaryInsideMargin = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+
+    /**
+     * The default margin inside a [BasicComponent] with a bottom action.
+     */
+    val SliderInsideMargin = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+
+    /**
+     * The default min height of a title-only [BasicComponent].
+     */
+    val MinHeight = 48.dp
+
+    /**
+     * The default min height of a [BasicComponent] with a summary.
+     */
+    val SummaryMinHeight = 64.dp
+
+    /**
+     * The default min height of a [BasicComponent] with a bottom action.
+     */
+    val SliderMinHeight = 76.dp
+
+    /**
+     * Resolves the row padding from the presence of a summary and a bottom action.
+     */
+    fun resolvedInsideMargin(
+        hasSummary: Boolean,
+        hasBottomAction: Boolean,
+    ): PaddingValues = when {
+        hasBottomAction -> SliderInsideMargin
+        hasSummary -> SummaryInsideMargin
+        else -> InsideMargin
+    }
+
+    /**
+     * Resolves the row min height from the presence of a summary and a bottom action.
+     */
+    fun resolvedMinHeight(
+        hasSummary: Boolean,
+        hasBottomAction: Boolean,
+    ): Dp = when {
+        hasBottomAction -> SliderMinHeight
+        hasSummary -> SummaryMinHeight
+        else -> MinHeight
+    }
 
     /**
      * The default color of the title.

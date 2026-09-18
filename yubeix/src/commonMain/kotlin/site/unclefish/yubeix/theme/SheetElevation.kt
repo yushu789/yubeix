@@ -69,7 +69,7 @@ fun Colors.elevatedSheetColors(): Colors = copy(
 @Composable
 fun YubeixSheetElevatedTheme(content: @Composable () -> Unit) {
     val elevatedColors = YubeixTheme.colorScheme.elevatedSheetColors()
-    val elevatedGroupedBackground = LocalSystemGroupedBackground.current.elevatedSheetSurface()
+    val elevatedGroupedBackground = YubeixTheme.colorScheme.systemGroupedBackground.elevatedSheetSurface()
     // YubeixTheme puts its own overscroll factory back; keep whatever one the host installed.
     val overscrollFactory = LocalOverscrollFactory.current
 

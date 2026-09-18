@@ -16,7 +16,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.ScrollBehavior
-import site.unclefish.yubeix.basic.SmallTopAppBar
 import site.unclefish.yubeix.basic.TopAppBar
 import site.unclefish.yubeix.utils.scrollEndHaptic
 
@@ -64,21 +63,14 @@ fun AdaptiveTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     if (showTopAppBar) {
-        if (isWideScreen) {
-            SmallTopAppBar(
-                title = title,
-                scrollBehavior = scrollBehavior,
-                defaultWindowInsetsPadding = false,
-                navigationIcon = navigationIcon,
-                actions = actions,
-            )
-        } else {
-            TopAppBar(
-                title = title,
-                scrollBehavior = scrollBehavior,
-                navigationIcon = navigationIcon,
-                actions = actions,
-            )
-        }
+        // Both layouts use the yubeix collapsing large-title bar; the wide layout just drops
+        // the default window-insets padding because the split pane already pads the top.
+        TopAppBar(
+            title = title,
+            scrollBehavior = scrollBehavior,
+            defaultWindowInsetsPadding = !isWideScreen,
+            navigationIcon = navigationIcon,
+            actions = actions,
+        )
     }
 }

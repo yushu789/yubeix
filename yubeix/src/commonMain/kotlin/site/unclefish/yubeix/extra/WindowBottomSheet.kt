@@ -80,6 +80,7 @@ import site.unclefish.yubeix.anim.yubeixSpring
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.component.SheetBackgroundTransformSource
 import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
 import site.unclefish.yubeix.icon.cupertino.outlined.Checkmark
 import site.unclefish.yubeix.icon.cupertino.outlined.Xmark
@@ -428,7 +429,8 @@ fun WindowBottomSheetConfirmAction(
 }
 
 /**
- * Internal layout logic for [WindowBottomSheet], adapted from Miuix 0.8.8 BottomSheetContentLayout.
+ * Internal shared layout logic for [SuperBottomSheet] and [WindowBottomSheet], adapted from
+ * Miuix 0.8.8 BottomSheetContentLayout.
  *
  * @param show Whether the bottom sheet is currently shown.
  * @param backgroundColor The background color of the bottom sheet.
@@ -449,12 +451,13 @@ fun WindowBottomSheetConfirmAction(
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
  * @param enableNestedScroll Whether to enable nested scrolling for the content.
+ * @param enableBackgroundTransform Whether the page behind the sheet shrinks while it is shown.
  * @param topInset Optional top inset override. If null, calculated from window insets.
  * @param content The content of the bottom sheet.
  */
 @Suppress("ktlint:compose:modifier-not-used-at-root")
 @Composable
-private fun WindowBottomSheetContentLayout(
+internal fun WindowBottomSheetContentLayout(
     show: Boolean,
     backgroundColor: Color,
     cornerRadius: Dp,
@@ -473,6 +476,7 @@ private fun WindowBottomSheetContentLayout(
     defaultWindowInsetsPadding: Boolean = true,
     allowDismiss: Boolean = true,
     enableNestedScroll: Boolean = true,
+    enableBackgroundTransform: Boolean = true,
     topInset: Dp? = null,
     content: @Composable () -> Unit,
 ) {
@@ -517,6 +521,12 @@ private fun WindowBottomSheetContentLayout(
     val dimAlpha = remember { mutableFloatStateOf(1f) }
     val dragSnapChannel = remember { Channel<Float>(capacity = Channel.CONFLATED) }
     val currentOnDismissRequest by rememberUpdatedState(onDismissRequest)
+
+    // Push the page behind the sheet back in step with the dim, so dragging the sheet down
+    // brings the page forward again.
+    SheetBackgroundTransformSource(enabled = enableBackgroundTransform) {
+        animationProgress.value.coerceIn(0f, 1f) * dimAlpha.floatValue.coerceIn(0f, 1f)
+    }
 
     val requestDismiss: () -> Unit = remember {
         { currentOnDismissRequest?.invoke() }

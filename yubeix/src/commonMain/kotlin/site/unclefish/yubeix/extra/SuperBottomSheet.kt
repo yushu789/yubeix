@@ -1,4 +1,4 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package site.unclefish.yubeix.extra
@@ -13,25 +13,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.elevatedSheetSurface
 import site.unclefish.yubeix.utils.YubeixPopupUtils.Companion.DialogLayout
 
 /**
  * A bottom sheet that slides up from the bottom of the screen.
  * The height adapts to the content size, but will not cover the status bar area.
  *
+ * The sheet presents with the same fish-back visual as [WindowBottomSheet]: a floating card with
+ * 32.dp continuous top corners at the elevated interface level ([elevatedSheetSurface]), a
+ * centered drag handle above a fixed-height title row, and a window dim whose alpha follows the
+ * presentation progress and the drag offset.
+ *
  * @param show Whether the [SuperBottomSheet] is shown.
  * @param modifier The modifier to be applied to the [SuperBottomSheet].
  * @param title Optional title to display at the top of the [SuperBottomSheet].
  * @param startAction Optional [Composable] to display on the start side of the title (e.g. a close button).
  * @param endAction Optional [Composable] to display on the end side of the title (e.g. a submit button).
- * @param backgroundColor The background color of the [SuperBottomSheet].
+ * @param backgroundColor The background color of the [SuperBottomSheet]. Defaults to the elevated
+ *   sheet surface so a dark sheet stays readable over the dimmed page behind it.
  * @param enableWindowDim Whether to dim the window behind the [SuperBottomSheet].
  * @param cornerRadius The corner radius of the top corners of the [SuperBottomSheet].
  * @param sheetMaxWidth The maximum width of the [SuperBottomSheet].
  * @param onDismissRequest Will called when the user tries to dismiss the Dialog by clicking outside or pressing the back button.
  * @param onDismissFinished The callback when the [SuperBottomSheet] is completely dismissed.
  * @param outsideMargin The margin outside the [SuperBottomSheet].
- * @param insideMargin The margin inside the [SuperBottomSheet].
+ * @param insideMargin The margin inside the [SuperBottomSheet]. Its width is also used as the
+ *   padding above the title row.
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding.
  * @param dragHandleColor The color of the drag handle at the top.
  * @param allowDismiss Whether to allow dismissing the sheet via drag or back gesture.
@@ -63,7 +73,7 @@ fun SuperBottomSheet(
     renderInRootScaffold: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    BottomSheetContentLayout(
+    WindowBottomSheetContentLayout(
         show = show,
         backgroundColor = backgroundColor,
         cornerRadius = cornerRadius,
@@ -169,4 +179,46 @@ object SuperBottomSheetDefaults {
     val outsideMargin get() = BottomSheetDefaults.outsideMargin
 
     val insideMargin get() = BottomSheetDefaults.insideMargin
+}
+
+/**
+ * The defaults for [SuperBottomSheet] and [WindowBottomSheet].
+ */
+object BottomSheetDefaults {
+
+    /**
+     * The default background color of the bottom sheet.
+     *
+     * A sheet sits at the elevated interface level, so in dark mode this is lifted one step above
+     * the page background - see [elevatedSheetSurface].
+     */
+    @Composable
+    fun backgroundColor() = YubeixTheme.colorScheme.background.elevatedSheetSurface()
+
+    /**
+     * The default color of the drag handle.
+     */
+    @Composable
+    fun dragHandleColor() = YubeixTheme.colorScheme.onSurfaceVariantSummary.copy(alpha = 0.2f)
+
+    /**
+     * The default corner radius of the top corners of the bottom sheet.
+     */
+    val cornerRadius = 32.dp
+
+    /**
+     * The default maximum width of the bottom sheet.
+     */
+    val maxWidth = 560.dp
+
+    /**
+     * The default margin outside the bottom sheet.
+     */
+    val outsideMargin = DpSize(0.dp, 0.dp)
+
+    /**
+     * The default margin inside the bottom sheet. Its width is also used as the padding above the
+     * title row.
+     */
+    val insideMargin = DpSize(16.dp, 14.dp)
 }

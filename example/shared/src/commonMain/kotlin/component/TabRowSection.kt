@@ -3,8 +3,6 @@
 
 package component
 
-import site.unclefish.yubeix.component.animatePagerToPage
-import site.unclefish.yubeix.component.rememberPagerFlingBehavior
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +22,8 @@ import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.TabRow
 import site.unclefish.yubeix.basic.TabRowWithContour
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.component.animatePagerToPage
+import site.unclefish.yubeix.component.rememberPagerFlingBehavior
 
 fun LazyListScope.tabRowSection() {
     item(key = "tabRow") {

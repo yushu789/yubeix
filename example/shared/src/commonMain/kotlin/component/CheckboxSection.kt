@@ -16,18 +16,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.Checkbox
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.extra.CheckboxLocation
 import site.unclefish.yubeix.extra.SuperCheckbox
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.theme.YubeixTheme
 
 fun LazyListScope.checkboxSection() {
     item(key = "checkbox") {
         SmallTitle(text = "Checkbox")
-        Card(
+        SuperGroup(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),

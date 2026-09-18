@@ -3,8 +3,6 @@
 
 package site.unclefish.yubeix.basic
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.CubicBezierEasing
@@ -29,6 +27,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -100,8 +99,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
-import kotlinx.coroutines.launch
-import site.unclefish.yubeix.anim.yubeixSpring
 import site.unclefish.yubeix.basic.TopAppBarState.Companion.Saver
 import site.unclefish.yubeix.blur.BlurColors
 import site.unclefish.yubeix.blur.LayerBackdrop
@@ -118,27 +115,35 @@ import kotlin.math.roundToInt
  * A [TopAppBar] with Yubeix style that can collapse and expand based on the
  * scroll position of the content below it.
  *
+ * The bar renders in the flat title bar chrome visual language (see [LargeTopAppBar]): a centered
+ * semi-bold title over a layered translucent surface with a hairline divider, a start slot sized
+ * for the standard back button, and trailing actions. The [largeTitle] renders with the hero title
+ * typography below the collapsed row and moves with the content as it scrolls.
+ *
  * The [TopAppBar] can be configured with a title, a navigation icon, and action icons.
- * The large title will collapse when the content is scrolled up and expand when
- * the content is scrolled down.
+ * The bar collapses when the content is scrolled up and expands back when the content is
+ * scrolled down: the nested-scroll collapse progress drives the background layer's and the
+ * centered collapsed title's opacity, the collapsed title's enter offset and blur, and the bar
+ * height shrink, while the large title fades out.
  *
  * @param title The title of the [TopAppBar].
  * @param modifier The modifier to be applied to the  [TopAppBar].
- * @param color The background color of the [TopAppBar].
- * @param titleColor The color of the collapsed small title text.
+ * @param color The background surface color of the [TopAppBar], drawn as the flat title bar's
+ *   translucent layered fill.
+ * @param titleColor The color of the collapsed centered title text.
  * @param largeTitle The large title of the [TopAppBar].
- * @param largeTitleColor The color of the expanded large title text.
+ * @param largeTitleColor The color of the large title text.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [TopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [TopAppBar].
- * @param horizontalPadding The horizontal padding of the [TopAppBar]'s title & large title.
+ * @param horizontalPadding The horizontal padding of the [TopAppBar]'s large title.
  */
 @Composable
 fun TopAppBar(
     title: String,
     modifier: Modifier = Modifier,
-    color: Color = YubeixTheme.colorScheme.surface,
+    color: Color = YubeixTheme.colorScheme.systemGroupedBackground,
     titleColor: Color = YubeixTheme.colorScheme.onSurface,
     largeTitle: String = title,
     largeTitleColor: Color = YubeixTheme.colorScheme.onSurface,
@@ -173,9 +178,9 @@ fun TopAppBar(
         }
 
     // Compose a Surface with a TopAppBarLayout content.
-    // The surface's background color is animated as specified above.
-    // The height of the app bar is determined by subtracting the bar's height offset from the
-    // app bar's defined constant height value (i.e. the ContainerHeight token).
+    // The bar renders the flat title bar chrome: its layered background and centered collapsed
+    // title fade in with the nested-scroll collapse progress while the large title fades out and
+    // the bar height shrinks to the collapsed row height.
     TopAppBarLayout(
         title = title,
         color = color,
@@ -196,30 +201,34 @@ fun TopAppBar(
 /**
  * A [SmallTopAppBar] with Yubeix style.
  *
- * The [SmallTopAppBar] can be configured with a title, a navigation icon, and action icons.
+ * The bar renders as the collapsed state of the flat title bar chrome: the centered semi-bold
+ * title, the layered translucent surface fill with a hairline divider, a start slot sized for the
+ * standard back button (see [TopBarBackButton]), and trailing actions.
  *
  * @param title The title of the [SmallTopAppBar].
  * @param modifier The modifier to be applied to the  [SmallTopAppBar].
- * @param color The background color of the [SmallTopAppBar].
+ * @param color The background surface color of the [SmallTopAppBar], drawn as the flat title bar's
+ *   translucent layered fill.
  * @param titleColor The color of the title text.
  * @param navigationIcon The [Composable] content that represents the navigation icon.
  * @param actions The [Composable] content that represents the action icons.
  * @param scrollBehavior The [ScrollBehavior] that controls the behavior of the [SmallTopAppBar].
  * @param defaultWindowInsetsPadding Whether to apply default window insets padding to the [SmallTopAppBar].
- * @param horizontalPadding The horizontal padding of the [SmallTopAppBar]'s title.
+ * @param horizontalPadding Retained for signature compatibility; the flat title bar chrome uses
+ *   its fixed side padding.
  */
 @Composable
 @NonRestartableComposable
 fun SmallTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
-    color: Color = YubeixTheme.colorScheme.surface,
+    color: Color = YubeixTheme.colorScheme.systemGroupedBackground,
     titleColor: Color = YubeixTheme.colorScheme.onSurface,
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: ScrollBehavior? = null,
     defaultWindowInsetsPadding: Boolean = true,
-    horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
+    @Suppress("UNUSED_PARAMETER") horizontalPadding: Dp = TopAppBarDefaults.HorizontalPadding,
 ) {
     SideEffect {
         // Sets the height offset limit of the SmallTopAppBar to 0f
@@ -237,17 +246,14 @@ fun SmallTopAppBar(
             )
         }
 
-    // Compose a Surface with a SmallTopAppBarLayout content.
-    // The surface's background color is animated as specified above.
-    // The height of the app bar is determined by subtracting the bar's height offset from the
-    // app bar's defined constant height value (i.e. the ContainerHeight token).
+    // Compose the flat title bar chrome in its collapsed state: the layered background is always
+    // visible and the centered title is fully opaque.
     SmallTopAppBarLayout(
         title = title,
         color = color,
         titleColor = titleColor,
         navigationIcon = navigationIcon,
         actions = actionsRow,
-        horizontalPadding = horizontalPadding,
         modifier = modifier,
         defaultWindowInsetsPadding = defaultWindowInsetsPadding,
     )
@@ -411,14 +417,14 @@ class TopAppBarState(
 
 /** Contains default values used by [TopAppBar] and [SmallTopAppBar]. */
 object TopAppBarDefaults {
-    /** The default horizontal padding of the title and large title. */
-    val HorizontalPadding = 26.dp
+    /** The default horizontal padding of the large title, matching the hero title inset. */
+    val HorizontalPadding = 28.dp
 
-    /** The default collapsed height of the [TopAppBar]. */
-    val CollapsedHeight = 56.dp
+    /** The default collapsed height of the [TopAppBar], matching the flat title bar row height. */
+    val CollapsedHeight = 58.dp
 
-    /** The vertical center height used for [SmallTopAppBar] layout. */
-    val SmallTopAppBarCenterHeight = 60.dp
+    /** The visual row height used for [SmallTopAppBar] layout. */
+    val SmallTopAppBarCenterHeight = 58.dp
 }
 
 @Stable
@@ -605,21 +611,123 @@ private fun interface ScrolledOffset {
     fun offset(): Float
 }
 
+// Layout id of the collapsed title bar row slot inside [TopAppBarLayout].
+private const val TOP_BAR_COLLAPSED_ROW_LAYOUT_ID = "collapsedRow"
+
+// Layout id of the large title slot inside [TopAppBarLayout].
+private const val TOP_BAR_LARGE_TITLE_LAYOUT_ID = "largeTitle"
+
+// Nested-scroll progress at which the collapsed centered title starts fading in.
+private const val TOP_BAR_COLLAPSED_TITLE_REVEAL_PROGRESS = 1f / 3f
+
+// How much faster the large title fades out than the bar collapses.
+private const val TOP_BAR_LARGE_TITLE_FADE_SCALE = 3f
+
+// Vertical padding around the large title, matching the hero title padding.
+private val TOP_BAR_LARGE_TITLE_VERTICAL_PADDING = 4.dp
+
+// The flat title bar chrome metrics: the row's side padding, the square reserved for the edge
+// content (the standard back button and action buttons), and the gap between that square and the
+// centered title. Matches the flat title bar's actionSize and sidePadding.
+private val TOP_BAR_ROW_SIDE_PADDING = 16.dp
+private val TOP_BAR_EDGE_ACTION_SIZE = 42.dp
+private val TOP_BAR_TITLE_EDGE_SPACING = 12.dp
+
 /**
- * The base [Layout] for [TopAppBar]. This function lays out a [TopAppBar] navigation icon
- * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
- * the actions are optional.
+ * The collapsed row of the flat title bar chrome, shared by [TopAppBarLayout] and
+ * [SmallTopAppBarLayout]: a start slot sized for the standard back button, the centered semi-bold
+ * title with the flat title bar's enter offset and blur treatment, and the trailing actions.
+ *
+ * @param title The collapsed title shown centered in the row.
+ * @param titleColor The color of the title.
+ * @param navigationIcon Content aligned to the start edge of the row.
+ * @param actions Content aligned to the end edge of the row.
+ * @param titleVisibilityProgress Drives the centered title's opacity, enter offset and blur.
+ * @param titleBlurRadius The blur radius applied to the title while it is fading in.
+ * @param titleEnterOffsetPx The vertical distance the title enters from, in pixels.
+ * @param modifier The [Modifier] to be applied to the row.
+ */
+@Composable
+private fun CollapsedTitleBarRow(
+    title: String,
+    titleColor: Color,
+    navigationIcon: @Composable () -> Unit,
+    actions: @Composable () -> Unit,
+    titleVisibilityProgress: Float,
+    titleBlurRadius: Dp,
+    titleEnterOffsetPx: Float,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(TopAppBarDefaults.CollapsedHeight)
+            .padding(horizontal = TOP_BAR_ROW_SIDE_PADDING),
+    ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .zIndex(1f)
+                .defaultMinSize(minWidth = TOP_BAR_EDGE_ACTION_SIZE),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            navigationIcon()
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = TOP_BAR_EDGE_ACTION_SIZE + TOP_BAR_TITLE_EDGE_SPACING)
+                .blur(
+                    radius = titleBlurRadius,
+                    edgeTreatment = BlurredEdgeTreatment.Unbounded,
+                )
+                .graphicsLayer {
+                    alpha = titleVisibilityProgress
+                    translationY = lerp(
+                        titleEnterOffsetPx,
+                        0f,
+                        titleVisibilityProgress,
+                    )
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = topBarTitleTextStyle(),
+                color = titleColor,
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .zIndex(1f),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            actions()
+        }
+    }
+}
+
+/**
+ * The base [Layout] for [TopAppBar]. Renders the flat title bar chrome (see [LargeTopAppBar]):
+ * a layered translucent background that fades in with the collapse progress, a collapsed row with
+ * the start slot, the centered title and the trailing actions, and the large title below the row
+ * that fades out and clips away as the bar collapses.
  *
  * @param title the [TopAppBar] title (header).
- * @param color the background color of the [TopAppBar].
- * @param titleColor the color of the collapsed small title text.
+ * @param color the background surface color of the [TopAppBar].
+ * @param titleColor the color of the collapsed centered title text.
  * @param largeTitleColor the color of the expanded large title text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
- * @param horizontalPadding the horizontal padding of the [TopAppBar]'s title & large title.
+ * @param horizontalPadding the horizontal padding of the [TopAppBar]'s large title.
  * @param scrolledOffset a function that provides the scroll offset of the [TopAppBar].
- * @param largeTitleHeight a mutable state that holds the height of the large title.
  * @param expandedHeightPx the expanded height of the [TopAppBar] in pixels.
+ * @param largeTitleHeight a mutable state that holds the height of the large title.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param largeTitle the large title of the [TopAppBar], if not specified, it will be the same as title.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [TopAppBar].
@@ -648,208 +756,154 @@ private fun TopAppBarLayout(
         }
     }
 
-    // Small Title Animation
-    val extOffset by remember(heightOffset) {
-        derivedStateOf {
-            abs(heightOffset) / expandedHeightPx * 3
-        }
+    // Collapse progress mapped onto the flat title bar chrome: 0f at the expanded (hero) state,
+    // 1f fully collapsed. Drives the background layer's opacity and the collapsed title's reveal.
+    val collapseProgress = if (expandedHeightPx > 0f) {
+        (abs(heightOffset) / expandedHeightPx).coerceIn(0f, 1f)
+    } else {
+        0f
     }
+    val largeTitleAlpha = 1f - (collapseProgress * TOP_BAR_LARGE_TITLE_FADE_SCALE).coerceIn(0f, 1f)
 
-    // Large Title Alpha Animation
-    val largeTitleAlpha by remember(heightOffset, expandedHeightPx) {
-        derivedStateOf {
-            1f - (abs(heightOffset) / expandedHeightPx * 3).coerceIn(0f, 1f)
-        }
-    }
-
-    // Small title animation is triggered once when the threshold is crossed
-    // then runs independently to completion
-    val smallTitleVisible = extOffset >= 1f
-    val smallTitleAlpha = remember { Animatable(0f) }
-    val smallTitleTranslationY = remember { Animatable(20f) }
-
-    LaunchedEffect(smallTitleVisible) {
-        if (smallTitleVisible) {
-            val showSpec = yubeixSpring<Float>(damping = 1.0f, response = 0.3f)
-            launch { smallTitleAlpha.animateTo(1f, showSpec) }
-            launch { smallTitleTranslationY.animateTo(0f, showSpec) }
-        } else {
-            val hideSpec = yubeixSpring<Float>(damping = 1.0f, response = 0.15f)
-            launch { smallTitleAlpha.animateTo(0f, hideSpec) }
-            launch { smallTitleTranslationY.animateTo(20f, hideSpec) }
-        }
-    }
-
-    // Title color transition animation
-    val animatedTitleColor by animateColorAsState(
-        targetValue = titleColor,
-        animationSpec = tween(durationMillis = 50),
+    // The collapsed title fades in once the collapse crosses the reveal threshold, then runs to
+    // completion independently with the flat title bar's enter offset and blur treatment.
+    val reducedDynamicEffectsEnabled = LocalReducedDynamicEffectsEnabled.current
+    val titleVisibilityProgress by animateFloatAsState(
+        targetValue = if (collapseProgress >= TOP_BAR_COLLAPSED_TITLE_REVEAL_PROGRESS) 1f else 0f,
+        animationSpec = tween(durationMillis = 220),
+        label = "TopAppBarTitleVisibility",
     )
-    val animatedLargeTitleColor by animateColorAsState(
-        targetValue = largeTitleColor,
-        animationSpec = tween(durationMillis = 50),
+    val backgroundVisibility by animateFloatAsState(
+        targetValue = collapseProgress,
+        animationSpec = tween(durationMillis = 140),
+        label = "TopAppBarBackgroundVisibility",
     )
+    val titleBlurRadius = if (reducedDynamicEffectsEnabled) {
+        0.dp
+    } else {
+        TitleBarTitleMaxBlurRadius * (1f - titleVisibilityProgress)
+    }
+    val titleEnterOffsetPx = with(LocalDensity.current) { TitleBarTitleEnterOffset.toPx() }
 
-    Layout(
-        {
+    Box(modifier = modifier) {
+        // Background layer: the flat title bar's translucent surface fill plus hairline divider,
+        // faded in with the collapse progress so content scrolls under a transparent bar at rest.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clipToBounds()
+                .graphicsLayer { alpha = backgroundVisibility },
+        ) {
             Box(
-                Modifier
-                    .layoutId("navigationIcon"),
-            ) {
-                navigationIcon()
-            }
-            Box(
-                Modifier
-                    .layoutId("title")
-                    .padding(horizontal = horizontalPadding)
-                    .graphicsLayer {
-                        alpha = smallTitleAlpha.value
-                        translationY = smallTitleTranslationY.value
-                    },
-            ) {
-                Text(
-                    text = title,
-                    color = animatedTitleColor,
-                    fontSize = YubeixTheme.textStyles.title3.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color.copy(alpha = 0.5f)),
+            )
+            FlatTitleBarSurfaceLayer(
+                surfaceColor = color,
+                dividerColor = YubeixTheme.colorScheme.dividerLine,
+                backgroundAlpha = if (reducedDynamicEffectsEnabled) 0.5f else 0.75f,
+            )
+        }
+
+        Layout(
+            content = {
+                CollapsedTitleBarRow(
+                    title = title,
+                    titleColor = titleColor,
+                    navigationIcon = navigationIcon,
+                    actions = actions,
+                    titleVisibilityProgress = titleVisibilityProgress,
+                    titleBlurRadius = titleBlurRadius,
+                    titleEnterOffsetPx = titleEnterOffsetPx,
+                    modifier = Modifier.layoutId(TOP_BAR_COLLAPSED_ROW_LAYOUT_ID),
                 )
-            }
-            Box(
-                Modifier
-                    .layoutId("actionIcons"),
-            ) {
-                actions()
-            }
-            Box(
-                Modifier
-                    .layoutId("largeTitle")
-                    .padding(top = TopAppBarDefaults.CollapsedHeight)
-                    .padding(horizontal = horizontalPadding)
-                    .graphicsLayer { alpha = largeTitleAlpha },
-            ) {
-                Text(
-                    modifier = Modifier.offset { IntOffset(0, heightOffset) },
-                    text = largeTitle,
-                    color = animatedLargeTitleColor,
-                    fontSize = YubeixTheme.textStyles.title1.fontSize,
-                    fontWeight = FontWeight.Normal,
-                    onTextLayout = {
-                        largeTitleHeight.value = it.size.height
+                Box(
+                    modifier = Modifier
+                        .layoutId(TOP_BAR_LARGE_TITLE_LAYOUT_ID)
+                        .padding(horizontal = horizontalPadding)
+                        .padding(vertical = TOP_BAR_LARGE_TITLE_VERTICAL_PADDING)
+                        .graphicsLayer { alpha = largeTitleAlpha },
+                ) {
+                    Text(
+                        modifier = Modifier.offset { IntOffset(0, heightOffset) },
+                        text = largeTitle,
+                        color = largeTitleColor,
+                        style = YubeixTheme.textStyles.title1,
+                        fontWeight = FontWeight.SemiBold,
+                        onTextLayout = {
+                            largeTitleHeight.value = it.size.height
+                        },
+                    )
+                }
+            },
+            modifier = Modifier
+                .then(
+                    if (defaultWindowInsetsPadding) {
+                        Modifier
+                            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                    } else {
+                        Modifier
                     },
                 )
-            }
-        },
-        modifier = modifier
-            .then(Modifier.background(color))
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-                } else {
-                    Modifier
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .clipToBounds()
+                .pointerInput(Unit) {
+                    detectTapGestures { /* Consume click */ }
                 },
-            )
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-            .clipToBounds()
-            .pointerInput(Unit) {
-                detectTapGestures { /* Consume click */ }
-            },
-    ) { measurables, constraints ->
-        val navigationIconPlaceable =
-            measurables
-                .fastFirst { it.layoutId == "navigationIcon" }
-                .measure(constraints.copy(minWidth = 0, minHeight = 0))
+        ) { measurables, constraints ->
+            val collapsedRowPlaceable =
+                measurables
+                    .fastFirst { it.layoutId == TOP_BAR_COLLAPSED_ROW_LAYOUT_ID }
+                    .measure(constraints.copy(minWidth = 0, minHeight = 0))
 
-        val actionIconsPlaceable =
-            measurables
-                .fastFirst { it.layoutId == "actionIcons" }
-                .measure(constraints.copy(minWidth = 0, minHeight = 0))
+            val largeTitlePlaceable =
+                measurables
+                    .fastFirst { it.layoutId == TOP_BAR_LARGE_TITLE_LAYOUT_ID }
+                    .measure(
+                        constraints.copy(
+                            minWidth = 0,
+                            minHeight = 0,
+                            maxHeight = Constraints.Infinity,
+                        ),
+                    )
 
-        val maxTitleWidth = constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width
+            val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
+            val expandedHeight = collapsedHeight + largeTitlePlaceable.height
 
-        val titlePlaceable =
-            measurables
-                .fastFirst { it.layoutId == "title" }
-                .measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
+            val layoutHeight = lerp(
+                start = collapsedHeight,
+                stop = expandedHeight,
+                fraction = if (expandedHeightPx > 0f) {
+                    val offset = scrolledOffset.offset()
+                    if (offset.isNaN()) 1f else (1f - (abs(offset) / expandedHeightPx).coerceIn(0f, 1f))
+                } else {
+                    1f
+                },
+            ).toFloat().roundToInt()
 
-        val largeTitlePlaceable =
-            measurables
-                .fastFirst { it.layoutId == "largeTitle" }
-                .measure(
-                    constraints.copy(
-                        minWidth = 0,
-                        minHeight = 0,
-                        maxHeight = Constraints.Infinity,
-                    ),
-                )
+            layout(constraints.maxWidth, layoutHeight) {
+                // Collapsed title bar row
+                collapsedRowPlaceable.placeRelative(0, 0)
 
-        val collapsedHeight = TopAppBarDefaults.CollapsedHeight.roundToPx()
-        val expandedHeight = maxOf(
-            collapsedHeight,
-            largeTitlePlaceable.height,
-        )
-
-        val layoutHeight = lerp(
-            start = collapsedHeight,
-            stop = expandedHeight,
-            fraction = if (expandedHeightPx > 0f) {
-                val offset = scrolledOffset.offset()
-                if (offset.isNaN()) 1f else (1f - (abs(offset) / expandedHeightPx).coerceIn(0f, 1f))
-            } else {
-                1f
-            },
-        ).toFloat().roundToInt()
-
-        layout(constraints.maxWidth, layoutHeight) {
-            val verticalCenter = collapsedHeight / 2
-
-            // Navigation icon
-            navigationIconPlaceable.placeRelative(
-                x = 0,
-                y = verticalCenter - navigationIconPlaceable.height / 2,
-            )
-
-            // Title
-            var baseX = (constraints.maxWidth - titlePlaceable.width) / 2
-            if (baseX < navigationIconPlaceable.width) {
-                baseX += (navigationIconPlaceable.width - baseX)
-            } else if (baseX + titlePlaceable.width > constraints.maxWidth - actionIconsPlaceable.width) {
-                baseX += ((constraints.maxWidth - actionIconsPlaceable.width) - (baseX + titlePlaceable.width))
+                // Large title
+                largeTitlePlaceable.placeRelative(0, collapsedRowPlaceable.height)
             }
-            titlePlaceable.placeRelative(
-                x = baseX,
-                y = verticalCenter - titlePlaceable.height / 2,
-            )
-
-            // Action icons
-            actionIconsPlaceable.placeRelative(
-                x = constraints.maxWidth - actionIconsPlaceable.width,
-                y = verticalCenter - actionIconsPlaceable.height / 2,
-            )
-
-            // Large title
-            largeTitlePlaceable.placeRelative(
-                x = 0,
-                y = 0,
-            )
         }
     }
 }
 
 /**
- * The base [Layout] for [SmallTopAppBar]. This function lays out a [SmallTopAppBar] navigation icon
- * (leading icon), a title (header), and action icons (trailing icons). Note that the navigation and
- * the actions are optional.
+ * The base layout for [SmallTopAppBar]. Renders the flat title bar chrome in its collapsed state:
+ * the layered translucent background with the hairline divider is always visible and the centered
+ * title is fully opaque.
  *
  * @param title the [SmallTopAppBar] title (header).
- * @param color the background color of the [SmallTopAppBar].
+ * @param color the background surface color of the [SmallTopAppBar].
  * @param titleColor the color of the title text.
  * @param navigationIcon a navigation icon [Composable].
  * @param actions actions [Composable].
- * @param horizontalPadding the horizontal padding of the [SmallTopAppBar]'s title.
  * @param modifier the [Modifier] to be applied to this layout.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [SmallTopAppBar].
  */
@@ -860,115 +914,58 @@ private fun SmallTopAppBarLayout(
     titleColor: Color,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
-    horizontalPadding: Dp,
     modifier: Modifier = Modifier,
     defaultWindowInsetsPadding: Boolean = true,
 ) {
-    val titleModifier = remember(horizontalPadding) {
-        Modifier
-            .layoutId("title")
-            .padding(horizontal = horizontalPadding)
-    }
+    val reducedDynamicEffectsEnabled = LocalReducedDynamicEffectsEnabled.current
 
-    // Title color transition animation
-    val animatedTitleColor by animateColorAsState(
-        targetValue = titleColor,
-        animationSpec = tween(durationMillis = 50),
-    )
-
-    Layout(
-        {
+    Box(modifier = modifier) {
+        // Background layer: the flat title bar's translucent surface fill plus hairline divider,
+        // always visible since the bar only ever renders in its collapsed state.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clipToBounds(),
+        ) {
             Box(
-                Modifier
-                    .layoutId("navigationIcon"),
-            ) {
-                navigationIcon()
-            }
-            Box(titleModifier) {
-                Text(
-                    text = title,
-                    color = animatedTitleColor,
-                    maxLines = 1,
-                    fontSize = YubeixTheme.textStyles.title3.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color.copy(alpha = 0.5f)),
+            )
+            FlatTitleBarSurfaceLayer(
+                surfaceColor = color,
+                dividerColor = YubeixTheme.colorScheme.dividerLine,
+                backgroundAlpha = if (reducedDynamicEffectsEnabled) 0.5f else 0.75f,
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .then(
+                    if (defaultWindowInsetsPadding) {
+                        Modifier
+                            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                    } else {
+                        Modifier
+                    },
                 )
-            }
-            Box(
-                Modifier
-                    .layoutId("actionIcons"),
-            ) {
-                actions()
-            }
-        },
-        modifier = modifier
-            .then(Modifier.background(color))
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-                } else {
-                    Modifier
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+                .heightIn(max = TopAppBarDefaults.CollapsedHeight)
+                .clipToBounds()
+                .pointerInput(Unit) {
+                    detectTapGestures { /* Consume click */ }
                 },
-            )
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
-            .heightIn(max = TopAppBarDefaults.CollapsedHeight)
-            .clipToBounds()
-            .pointerInput(Unit) {
-                detectTapGestures { /* Consume click */ }
-            },
-    ) { measurables, constraints ->
-        val navigationIconPlaceable =
-            measurables
-                .fastFirst { it.layoutId == "navigationIcon" }
-                .measure(constraints.copy(minWidth = 0, minHeight = 0))
-
-        val actionIconsPlaceable =
-            measurables
-                .fastFirst { it.layoutId == "actionIcons" }
-                .measure(constraints.copy(minWidth = 0, minHeight = 0))
-
-        val maxTitleWidth = constraints.maxWidth - navigationIconPlaceable.width - actionIconsPlaceable.width
-
-        val titlePlaceable =
-            measurables
-                .fastFirst { it.layoutId == "title" }
-                .measure(constraints.copy(minWidth = 0, maxWidth = (maxTitleWidth * 0.9).roundToInt(), minHeight = 0))
-
-        val layoutHeight =
-            if (constraints.maxHeight == Constraints.Infinity) {
-                constraints.maxHeight
-            } else {
-                constraints.maxHeight
-            }
-
-        layout(constraints.maxWidth, layoutHeight) {
-            val verticalCenter = TopAppBarDefaults.SmallTopAppBarCenterHeight.roundToPx() / 2
-
-            // Navigation icon
-            navigationIconPlaceable.placeRelative(
-                x = 0,
-                y = verticalCenter - navigationIconPlaceable.height / 2,
-            )
-
-            // Title
-            var baseX = (constraints.maxWidth - titlePlaceable.width) / 2
-            if (baseX < navigationIconPlaceable.width) {
-                baseX += (navigationIconPlaceable.width - baseX)
-            } else if (baseX + titlePlaceable.width > constraints.maxWidth - actionIconsPlaceable.width) {
-                baseX += ((constraints.maxWidth - actionIconsPlaceable.width) - (baseX + titlePlaceable.width))
-            }
-            titlePlaceable.placeRelative(
-                x = baseX,
-                y = verticalCenter - titlePlaceable.height / 2,
-            )
-
-            // Action icons
-            actionIconsPlaceable.placeRelative(
-                x = constraints.maxWidth - actionIconsPlaceable.width,
-                y = verticalCenter - actionIconsPlaceable.height / 2,
+        ) {
+            CollapsedTitleBarRow(
+                title = title,
+                titleColor = titleColor,
+                navigationIcon = navigationIcon,
+                actions = actions,
+                titleVisibilityProgress = 1f,
+                titleBlurRadius = 0.dp,
+                titleEnterOffsetPx = 0f,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

@@ -54,7 +54,10 @@ fun SuperRadioButton(
     endActions: @Composable RowScope.() -> Unit = {},
     radioButtonLocation: RadioButtonLocation = RadioButtonLocation.Start,
     bottomAction: (@Composable () -> Unit)? = null,
-    insideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
+    insideMargin: PaddingValues = BasicComponentDefaults.resolvedInsideMargin(
+        hasSummary = !summary.isNullOrBlank(),
+        hasBottomAction = bottomAction != null,
+    ),
     holdDownState: Boolean = false,
     enabled: Boolean = true,
 ) {

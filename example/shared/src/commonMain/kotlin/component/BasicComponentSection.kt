@@ -10,15 +10,15 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.BasicComponent
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.Text
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.theme.YubeixTheme
 
 fun LazyListScope.basicComponentSection() {
     item(key = "basicComponent") {
         SmallTitle(text = "Basic Component")
-        Card(
+        SuperGroup(
             modifier = Modifier
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 12.dp),
