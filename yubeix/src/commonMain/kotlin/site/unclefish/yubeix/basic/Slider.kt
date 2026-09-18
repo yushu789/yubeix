@@ -643,9 +643,11 @@ fun VerticalSlider(
                 Box(
                     modifier = Modifier
                         .offset { IntOffset(0, (stepCenterY - containerHeightPx / 2f).roundToInt()) }
+                        // Ticks cross the vertical track: wide and short, unlike the horizontal
+                        // slider's tall-and-narrow markers.
                         .size(
-                            width = CupertinoSliderDetentMarkerWidth,
-                            height = CupertinoSliderDetentMarkerHeight,
+                            width = CupertinoSliderDetentMarkerHeight,
+                            height = CupertinoSliderDetentMarkerWidth,
                         )
                         .background(
                             color = if (stepFraction <= animatedFraction) {

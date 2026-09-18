@@ -1,17 +1,19 @@
-// Copyright 2025, yubeix contributors
+// Copyright 2026, yubeix contributors
 // SPDX-License-Identifier: Apache-2.0
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -43,31 +45,25 @@ import component.spinnerSection
 import component.switchSection
 import component.tabRowSection
 import component.textFieldSection
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import site.unclefish.yubeix.basic.BasicComponent
 import site.unclefish.yubeix.basic.InputField
-import site.unclefish.yubeix.basic.Scaffold
+import site.unclefish.yubeix.basic.ScreenScaffold
+import site.unclefish.yubeix.basic.ScreenTitleMode
 import site.unclefish.yubeix.basic.SearchBar
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.SnackbarHostState
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
-import site.unclefish.yubeix.basic.YubeixScrollBehavior
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.YubeixTheme
-import utils.AdaptiveTopAppBar
-import utils.pageContentPadding
-import utils.pageScrollModifiers
 
 @Composable
 fun MainPage(
     snackbarHostState: SnackbarHostState,
     padding: PaddingValues,
 ) {
-    val appState = LocalAppState.current
-    val isWideScreen = LocalIsWideScreen.current
     var searchValue by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
@@ -79,105 +75,105 @@ fun MainPage(
         }
     }
 
-    val topAppBarScrollBehavior = YubeixScrollBehavior()
+    val isWideScreen = LocalIsWideScreen.current
     val lazyListState = rememberLazyListState()
-    // Marks the scrolling content so the top bar can blur it via haze.
+    // The chrome bar frosts the scrolling content through this state; ScreenScaffold marks the
+    // content as the haze source itself, so the list needs no manual hazeSource here.
     val hazeState = rememberHazeState()
-
-    Scaffold(
-        topBar = {
-            AdaptiveTopAppBar(
-                title = "Home",
-                showTopAppBar = appState.showTopAppBar,
-                isWideScreen = isWideScreen,
-                scrollBehavior = topAppBarScrollBehavior,
-                hazeState = hazeState,
-            )
+    // The compact shell's bottom bar floats over the page, so its height joins the content's
+    // bottom padding; the wide pane has no bottom bar and the scaffold's own inset is enough.
+    val bottomBarOverlayHeight = if (isWideScreen) 0.dp else padding.calculateBottomPadding()
+    // Keeps the scrollbar track between the chrome bar at the top and the page bottom.
+    val scrollBarTrackPadding = PaddingValues(
+        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+        bottom = if (isWideScreen) {
+            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        } else {
+            bottomBarOverlayHeight
         },
-    ) { innerPadding ->
-        val contentPadding = pageContentPadding(innerPadding, padding, isWideScreen)
-        Box {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier.pageScrollModifiers(
-                    appState.enableScrollEndHaptic,
-                    appState.showTopAppBar,
-                    topAppBarScrollBehavior,
-                ).hazeSource(state = hazeState),
-                contentPadding = contentPadding,
-            ) {
-                item(key = "searchbar") {
-                    SmallTitle(text = "SearchBar")
-                    SearchBar(
-                        modifier = Modifier.padding(bottom = 12.dp),
-                        inputField = {
-                            InputField(
-                                query = searchValue,
-                                onQueryChange = { searchValue = it },
-                                onSearch = { expanded = false },
-                                expanded = expanded,
-                                onExpandedChange = { expanded = it },
-                                label = "Search",
-                            )
-                        },
-                        outsideEndAction = {
-                            Text(
-                                modifier = Modifier
-                                    .padding(end = 12.dp)
-                                    .clickable(
-                                        interactionSource = null,
-                                        indication = null,
-                                        onClick = onCancelSearch,
-                                    ),
-                                text = "Cancel",
-                                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
-                                color = YubeixTheme.colorScheme.primary,
-                            )
-                        },
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                    ) {
-                        Column {
-                            repeat(4) { idx ->
-                                val resultText = "Suggestion $idx"
-                                BasicComponent(
-                                    title = resultText,
-                                    onClick = {
-                                        searchValue = resultText
-                                        expanded = false
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
-                if (notExpanded) {
-                    basicComponentSection()
-                    checkboxSection()
-                    radioButtonSection()
-                    switchSection()
-                    arrowSection()
-                    dialogSection()
-                    bottomSheetSection()
-                    dropdownSection()
-                    spinnerSection()
-                    buttonSection()
-                    snackbarSection(snackbarHostState)
-                    progressIndicatorSection()
-                    textFieldSection()
-                    sliderSection()
-                    tabRowSection()
-                    numberPickerSection()
-                    colorPickerSection()
-                    cardSection()
-                    item { Spacer(modifier = Modifier.height(12.dp)) }
-                }
-            }
+    )
+
+    ScreenScaffold(
+        title = "Home",
+        onBack = null,
+        titleMode = ScreenTitleMode.Hero,
+        listState = lazyListState,
+        hazeState = hazeState,
+        itemSpacing = 0.dp,
+        bottomContentPadding = 32.dp + bottomBarOverlayHeight,
+        floatingBottomContent = {
             VerticalScrollBar(
                 adapter = rememberScrollBarAdapter(lazyListState),
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                trackPadding = contentPadding,
+                trackPadding = scrollBarTrackPadding,
             )
+        },
+    ) {
+        item(key = "searchbar") {
+            SmallTitle(text = "SearchBar")
+            SearchBar(
+                modifier = Modifier.padding(bottom = 12.dp),
+                inputField = {
+                    InputField(
+                        query = searchValue,
+                        onQueryChange = { searchValue = it },
+                        onSearch = { expanded = false },
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                        label = "Search",
+                    )
+                },
+                outsideEndAction = {
+                    Text(
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .clickable(
+                                interactionSource = null,
+                                indication = null,
+                                onClick = onCancelSearch,
+                            ),
+                        text = "Cancel",
+                        style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                        color = YubeixTheme.colorScheme.primary,
+                    )
+                },
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
+            ) {
+                Column {
+                    repeat(4) { idx ->
+                        val resultText = "Suggestion $idx"
+                        BasicComponent(
+                            title = resultText,
+                            onClick = {
+                                searchValue = resultText
+                                expanded = false
+                            },
+                        )
+                    }
+                }
+            }
+        }
+        if (notExpanded) {
+            basicComponentSection()
+            checkboxSection()
+            radioButtonSection()
+            switchSection()
+            arrowSection()
+            dialogSection()
+            bottomSheetSection()
+            dropdownSection()
+            spinnerSection()
+            buttonSection()
+            snackbarSection(snackbarHostState)
+            progressIndicatorSection()
+            textFieldSection()
+            sliderSection()
+            tabRowSection()
+            numberPickerSection()
+            colorPickerSection()
+            cardSection()
+            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
     }
 }
