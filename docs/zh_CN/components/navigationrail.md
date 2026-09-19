@@ -54,7 +54,7 @@ Row {
 | header                     | @Composable (ColumnScope.() -> Unit)?  | 头部内容（通常是 FAB 或 Logo）                | null                              | 否       |
 | color                      | Color                                  | NavigationRail 的背景颜色                     | MiuixTheme.colorScheme.surface    | 否       |
 | showDivider                | Boolean                                | 是否在 NavigationRail 和内容之间显示分割线    | true                              | 否       |
-| defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 应用默认的窗口边距      | true                              | 否       |
+| defaultWindowInsetsPadding | Boolean                                | 是否对 NavigationRail 的内容应用默认的窗口边距（背景与分割线始终延伸到系统栏下方） | true                              | 否       |
 | minWidth                   | Dp                                     | NavigationRail 的最小宽度                     | NavigationRailDefaults.MinWidth   | 否       |
 | mode                       | NavigationRailDisplayMode                  | 项目的显示模式                                | NavigationRailDisplayMode.IconAndText | 否       |
 | content                    | @Composable ColumnScope.()             | NavigationRail 的内容                         | -                                 | 是       |

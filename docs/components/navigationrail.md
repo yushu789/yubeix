@@ -54,7 +54,7 @@ Row {
 | header                     | @Composable (ColumnScope.() -> Unit)?  | Header content (e.g. FAB or Logo)             | null                              | No       |
 | color                      | Color                                  | Background color of the rail                  | MiuixTheme.colorScheme.surface    | No       |
 | showDivider                | Boolean                                | Show divider line between rail and content    | true                              | No       |
-| defaultWindowInsetsPadding | Boolean                                | Apply default window insets padding           | true                              | No       |
+| defaultWindowInsetsPadding | Boolean                                | Pad the rail's content by default window insets (background and divider always extend under the system bars) | true                              | No       |
 | minWidth                   | Dp                                     | Minimum width of the rail                     | NavigationRailDefaults.MinWidth   | No       |
 | mode                       | NavigationRailDisplayMode                  | Display mode for items                        | NavigationRailDisplayMode.IconAndText | No       |
 | content                    | @Composable ColumnScope.()             | The content of the rail                       | -                                 | Yes      |

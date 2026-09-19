@@ -724,6 +724,14 @@ object ScreenScaffoldDefaults {
 }
 
 /**
+ * Extra start inset applied to scene-leading chrome — currently the top bar's back button —
+ * because host-level chrome (for example a resident sidebar toggle pinned over the scene's
+ * leading corner) occupies that spot. Hosts provide it while the overlap exists; the default
+ * of zero leaves scene bars untouched.
+ */
+val LocalSceneLeadingInset = compositionLocalOf { 0.dp }
+
+/**
  * A full-screen scaffold with the app chrome top bar built in: a [Scaffold] whose content hosts a
  * large-title hero (or custom body), with [LargeTopAppBar] layered on top, spec-driven
  * [actions] and a [WindowListPopup] overflow [menuItems] menu.
@@ -789,14 +797,6 @@ object ScreenScaffoldDefaults {
  *   scroll position.
  * @param content List items of the built-in lazy list, below the hero title.
  */
-/**
- * Extra start inset applied to scene-leading chrome — currently the top bar's back button —
- * because host-level chrome (for example a resident sidebar toggle pinned over the scene's
- * leading corner) occupies that spot. Hosts provide it while the overlap exists; the default
- * of zero leaves scene bars untouched.
- */
-val LocalSceneLeadingInset = compositionLocalOf { 0.dp }
-
 @Composable
 fun ScreenScaffold(
     title: String,

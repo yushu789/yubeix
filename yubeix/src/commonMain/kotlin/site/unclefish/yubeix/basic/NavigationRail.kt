@@ -68,7 +68,9 @@ import site.unclefish.yubeix.theme.yubeixShape
  * @param dividerColor The color of the divider line between the [NavigationRail] and the content;
  *   defaults to the theme divider color.
  * @param showDivider Whether to show the divider line between the [NavigationRail] and the content.
- * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationRail].
+ * @param defaultWindowInsetsPadding whether to pad the [NavigationRail]'s content by the default
+ *   window insets (status bar, display cutout, navigation bar); the background and divider always
+ *   extend under the system bars regardless.
  * @param minWidth The width of the [NavigationRail].
  * @param mode The mode for displaying items in the [NavigationRail]. It can show icons, text or both.
  * @param content The content of the [NavigationRail], usually [NavigationRailItem]s.
@@ -86,25 +88,28 @@ fun NavigationRail(
     mode: NavigationRailDisplayMode = NavigationRailDisplayMode.IconAndText,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    // The background and divider paint the FULL window height (under the status/navigation
+    // bars); only the content is inset, so the sidebar reads as an edge-to-edge surface
+    // instead of starting below the status bar.
     Row(
         modifier = modifier
             .fillMaxHeight()
-            .then(
-                if (defaultWindowInsetsPadding) {
-                    Modifier
-                        .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Vertical))
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Start))
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Start))
-                } else {
-                    Modifier
-                },
-            )
             .background(color),
     ) {
         Column(
             modifier = Modifier
                 .width(minWidth)
                 .fillMaxHeight()
+                .then(
+                    if (defaultWindowInsetsPadding) {
+                        Modifier
+                            .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Vertical))
+                            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Start))
+                            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Start))
+                    } else {
+                        Modifier
+                    },
+                )
                 .verticalScroll(rememberScrollState())
                 .padding(
                     horizontal = NavigationRailDefaults.ItemHorizontalPadding,
@@ -317,7 +322,7 @@ object NavigationRailDefaults {
     val UnselectedPressedBackgroundAlpha = 0.08f
 
     /** The duration of the selection pill and content color transition, in milliseconds. */
-    const val SelectionAnimationDurationMillis = 150
+    val SelectionAnimationDurationMillis = 150
 }
 
 /**
