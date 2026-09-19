@@ -914,12 +914,16 @@ fun ScreenScaffold(
     // observable state on the slot written by the host, so the scaffold's flip to (or from)
     // donating lands in its own pass; at transition start the inline bar may therefore stay one
     // extra frame under the overlay's copy - identical pixels - instead of there being a frame
-    // with no bar at all.
+    // with no bar at all. A scene with its hero (large) title still on screen is exempt: it has
+    // no visible bar to hand over, and a pair with such a scene keeps both bars sliding with
+    // their scenes - the exact pre-shared-top-bar behavior.
     val sceneTopBarSlot = LocalSceneTopBarSlot.current
     val sceneTopBarNesting = LocalSceneTopBarNesting.current
+    val heroTitleShown = titleMode.showsHeroTitle && resolvedCollapsedTitleProgress <= 0f
     val donatesTopBar = sceneTopBarSlot != null &&
         sceneTopBarSlot.inOverlay &&
-        sceneTopBarNesting == 0
+        sceneTopBarNesting == 0 &&
+        !heroTitleShown
     val chromeTopBar: @Composable BoxScope.() -> Unit = {
         ScreenChromeTopBar(
             title = title,
@@ -960,6 +964,7 @@ fun ScreenScaffold(
     // transition ends so the stale lambda is not drawn anywhere. The write happens during
     // composition, before the host overlay (composed after the scenes) reads it.
     if (sceneTopBarSlot != null && sceneTopBarNesting == 0) {
+        sceneTopBarSlot.heroVisible = heroTitleShown
         sceneTopBarSlot.content = if (donatesTopBar) chromeTopBar else null
         // This scene has (re)donated its bar - the overlay may now draw the pair.
         sceneTopBarSlot.awaitingDonation = false

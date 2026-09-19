@@ -65,6 +65,14 @@ internal class SharedTopBarSlot {
      * to the pre-transition frame.
      */
     var awaitingDonation by mutableStateOf(false)
+
+    /**
+     * Whether the scene currently shows its hero (large) title instead of a collapsed chrome
+     * bar. A scene with the hero title on screen has no visible bar to hand over, so the pair
+     * must not share: both bars keep sliding with their scenes, exactly as if the shared
+     * top-bar transition were off. Mirrored from the scene's scaffold on every composition.
+     */
+    var heroVisible by mutableStateOf(false)
 }
 
 /** One [SharedTopBarSlot] per live scene id, for the lifetime of the host's composition. */
@@ -141,11 +149,16 @@ internal fun SharedTopBarOverlay(
     // before BOTH scenes have donated would flash whichever bar arrived first. Until then the
     // overlay draws nothing and the scenes keep their inline bars (identical pixels).
     val pairReady = incomingSlot.awaitingDonation.not() && outgoingSlot?.awaitingDonation != true
+    // A pair with the hero (large) title still visible on either side does not share: that side
+    // has no visible bar to hand over, so both bars keep sliding with their scenes - the exact
+    // pre-shared-top-bar behavior.
+    val shareAllowed = !transitionActive ||
+        (outgoingSlot?.heroVisible != true && !incomingSlot.heroVisible)
     // Publish the pickup state before the early return so a scaffold donating into an overlay
     // that currently draws nothing (e.g. the first pass of a fresh transition pair) always
     // learns that its bar is not being drawn yet and keeps its inline copy.
-    val drawOutgoing = pairReady && outgoingBar != null
-    val drawIncoming = pairReady && incomingBar != null
+    val drawOutgoing = pairReady && shareAllowed && outgoingBar != null
+    val drawIncoming = pairReady && shareAllowed && incomingBar != null
     outgoingSlot?.overlayPickedUp = drawOutgoing
     incomingSlot.overlayPickedUp = drawIncoming
     if (!drawOutgoing && !drawIncoming) {

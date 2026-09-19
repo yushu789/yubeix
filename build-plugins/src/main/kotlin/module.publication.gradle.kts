@@ -22,7 +22,7 @@ val javadocJar by tasks.registering(Jar::class) {
 
 val githubUrl = "https://github.com"
 val githubPkgUrl = "https://maven.pkg.github.com"
-val owner = "unclefish"
+val owner = "yushu789"
 val repository = "yubeix"
 val projectUrl = "$githubUrl/$owner/$repository"
 val githubPackagesUrl = "$githubPkgUrl/$owner/$repository"
@@ -84,14 +84,15 @@ publishing {
                 url.set("$projectUrl/issues")
             }
             scm {
-                connection.set("$projectUrl.git")
+                connection.set("scm:git:$projectUrl.git")
+                developerConnection.set("scm:git:$projectUrl.git")
                 url.set(projectUrl)
             }
             developers {
                 developer {
-                    id.set("compose-miuix-ui")
-                    name.set("compose-miuix-ui")
-                    url.set("$githubUrl/compose-miuix-ui")
+                    id.set("yushu789")
+                    name.set("yushu789")
+                    url.set("$githubUrl/yushu789")
                 }
             }
         }

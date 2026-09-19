@@ -5,10 +5,9 @@ on:
     branches: ["main"]
     tags: ["*"]
     paths:
-      - "miuix/**"
-      - "miuix-icons/**"
-      - "miuix-navigation3-ui/**"
-      - "build-plugin/**"
+      - "yubeix/**"
+      - "yubeix-icons/**"
+      - "build-plugins/**"
       - "gradle/**"
       - "settings.gradle.kts"
       - "build.gradle.kts"

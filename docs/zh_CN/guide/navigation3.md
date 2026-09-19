@@ -85,6 +85,6 @@ SceneDisplay(
 | predictiveBackEnabled  | Boolean                                      | false        | 将系统返回手势接入前台场景的实时拖动（在平台上报进度的设备上）                             |
 | sharedTransitionEnabled| (from: T?, to: T?) -> Boolean                | { false }    | 为指定路由组合启用共享元素动效                                                             |
 | sharedTransitionElastic| (from: T?, to: T?) -> Boolean                | { false }    | 其中保留弹性落位的共享元素组合                                                             |
-| sharedTopBarEnabled    | Boolean                                      | false        | 转场期间将成对场景的标题栏提取到窗口顶部统一绘制（iOS 导航栏行为），而不是随场景滑动。要求场景使用 `ScreenScaffold` 标题栏；没有标题栏的场景不受影响 |
+| sharedTopBarEnabled    | Boolean                                      | false        | 转场期间将成对场景的标题栏提取到窗口顶部统一绘制（iOS 导航栏行为），而不是随场景滑动。要求场景使用 `ScreenScaffold` 标题栏；没有标题栏的场景不受影响。任一方仍在显示大标题（`ScreenTitleMode.Hero` 且折叠标题栏未出现）时不共享，双方标题栏照常随页面滑动 |
 | customSceneTransform   | (scene, followingScenes, zIndex) -> Modifier? | null         | 用自定义变换替换标准的页面滑动（例如水平引导页翻页）                                       |
 | sceneCornerClipEnabled | Boolean                                      | true         | 推入/弹出转场期间为顶层场景应用圆角裁剪；当界面旁驻留其他元素（如常驻侧栏）时应关闭        |

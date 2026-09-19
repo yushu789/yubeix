@@ -80,7 +80,10 @@ fun <T : NavKey> SceneDisplay(
     sharedTransitionElastic: (from: T?, to: T?) -> Boolean = { _, _ -> false },
     // Whether the pair's chrome bars are drawn once, fixed at the top of the window, during a
     // transition (the iOS navigation-bar behavior) instead of sliding with their scenes. Scenes
-    // without a [ScreenScaffold] chrome bar are unaffected.
+    // without a [ScreenScaffold] chrome bar are unaffected, and a pair with either scene still
+    // showing its hero (large) title - [site.unclefish.yubeix.basic.ScreenTitleMode.Hero] before
+    // the bar collapses - does not share: both bars keep sliding with their scenes, exactly as
+    // with this flag off.
     sharedTopBarEnabled: Boolean = false,
     customSceneTransform: (
         (
