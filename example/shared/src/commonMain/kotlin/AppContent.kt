@@ -174,9 +174,6 @@ fun AppContent(
                         padding = padding,
                     )
                 }
-                entry<Route.MultiScaffoldTest> {
-                    MultiScaffoldTestPage(padding = padding)
-                }
             }
         }
 

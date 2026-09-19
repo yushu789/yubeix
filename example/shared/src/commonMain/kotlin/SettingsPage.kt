@@ -283,18 +283,10 @@ fun SettingsPage(
                     title = "Navigate Test",
                     onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                 )
-                SuperArrow(
-                    title = "Multi-Scaffold Test",
-                    onClick = { navigator.push(Route.MultiScaffoldTest) },
-                )
             }
             // Row descriptions moved out of the rows, one caption per row in row order.
             SectionCaption(
                 text = "Navigate to a Navigate Test Page",
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-            SectionCaption(
-                text = "Test popup positioning with side-by-side Scaffolds",
                 modifier = Modifier.padding(bottom = 12.dp),
             )
         }

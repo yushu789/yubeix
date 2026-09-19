@@ -3,15 +3,13 @@
 
 @file:OptIn(ExperimentalScrollBarApi::class)
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -28,26 +26,36 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kyant.shapes.UnevenRoundedRectangle
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import site.unclefish.yubeix.basic.PullToRefresh
 import site.unclefish.yubeix.basic.ScreenScaffold
 import site.unclefish.yubeix.basic.ScreenScaffoldDefaults
 import site.unclefish.yubeix.basic.ScreenTitleMode
+import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
 import site.unclefish.yubeix.basic.rememberPullToRefreshState
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
+import site.unclefish.yubeix.component.OverscrollTitle
+import site.unclefish.yubeix.component.overscrollTitleTextStyle
 import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.extra.WindowDropdown
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
+import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.YubeixTheme.colorScheme
 
-private val DropdownListTopShape = UnevenRoundedRectangle(topStart = 16.dp, topEnd = 16.dp)
-private val DropdownListBottomShape = UnevenRoundedRectangle(bottomStart = 16.dp, bottomEnd = 16.dp)
+// ScreenScaffold's private DefaultScreenHeroTitlePadding is the reference for this inset; body
+// mode pages replicate it to keep the hero title visually aligned with the built-in list path.
+private val DropdownHeroTitlePadding = PaddingValues(
+    start = 12.dp,
+    end = 16.dp,
+    top = 4.dp,
+    bottom = 4.dp,
+)
 
 @Composable
 fun DropdownPage(
@@ -73,6 +81,13 @@ fun DropdownPage(
     // ScreenScaffold marks the scrolling content as the haze source itself, so the chrome bar can
     // frost it without a manual hazeSource on the list.
     val hazeState = rememberHazeState()
+    val density = LocalDensity.current
+    // The hero title rests right below the chrome bar, matching the scaffold's own hero geometry:
+    // status bar inset + chrome bar height, measured in window pixels for OverscrollTitle.
+    val heroTitleRestingTop =
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding() +
+            ScreenScaffoldDefaults.TopBarVisualHeight
+    val heroTitleRestingTopInWindowPx = with(density) { heroTitleRestingTop.toPx() }
     // The compact shell's bottom bar floats over the page, so its height joins the content's
     // bottom padding; the wide pane has no bottom bar and the scaffold's own inset is enough.
     val bottomBarOverlayHeight = if (isWideScreen) 0.dp else padding.calculateBottomPadding()
@@ -104,7 +119,9 @@ fun DropdownPage(
         },
         bodyContent = { contentModifier ->
             // PullToRefresh wraps the scrolling content; the modifier carries the haze source
-            // marking for the chrome bar's frost.
+            // marking for the chrome bar's frost. Body mode does not get an automatic hero, so
+            // the page renders its own with OverscrollTitle; the scaffold's collapsed title is
+            // driven from the hoisted lazyListState shared with the list below.
             PullToRefresh(
                 isRefreshing = isRefreshing,
                 onRefresh = { isRefreshing = true },
@@ -116,42 +133,49 @@ fun DropdownPage(
                     state = lazyListState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = listContentPadding,
+                    // Mirrors the built-in list's itemSpacing so the hero title keeps the same
+                    // distance to the first group as on content-path pages.
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(
-                        count = dropdownCount,
-                        key = { "dropdown_$it" },
-                    ) { i ->
-                        val isFirst = i == 0
-                        val isLast = i == dropdownCount - 1
-                        val shape = when {
-                            isFirst -> DropdownListTopShape
-                            isLast -> DropdownListBottomShape
-                            else -> RectangleShape
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(shape)
-                                .background(colorScheme.surfaceContainer),
+                    item(key = "dropdownHero") {
+                        OverscrollTitle(
+                            restingTopInWindowPx = heroTitleRestingTopInWindowPx,
                         ) {
-                            if (i % 2 == 0) {
-                                SuperDropdown(
-                                    title = "SuperDropdown ${i + 1}",
-                                    items = dropdownOptions,
-                                    selectedIndex = dropdownSelectedOption,
-                                    onSelectedIndexChange = { newOption ->
-                                        dropdownSelectedOption = newOption
-                                    },
-                                )
-                            } else {
-                                WindowDropdown(
-                                    title = "WindowDropdown ${i + 1}",
-                                    items = dropdownOptions,
-                                    selectedIndex = dropdownSelectedOption,
-                                    onSelectedIndexChange = { newOption ->
-                                        dropdownSelectedOption = newOption
-                                    },
-                                )
+                            Text(
+                                text = "Dropdown",
+                                style = overscrollTitleTextStyle(
+                                    YubeixTheme.textStyles.title1.copy(fontWeight = FontWeight.SemiBold),
+                                ),
+                                color = colorScheme.onSurface,
+                                modifier = Modifier.padding(DropdownHeroTitlePadding),
+                            )
+                        }
+                    }
+                    item(key = "dropdownGroup") {
+                        // SuperGroup is the built-in grouped container: it draws the rounded card
+                        // background and the dividers between rows, so no per-row shapes are
+                        // needed. Its SubcomposeLayout measures fine inside a lazy list item.
+                        SuperGroup {
+                            repeat(dropdownCount) { i ->
+                                if (i % 2 == 0) {
+                                    SuperDropdown(
+                                        title = "SuperDropdown ${i + 1}",
+                                        items = dropdownOptions,
+                                        selectedIndex = dropdownSelectedOption,
+                                        onSelectedIndexChange = { newOption ->
+                                            dropdownSelectedOption = newOption
+                                        },
+                                    )
+                                } else {
+                                    WindowDropdown(
+                                        title = "WindowDropdown ${i + 1}",
+                                        items = dropdownOptions,
+                                        selectedIndex = dropdownSelectedOption,
+                                        onSelectedIndexChange = { newOption ->
+                                            dropdownSelectedOption = newOption
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

@@ -780,7 +780,12 @@ object ScreenScaffoldDefaults {
  * @param onTitleClick Invoked on collapsed title clicks; defaults to scrolling the list to top.
  * @param heroTitle The hero title content; receives the modifier to apply to it.
  * @param floatingBottomContent Content overlaid above the bottom edge (FABs, snackbars, bars).
- * @param bodyContent Custom body replacing the built-in lazy list; receives the content modifier.
+ * @param bodyContent Custom body replacing the built-in lazy list; receives the content modifier
+ *   (already marked as the haze source when blurring is active). The scaffold does not inject the
+ *   hero title into a custom body: with [ScreenTitleMode.Hero], render the hero yourself as the
+ *   body's first content using [OverscrollTitle] with [overscrollTitleTextStyle], and pass the
+ *   same [listState] to your scrolling container so the collapsed title is driven from the list's
+ *   scroll position.
  * @param content List items of the built-in lazy list, below the hero title.
  */
 @Composable
