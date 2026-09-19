@@ -87,6 +87,8 @@ import site.unclefish.yubeix.extra.WindowListPopup
 import site.unclefish.yubeix.icon.cupertino.CupertinoIcons
 import site.unclefish.yubeix.icon.cupertino.outlined.Checkmark
 import site.unclefish.yubeix.icon.cupertino.outlined.Ellipsis
+import site.unclefish.yubeix.navigation.LocalSceneTopBarNesting
+import site.unclefish.yubeix.navigation.LocalSceneTopBarSlot
 import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.utils.LocalDialogStates
@@ -905,120 +907,155 @@ fun ScreenScaffold(
         null
     }
 
+    // The shared top-bar transition: while the scene takes part in one, its outermost scaffold
+    // hands the chrome bar to the host-level overlay and drops the inline copy, so the bar stays
+    // fixed at the top of the window while the scene slides under it. Nested scaffolds are
+    // content-level chrome - they keep their inline bars and move with the page. `inOverlay` is
+    // observable state on the slot written by the host, so the scaffold's flip to (or from)
+    // donating lands in its own pass; at transition start the inline bar may therefore stay one
+    // extra frame under the overlay's copy - identical pixels - instead of there being a frame
+    // with no bar at all.
+    val sceneTopBarSlot = LocalSceneTopBarSlot.current
+    val sceneTopBarNesting = LocalSceneTopBarNesting.current
+    val donatesTopBar = sceneTopBarSlot != null &&
+        sceneTopBarSlot.inOverlay &&
+        sceneTopBarNesting == 0
+    val chromeTopBar: @Composable BoxScope.() -> Unit = {
+        ScreenChromeTopBar(
+            title = title,
+            onBack = onBack,
+            subtitle = subtitle,
+            modifier = Modifier.fillMaxSize(),
+            barModifier = if (topBarMaxWidth != null) {
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .widthIn(max = topBarMaxWidth)
+                    .fillMaxWidth()
+                    .height(topBarHeight)
+                    .clipToBounds()
+                    .zIndex(1f)
+            } else {
+                Modifier
+                    .fillMaxWidth()
+                    .height(topBarHeight)
+                    .clipToBounds()
+                    .zIndex(1f)
+            },
+            actions = actions,
+            menuItems = menuItems,
+            startContent = topBarStartContent,
+            centerContent = topBarCenterContent,
+            topInset = topInset,
+            titleAlpha = resolvedCollapsedTitleProgress,
+            backgroundVisibilityProgress = resolvedCollapsedTitleProgress,
+            contentVisibilityProgress = topBarContentVisibilityProgress,
+            contentOffsetY = topBarContentOffsetY,
+            onTitleClick = resolvedOnTitleClick,
+            titleColor = titleColor,
+            hazeState = chromeHazeState.takeIf { shouldProvideChromeHazeSource },
+            maxVisibleActions = topBarMaxVisibleActions,
+        )
+    }
+    // Depth zero owns the slot's lifecycle: donate while in the overlay, clear the moment the
+    // transition ends so the stale lambda is not drawn anywhere. The write happens during
+    // composition, before the host overlay (composed after the scenes) reads it.
+    if (sceneTopBarSlot != null && sceneTopBarNesting == 0) {
+        sceneTopBarSlot.content = if (donatesTopBar) chromeTopBar else null
+        // This scene has (re)donated its bar - the overlay may now draw the pair.
+        sceneTopBarSlot.awaitingDonation = false
+    }
+    // The inline copy stays until the overlay has actually composed the donated bar
+    // (overlayPickedUp). The overlay's scope and this scope can execute in either order within
+    // a recomposition pass; dropping the inline copy unconditionally could leave one frame
+    // where neither the overlay nor this scaffold draws the bar.
+    val suppressInlineTopBar = donatesTopBar && sceneTopBarSlot?.overlayPickedUp == true
+
     Scaffold(modifier = modifier, containerColor = Color.Transparent) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned { coordinates ->
-                    scaffoldTopInWindowPx = coordinates.positionInWindow().y
-                },
-        ) {
+        CompositionLocalProvider(LocalSceneTopBarNesting provides sceneTopBarNesting + 1) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(backgroundColor),
+                    .onGloballyPositioned { coordinates ->
+                        scaffoldTopInWindowPx = coordinates.positionInWindow().y
+                    },
             ) {
-                val contentModifier = if (contentMaxWidth != null) {
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .widthIn(max = contentMaxWidth)
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .then(
-                            if (shouldProvideChromeHazeSource) {
-                                Modifier.hazeSource(state = chromeHazeState)
-                            } else {
-                                Modifier
-                            },
-                        )
-                } else {
-                    Modifier
+                Box(
+                    modifier = Modifier
                         .fillMaxSize()
-                        .then(
-                            if (shouldProvideChromeHazeSource) {
-                                Modifier.hazeSource(state = chromeHazeState)
-                            } else {
-                                Modifier
-                            },
-                        )
-                }
-                val customBodyContent = bodyContent
-                if (customBodyContent != null) {
-                    customBodyContent(contentModifier)
-                } else {
-                    LazyColumn(
-                        state = resolvedListState,
-                        modifier = contentModifier,
-                        contentPadding = PaddingValues(
-                            top = effectiveContentTopPadding,
-                            bottom = bottomContentPadding + paddingValues.calculateBottomPadding(),
-                            start = horizontalContentPadding,
-                            end = horizontalContentPadding,
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(itemSpacing),
-                    ) {
-                        if (titleMode.showsHeroTitle) {
-                            item {
-                                OverscrollTitle(
-                                    restingTopInWindowPx = heroTitleRestingTopInWindowPx,
-                                    enabled = heroTitleOverscrollScale,
-                                    modifier = Modifier.onBottomPositionInWindowChanged {
-                                        heroTitleBottomInWindowPx = it
-                                    },
-                                ) {
-                                    heroTitle(Modifier.padding(heroTitlePadding))
+                        .background(backgroundColor),
+                ) {
+                    val contentModifier = if (contentMaxWidth != null) {
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .widthIn(max = contentMaxWidth)
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .then(
+                                if (shouldProvideChromeHazeSource) {
+                                    Modifier.hazeSource(state = chromeHazeState)
+                                } else {
+                                    Modifier
+                                },
+                            )
+                    } else {
+                        Modifier
+                            .fillMaxSize()
+                            .then(
+                                if (shouldProvideChromeHazeSource) {
+                                    Modifier.hazeSource(state = chromeHazeState)
+                                } else {
+                                    Modifier
+                                },
+                            )
+                    }
+                    val customBodyContent = bodyContent
+                    if (customBodyContent != null) {
+                        customBodyContent(contentModifier)
+                    } else {
+                        LazyColumn(
+                            state = resolvedListState,
+                            modifier = contentModifier,
+                            contentPadding = PaddingValues(
+                                top = effectiveContentTopPadding,
+                                bottom = bottomContentPadding + paddingValues.calculateBottomPadding(),
+                                start = horizontalContentPadding,
+                                end = horizontalContentPadding,
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                        ) {
+                            if (titleMode.showsHeroTitle) {
+                                item {
+                                    OverscrollTitle(
+                                        restingTopInWindowPx = heroTitleRestingTopInWindowPx,
+                                        enabled = heroTitleOverscrollScale,
+                                        modifier = Modifier.onBottomPositionInWindowChanged {
+                                            heroTitleBottomInWindowPx = it
+                                        },
+                                    ) {
+                                        heroTitle(Modifier.padding(heroTitlePadding))
+                                    }
                                 }
                             }
-                        }
 
-                        content()
+                            content()
 
-                        if (showTrailingFiller) {
-                            paddingItem(
-                                state = resolvedListState,
-                                minimumScrollDistance = minimumScrollDistance,
-                            )
+                            if (showTrailingFiller) {
+                                paddingItem(
+                                    state = resolvedListState,
+                                    minimumScrollDistance = minimumScrollDistance,
+                                )
+                            }
                         }
                     }
                 }
+
+                // Suppressed while the bar is drawn by the host-level shared top-bar overlay.
+                if (!suppressInlineTopBar) {
+                    chromeTopBar()
+                }
+
+                floatingBottomContent()
             }
-
-            ScreenChromeTopBar(
-                title = title,
-                onBack = onBack,
-                subtitle = subtitle,
-                modifier = Modifier.fillMaxSize(),
-                barModifier = if (topBarMaxWidth != null) {
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .widthIn(max = topBarMaxWidth)
-                        .fillMaxWidth()
-                        .height(topBarHeight)
-                        .clipToBounds()
-                        .zIndex(1f)
-                } else {
-                    Modifier
-                        .fillMaxWidth()
-                        .height(topBarHeight)
-                        .clipToBounds()
-                        .zIndex(1f)
-                },
-                actions = actions,
-                menuItems = menuItems,
-                startContent = topBarStartContent,
-                centerContent = topBarCenterContent,
-                topInset = topInset,
-                titleAlpha = resolvedCollapsedTitleProgress,
-                backgroundVisibilityProgress = resolvedCollapsedTitleProgress,
-                contentVisibilityProgress = topBarContentVisibilityProgress,
-                contentOffsetY = topBarContentOffsetY,
-                onTitleClick = resolvedOnTitleClick,
-                titleColor = titleColor,
-                hazeState = chromeHazeState.takeIf { shouldProvideChromeHazeSource },
-                maxVisibleActions = topBarMaxVisibleActions,
-            )
-
-            floatingBottomContent()
         }
     }
 }

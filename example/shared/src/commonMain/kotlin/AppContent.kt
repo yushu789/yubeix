@@ -3,11 +3,11 @@
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
@@ -16,11 +16,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,6 +39,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -53,10 +52,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -75,8 +75,8 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import site.unclefish.yubeix.basic.FabPosition
 import site.unclefish.yubeix.basic.FloatingActionButton
@@ -86,6 +86,7 @@ import site.unclefish.yubeix.basic.FloatingNavigationBarItem
 import site.unclefish.yubeix.basic.FloatingToolbar
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
+import site.unclefish.yubeix.basic.LocalSceneLeadingInset
 import site.unclefish.yubeix.basic.NavigationBar
 import site.unclefish.yubeix.basic.NavigationBarDisplayMode
 import site.unclefish.yubeix.basic.NavigationBarItem
@@ -93,7 +94,6 @@ import site.unclefish.yubeix.basic.NavigationItem
 import site.unclefish.yubeix.basic.NavigationRail
 import site.unclefish.yubeix.basic.NavigationRailDefaults
 import site.unclefish.yubeix.basic.NavigationRailDisplayMode
-import site.unclefish.yubeix.basic.LocalSceneLeadingInset
 import site.unclefish.yubeix.basic.NavigationRailItem
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.SnackbarHost
@@ -134,7 +134,7 @@ private val SidebarToggleSlotSize = 40.dp
 
 // Marker string only: lets a build be proven fresh by grepping the APK's dex, since
 // Gradle's incremental compile can otherwise hand back a stale artifact.
-private const val SidebarRevealMarker = "railTwoModes"
+private const val SIDEBAR_REVEAL_MARKER = "railTwoModes"
 
 enum class FloatingNavigationBarAlignment(val value: Int) {
     Center(0),
@@ -225,6 +225,7 @@ fun AppContent(
                 navigationPath = navigationPath,
                 entryProvider = entryProvider,
                 predictiveBackEnabled = true,
+                sharedTopBarEnabled = true,
             )
         }
     }
@@ -423,6 +424,7 @@ private fun WideScreenAppLayout(
                         navigationPath = navigationPath,
                         entryProvider = entryProvider,
                         predictiveBackEnabled = true,
+                        sharedTopBarEnabled = true,
                         sceneCornerClipEnabled = !showSidebar,
                     )
                 }

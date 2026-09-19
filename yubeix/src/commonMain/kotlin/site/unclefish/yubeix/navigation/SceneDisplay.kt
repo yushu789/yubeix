@@ -50,6 +50,9 @@ import kotlin.time.TimeSource
  * - [sharedTransitionEnabled]/[sharedTransitionElastic] opt route pairs into shared-element
  *   motion; [customSceneTransform] lets a host substitute its own transform for the standard
  *   page slide on selected transitions (a horizontal onboarding slide, for instance).
+ * - [sharedTopBarEnabled] turns on the shared top-bar transition: instead of each scene's chrome
+ *   bar sliding with its page, the pair's bars are drawn once, fixed at the top of the window,
+ *   and cross-fade on the transition progress while the content moves under them.
  *
  * Hosts declare destinations with [entryProvider] and hold the back stack in a [NavigationPath]:
  * ```
@@ -75,6 +78,10 @@ fun <T : NavKey> SceneDisplay(
     // rides the plain no-bounce springs: a terminal overshoot reads as a second jump on small
     // sources, however it is tuned.
     sharedTransitionElastic: (from: T?, to: T?) -> Boolean = { _, _ -> false },
+    // Whether the pair's chrome bars are drawn once, fixed at the top of the window, during a
+    // transition (the iOS navigation-bar behavior) instead of sliding with their scenes. Scenes
+    // without a [ScreenScaffold] chrome bar are unaffected.
+    sharedTopBarEnabled: Boolean = false,
     customSceneTransform: (
         (
             scene: Scene<T>,
@@ -94,6 +101,7 @@ fun <T : NavKey> SceneDisplay(
 
     val saveableStateHolder = rememberSaveableStateHolder()
     val sceneCornerRadius = rememberDeviceCornerRadius()
+    val sharedTopBarSlots = remember { SharedTopBarSlots() }
     val visibleScenes = scenes.filter { it.loadingState > SceneLoadingState.None }
     val retainedSceneIds = scenes.map { scene -> scene.id }.toSet()
     var knownSceneIds by remember { mutableStateOf(retainedSceneIds) }
@@ -107,6 +115,7 @@ fun <T : NavKey> SceneDisplay(
             saveableStateHolder.removeState(id)
             sceneViewModelStores.remove(id)?.clear()
         }
+        sharedTopBarSlots.prune(retainedSceneIds)
         knownSceneIds = retainedSceneIds
     }
 
@@ -238,6 +247,22 @@ fun <T : NavKey> SceneDisplay(
                         )
                 }
 
+                val sceneTopBarSlot = sharedTopBarSlots.slotFor(scene.id).takeIf { sharedTopBarEnabled }
+                // Written here, in the host's own recomposition scope, the moment the transition
+                // state is computed. The observing scaffold picks it up in its next pass; if that
+                // is one frame late the inline bar simply stays one extra frame - identical pixels
+                // - instead of leaving a frame with no bar drawn anywhere. On transition entry the
+                // slot also re-arms `awaitingDonation`, so the overlay holds off drawing until
+                // both scenes of the pair have (re)donated - drawing a partial pair would flash
+                // whichever bar arrived first.
+                if (sceneTopBarSlot != null) {
+                    val wasInOverlay = sceneTopBarSlot.inOverlay
+                    sceneTopBarSlot.inOverlay = sceneTransitionActive
+                    if (sceneTransitionActive && !wasInOverlay) {
+                        sceneTopBarSlot.awaitingDonation = true
+                    }
+                }
+
                 RenderScene(
                     navigationPath = navigationPath,
                     scene = scene,
@@ -253,8 +278,56 @@ fun <T : NavKey> SceneDisplay(
                     sharedTransitionDirection = sharedDirection,
                     isTransitionBackground = sceneTransitionActive && scene === previousFrontScene,
                     isForeground = scene === frontScene,
+                    topBarSlot = sceneTopBarSlot,
                 )
             }
+        }
+
+        // The overlay stays up not only while the transition runs but until the scenes' scaffolds
+        // have taken their bars back (slot content cleared). The take-back happens in the
+        // scaffolds' own recomposition passes, which can lag the transition end by a frame;
+        // dropping the overlay earlier would leave a frame with no bar drawn anywhere.
+        val frontSlot = sharedTopBarSlots.slotFor(frontScene.id)
+        val backSlot = previousFrontScene?.let { sharedTopBarSlots.slotFor(it.id) }
+        val sharedTopBarOverlayActive = sharedTopBarEnabled &&
+            (transitionActive || frontSlot.content != null || backSlot?.content != null)
+        if (sharedTopBarOverlayActive) {
+            // Once the transition is over the pair dissolves and only the front scene's bar
+            // survives - on a push and on a pop alike. The two scaffolds clear their slots in
+            // unrelated passes; if the overlay went on drawing the outgoing slot during that
+            // window, the pass where one slot is already cleared and the other is not would
+            // flash a half pair - the previous screen's bar for a frame after a push, or a
+            // barless frame after a pop.
+            val outgoingScene = when {
+                !transitionActive -> null
+                isPopTransition -> frontScene
+                else -> previousFrontScene
+            }
+            val incomingScene = if (isPopTransition && transitionActive) previousFrontScene!! else frontScene
+            SharedTopBarOverlay(
+                slots = sharedTopBarSlots,
+                outgoingSceneId = outgoingScene?.id,
+                incomingSceneId = incomingScene.id,
+                transitionActive = transitionActive,
+                // Single-sided fade: the bar that stays at this endpoint is drawn fully opaque
+                // underneath, and only the arriving (push) or leaving (pop) bar fades above it.
+                // Fading both bars together would thin the composite cover over the sliding scene
+                // and read as the frosted bar blinking at every transition edge. The front scene
+                // carries the transition progress: on a push it grows 0 -> 1 and the incoming bar
+                // fades in with it; on a pop it runs 1 -> 0 and the outgoing bar fades out with
+                // it. Clamped, because the bar swap must land exactly on its endpoints - the
+                // elastic overshoot belongs to the pages, not the chrome.
+                outgoingAlpha = {
+                    val progress = frontScene.progress.coerceIn(0f, 1f)
+                    if (isPopTransition) progress else 1f
+                },
+                incomingAlpha = {
+                    val progress = frontScene.progress.coerceIn(0f, 1f)
+                    if (isPopTransition) 1f else progress
+                },
+                incomingOnTop = !isPopTransition,
+                zIndex = renderScenes.size * 2f,
+            )
         }
     }
 }
@@ -518,6 +591,7 @@ private fun <T : NavKey> RenderScene(
     sharedTransitionDirection: SharedTransitionDirection,
     isTransitionBackground: Boolean,
     isForeground: Boolean,
+    topBarSlot: SharedTopBarSlot?,
     modifier: Modifier = Modifier,
 ) {
     val entry = remember(scene.route, entryProvider) {
@@ -556,6 +630,7 @@ private fun <T : NavKey> RenderScene(
                     LocalSharedTransitionDirection provides sharedTransitionDirection,
                     LocalHostIsTransitionBackground provides isTransitionBackground,
                     LocalSceneIsForeground provides isForeground,
+                    LocalSceneTopBarSlot provides topBarSlot,
                 ) {
                     entry.Content()
                 }
