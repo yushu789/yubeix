@@ -3,11 +3,8 @@
 
 package site.unclefish.yubeix.theme
 
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -16,41 +13,21 @@ import com.kyant.shapes.RoundedRectangle
 import com.kyant.shapes.UnevenRoundedRectangle
 
 /**
- * CompositionLocal to control whether Yubeix components use G2-continuity smooth rounded corners
- * (from com.kyant.shapes) or standard [RoundedCornerShape].
- *
- * When `true` (default), components use [RoundedRectangle] / [Capsule] for smoother corners.
- * When `false`, components fall back to [RoundedCornerShape] / [CircleShape] for better HWUI performance.
- */
-internal val LocalSmoothRounding = staticCompositionLocalOf { true }
-
-/**
- * Returns a [RoundedRectangle] shape when smooth rounding is enabled,
- * or a [RoundedCornerShape] when disabled.
+ * Returns a kyant [RoundedRectangle] with G2-continuous corners, the standard yubeix corner
+ * treatment. kyant shapes default to [com.kyant.shapes.RoundedCornerStyle.Continuous], so the
+ * corners stay round instead of the sharper miuix shape.
  */
 @Composable
-fun yubeixShape(cornerRadius: Dp): Shape {
-    val smooth = YubeixTheme.smoothRounding
-    return remember(cornerRadius, smooth) {
-        if (smooth) RoundedRectangle(cornerRadius) else RoundedCornerShape(cornerRadius)
-    }
-}
+fun yubeixShape(cornerRadius: Dp): Shape = remember(cornerRadius) { RoundedRectangle(cornerRadius) }
 
 /**
- * Returns a [Capsule] shape when smooth rounding is enabled,
- * or a [CircleShape] when disabled.
+ * Returns a kyant [Capsule] (stadium) shape.
  */
 @Composable
-fun yubeixCapsuleShape(): Shape {
-    val smooth = YubeixTheme.smoothRounding
-    return remember(smooth) {
-        if (smooth) Capsule() else CircleShape
-    }
-}
+fun yubeixCapsuleShape(): Shape = remember { Capsule() }
 
 /**
- * Returns an [UnevenRoundedRectangle] shape when smooth rounding is enabled,
- * or a [RoundedCornerShape] with individual corner radii when disabled.
+ * Returns a kyant [UnevenRoundedRectangle] with G2-continuous corners.
  */
 @Composable
 fun yubeixUnevenShape(
@@ -58,23 +35,11 @@ fun yubeixUnevenShape(
     topEnd: Dp = 0.dp,
     bottomEnd: Dp = 0.dp,
     bottomStart: Dp = 0.dp,
-): Shape {
-    val smooth = YubeixTheme.smoothRounding
-    return remember(topStart, topEnd, bottomEnd, bottomStart, smooth) {
-        if (smooth) {
-            UnevenRoundedRectangle(
-                topStart = topStart,
-                topEnd = topEnd,
-                bottomEnd = bottomEnd,
-                bottomStart = bottomStart,
-            )
-        } else {
-            RoundedCornerShape(
-                topStart = topStart,
-                topEnd = topEnd,
-                bottomEnd = bottomEnd,
-                bottomStart = bottomStart,
-            )
-        }
-    }
+): Shape = remember(topStart, topEnd, bottomEnd, bottomStart) {
+    UnevenRoundedRectangle(
+        topStart = topStart,
+        topEnd = topEnd,
+        bottomEnd = bottomEnd,
+        bottomStart = bottomStart,
+    )
 }

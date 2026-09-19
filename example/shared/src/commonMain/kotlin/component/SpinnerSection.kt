@@ -15,10 +15,10 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.SpinnerEntry
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.extra.SuperSpinner
 import site.unclefish.yubeix.extra.WindowSpinner
 
@@ -82,7 +82,7 @@ fun LazyListScope.spinnerSection() {
         }
 
         SmallTitle(text = "Spinner")
-        Card(
+        SuperGroup(
             modifier = Modifier
                 .padding(bottom = 12.dp),
         ) {

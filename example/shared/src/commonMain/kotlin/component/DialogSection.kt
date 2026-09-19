@@ -17,13 +17,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.basic.ButtonDefaults
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.TextButton
 import site.unclefish.yubeix.extra.CupertinoAlertAction
 import site.unclefish.yubeix.extra.CupertinoAlertActionStyle
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperDialog
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.extra.WindowDialog
 import site.unclefish.yubeix.theme.LocalDismissState
 
@@ -35,7 +35,7 @@ fun LazyListScope.dialogSection() {
         var windowDialogHoldDown by remember { mutableStateOf(false) }
 
         SmallTitle(text = "Dialog")
-        Card(
+        SuperGroup(
             modifier = Modifier
                 .padding(bottom = 12.dp),
         ) {

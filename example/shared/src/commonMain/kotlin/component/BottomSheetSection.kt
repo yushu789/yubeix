@@ -22,8 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.basic.Card
-import site.unclefish.yubeix.basic.CardDefaults
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
 import site.unclefish.yubeix.basic.Slider
@@ -57,7 +55,7 @@ fun LazyListScope.bottomSheetSection() {
         var bottomSheetSuperSwitchState by remember { mutableStateOf(true) }
 
         SmallTitle(text = "BottomSheet")
-        Card(
+        SuperGroup(
             modifier = Modifier
                 .padding(bottom = 12.dp),
         ) {
@@ -142,9 +140,6 @@ private fun SuperBottomSheetDemo(
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
                 SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = YubeixTheme.colorScheme.secondaryContainer,
-                    ),
                 ) {
                     SuperSwitch(
                         title = "Allow Dismiss",
@@ -175,9 +170,6 @@ private fun SuperBottomSheetDemo(
                 )
                 SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = YubeixTheme.colorScheme.secondaryContainer,
-                    ),
                 ) {
                     SuperDropdown(
                         title = "SuperDropdown",
@@ -245,9 +237,6 @@ private fun WindowBottomSheetDemo(
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
                 SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = YubeixTheme.colorScheme.secondaryContainer,
-                    ),
                 ) {
                     SuperSwitch(
                         title = "Allow Dismiss",
@@ -278,9 +267,6 @@ private fun WindowBottomSheetDemo(
                 )
                 SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
-                    colors = CardDefaults.defaultColors(
-                        color = YubeixTheme.colorScheme.secondaryContainer,
-                    ),
                 ) {
                     WindowDropdown(
                         title = "WindowDropdown",

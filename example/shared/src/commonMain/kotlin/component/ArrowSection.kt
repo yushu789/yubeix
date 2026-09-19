@@ -3,12 +3,8 @@
 
 package component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -19,13 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import site.unclefish.yubeix.basic.ButtonDefaults
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.Slider
 import site.unclefish.yubeix.basic.SmallTitle
 import site.unclefish.yubeix.basic.Text
-import site.unclefish.yubeix.basic.TextButton
 import site.unclefish.yubeix.basic.TextField
+import site.unclefish.yubeix.extra.CupertinoAlertAction
+import site.unclefish.yubeix.extra.CupertinoAlertActionStyle
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperDialog
 import site.unclefish.yubeix.extra.SuperGroup
@@ -116,18 +112,35 @@ private fun SliderDialog(
     onVolumeChange: (Float) -> Unit,
     onDismissFinished: () -> Unit,
 ) {
+    // The field state lives here (not inside the content slot) so the Confirm action can read it;
+    // keyed on visibility so the field restarts from the current volume on every presentation.
+    var text by remember(showDialog.value) { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
     SuperDialog(
         show = showDialog.value,
         title = "Adjust Volume",
-        summary = "Enter 0-100",
+        message = "Enter 0-100",
         onDismissRequest = {
             showDialog.value = false
         },
         onDismissFinished = onDismissFinished,
+        actions = listOf(
+            CupertinoAlertAction(
+                label = "Cancel",
+                role = CupertinoAlertActionStyle.Cancel,
+                onClick = { showDialog.value = false },
+            ),
+            CupertinoAlertAction(
+                label = "Confirm",
+                onClick = {
+                    val parsed = text.toIntOrNull()
+                    val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
+                    onVolumeChange(clamped / 100f)
+                    showDialog.value = false
+                },
+            ),
+        ),
         content = {
-            var text by remember { mutableStateOf(((volumeState() * 100).toInt()).toString()) }
             TextField(
-                modifier = Modifier.padding(bottom = 16.dp),
                 value = text,
                 maxLines = 1,
                 onValueChange = { newValue ->
@@ -142,25 +155,6 @@ private fun SliderDialog(
                     }
                 },
             )
-            Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(
-                    text = "Cancel",
-                    onClick = { showDialog.value = false },
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(20.dp))
-                TextButton(
-                    text = "Confirm",
-                    onClick = {
-                        val parsed = text.toIntOrNull()
-                        val clamped = parsed?.coerceIn(0, 100) ?: ((volumeState() * 100).toInt())
-                        onVolumeChange(clamped / 100f)
-                        showDialog.value = false
-                    },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.textButtonColorsPrimary(),
-                )
-            }
         },
     )
 }

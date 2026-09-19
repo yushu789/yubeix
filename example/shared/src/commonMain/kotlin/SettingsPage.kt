@@ -33,7 +33,6 @@ import site.unclefish.yubeix.extra.SuperSwitch
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.ThemeColorSpec
 import site.unclefish.yubeix.theme.ThemePaletteStyle
-import kotlin.random.Random
 
 private val NavigationBarDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
 private val NavigationRailDisplayModeOptions = listOf("IconAndText", "IconOnly", "TextOnly", "IconWithSelectedLabel")
@@ -195,11 +194,6 @@ fun SettingsPage(
                     checked = appState.enablePageUserScroll,
                     onCheckedChange = { updateAppState { state -> state.copy(enablePageUserScroll = it) } },
                 )
-                SuperSwitch(
-                    title = "G2 Smooth Rounded",
-                    checked = appState.smoothRounding,
-                    onCheckedChange = { updateAppState { state -> state.copy(smoothRounding = it) } },
-                )
                 SuperDropdown(
                     title = "Color Mode",
                     items = ColorModeOptions,
@@ -268,7 +262,11 @@ fun SettingsPage(
             SuperGroup {
                 SuperArrow(
                     title = "Navigate Test",
-                    onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
+                    // A stable route instance, not a fresh random id per tap: NavigationPath.push
+                    // only reverses a mid-exit scene back open when the pushed route equals the
+                    // exiting one, and a randomized id would tear the leaving page down and restart
+                    // the push from the right edge instead of interrupting it.
+                    onClick = { navigator.push(Route.NavTest("settings")) },
                 )
             }
             SectionCaption(
