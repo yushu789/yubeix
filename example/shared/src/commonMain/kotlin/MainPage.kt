@@ -126,7 +126,7 @@ fun MainPage(
                 outsideEndAction = {
                     Text(
                         modifier = Modifier
-                            .padding(end = 12.dp)
+                            .padding(start = 12.dp, end = 16.dp)
                             .clickable(
                                 interactionSource = null,
                                 indication = null,
