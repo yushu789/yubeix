@@ -357,8 +357,7 @@ fun SuperDialog(
     } else {
         CupertinoAlertDialogLightContainerColor
     }
-    val useHazeBackdrop = hazeState != null
-    val resolvedContainerColor = if (useHazeBackdrop) {
+    val resolvedContainerColor = if (hazeState != null) {
         containerColor.copy(
             alpha = if (dark) {
                 CUPERTINO_ALERT_DIALOG_DARK_BACKDROP_ALPHA
@@ -368,15 +367,6 @@ fun SuperDialog(
         )
     } else {
         containerColor
-    }
-    val hazeStyle = remember(containerColor) {
-        HazeStyle(
-            backgroundColor = containerColor,
-            tints = emptyList(),
-            blurRadius = CupertinoAlertDialogBlurRadius,
-            noiseFactor = 0f,
-            fallbackTint = HazeTint(containerColor),
-        )
     }
     val labelColor = YubeixTheme.colorScheme.onSurface
 
@@ -388,80 +378,148 @@ fun SuperDialog(
         dismissOnClickOutside = dismissOnClickOutside,
         scrimColor = scrimColor,
     ) {
+        CupertinoAlertDialogCard(
+            title = title,
+            titleColor = labelColor,
+            summary = message,
+            summaryColor = labelColor,
+            containerColor = resolvedContainerColor,
+            hazeBackdropColor = containerColor,
+            hazeState = hazeState,
+            modifier = Modifier.align(Alignment.Center).then(modifier),
+            dialogWidth = dialogWidth,
+            minHeight = minHeight,
+            contentPadding = contentPadding,
+            actions = actions,
+            buttonsOrientation = buttonsOrientation,
+            titleLeadingContent = titleLeadingContent,
+            content = content,
+        )
+    }
+}
+
+/**
+ * The cupertino alert card shared by the [SuperDialog] cupertino overloads and the window-level
+ * [WindowDialog]: the rounded, shadowed (optionally frosted) container with a centered title, an
+ * optional message, custom content, and a row (or column) of action buttons.
+ *
+ * Hosts place it inside a centered full-screen box; pass `Modifier.align(Alignment.Center)` via
+ * [modifier].
+ *
+ * @param title The title of the card; null hides the title row (unless [titleLeadingContent] is set).
+ * @param titleColor The color of the title text.
+ * @param summary The optional message below the title.
+ * @param summaryColor The color of the message text.
+ * @param containerColor The drawn container color (with backdrop alpha already applied when hazing).
+ * @param hazeBackdropColor The base container color the frost style is derived from; defaults to
+ *   [containerColor].
+ * @param hazeState When non-null, the card blurs that backdrop instead of drawing an opaque background.
+ */
+@OptIn(ExperimentalHazeApi::class)
+@Composable
+internal fun CupertinoAlertDialogCard(
+    title: String?,
+    titleColor: Color,
+    summary: String?,
+    summaryColor: Color,
+    containerColor: Color,
+    modifier: Modifier = Modifier,
+    hazeBackdropColor: Color = containerColor,
+    hazeState: HazeState? = null,
+    dialogWidth: Dp = CupertinoAlertDialogWidth,
+    minHeight: Dp = CupertinoAlertDialogMinHeight,
+    contentPadding: PaddingValues = CupertinoAlertDialogPadding,
+    actions: List<CupertinoAlertAction> = emptyList(),
+    buttonsOrientation: Orientation = Orientation.Horizontal,
+    titleLeadingContent: (@Composable () -> Unit)? = null,
+    content: (@Composable () -> Unit)? = null,
+) {
+    val useHazeBackdrop = hazeState != null
+    val hazeStyle = remember(hazeBackdropColor) {
+        HazeStyle(
+            backgroundColor = hazeBackdropColor,
+            tints = emptyList(),
+            blurRadius = CupertinoAlertDialogBlurRadius,
+            noiseFactor = 0f,
+            fallbackTint = HazeTint(hazeBackdropColor),
+        )
+    }
+
+    Column(
+        modifier = modifier
+            .width(dialogWidth)
+            .heightIn(min = minHeight)
+            .shadow(
+                elevation = CupertinoAlertDialogShadowElevation,
+                shape = CupertinoAlertDialogShape,
+                clip = true,
+            )
+            .then(
+                if (useHazeBackdrop) {
+                    Modifier.hazeEffect(
+                        state = requireNotNull(hazeState),
+                        style = hazeStyle,
+                    ) {
+                        inputScale = HazeInputScale.Auto
+                    }
+                } else {
+                    Modifier
+                },
+            )
+            .background(containerColor),
+    ) {
         Column(
             modifier = Modifier
-                .align(Alignment.Center)
-                .then(modifier)
-                .width(dialogWidth)
-                .heightIn(min = minHeight)
-                .shadow(
-                    elevation = CupertinoAlertDialogShadowElevation,
-                    shape = CupertinoAlertDialogShape,
-                    clip = true,
-                )
-                .then(
-                    if (useHazeBackdrop) {
-                        Modifier.hazeEffect(
-                            state = requireNotNull(hazeState),
-                            style = hazeStyle,
-                        ) {
-                            inputScale = HazeInputScale.Auto
-                        }
-                    } else {
-                        Modifier
-                    },
-                )
-                .background(resolvedContainerColor),
+                .padding(contentPadding)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(CupertinoAlertDialogTitleMessageSpacing),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(contentPadding)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(CupertinoAlertDialogTitleMessageSpacing),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                if (titleLeadingContent == null) {
+            if (titleLeadingContent == null) {
+                title?.let {
                     Text(
-                        text = title,
+                        text = it,
                         style = CupertinoAlertDialogTitleStyle,
-                        color = labelColor,
+                        color = titleColor,
                         textAlign = TextAlign.Center,
                     )
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            space = 10.dp,
-                            alignment = Alignment.CenterHorizontally,
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        titleLeadingContent()
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = 10.dp,
+                        alignment = Alignment.CenterHorizontally,
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    titleLeadingContent()
+                    title?.let {
                         Text(
-                            text = title,
+                            text = it,
                             style = CupertinoAlertDialogTitleStyle,
-                            color = labelColor,
+                            color = titleColor,
                             textAlign = TextAlign.Center,
                         )
                     }
                 }
-                message?.let {
-                    Text(
-                        text = it,
-                        style = CupertinoAlertDialogMessageStyle,
-                        color = labelColor,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                content?.invoke()
             }
-
-            if (actions.isNotEmpty()) {
-                CupertinoAlertDialogActions(
-                    actions = actions,
-                    orientation = buttonsOrientation,
+            summary?.let {
+                Text(
+                    text = it,
+                    style = CupertinoAlertDialogMessageStyle,
+                    color = summaryColor,
+                    textAlign = TextAlign.Center,
                 )
             }
+            content?.invoke()
+        }
+
+        if (actions.isNotEmpty()) {
+            CupertinoAlertDialogActions(
+                actions = actions,
+                orientation = buttonsOrientation,
+            )
         }
     }
 }
@@ -677,13 +735,15 @@ private fun SuperDialogAlertCard(
  * inside that full-screen host.
  */
 @Composable
-private fun CupertinoAlertHost(
+internal fun CupertinoAlertHost(
     show: Boolean,
     onDismissRequest: (() -> Unit)?,
     onDismissFinished: (() -> Unit)?,
     dismissOnBackPress: Boolean,
     dismissOnClickOutside: Boolean,
     scrimColor: Color,
+    scrimEnabled: Boolean = true,
+    applyWindowInsetsPadding: Boolean = true,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
@@ -750,9 +810,15 @@ private fun CupertinoAlertHost(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .drawBehind {
-                        drawRect(scrimColor.copy(alpha = scrimColor.alpha * scrimAlpha))
-                    }
+                    .then(
+                        if (scrimEnabled) {
+                            Modifier.drawBehind {
+                                drawRect(scrimColor.copy(alpha = scrimColor.alpha * scrimAlpha))
+                            }
+                        } else {
+                            Modifier
+                        },
+                    )
                     .then(
                         if (dismissOnClickOutside) {
                             Modifier.pointerInput(Unit) {
@@ -782,8 +848,13 @@ private fun CupertinoAlertHost(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .systemBarsPadding()
-                            .imePadding(),
+                            .then(
+                                if (applyWindowInsetsPadding) {
+                                    Modifier.systemBarsPadding().imePadding()
+                                } else {
+                                    Modifier
+                                },
+                            ),
                         content = content,
                     )
                 }
@@ -891,9 +962,9 @@ private fun CupertinoAlertDialogAction(action: CupertinoAlertAction) {
 
 private val CupertinoAlertDialogShape = RoundedRectangle(18.dp, style = RoundedCornerStyle.Continuous)
 private val CupertinoAlertDialogActionShape = RoundedRectangle(10.dp, style = RoundedCornerStyle.Continuous)
-private val CupertinoAlertDialogWidth = 270.dp
-private val CupertinoAlertDialogMinHeight = 110.dp
-private val CupertinoAlertDialogPadding = PaddingValues(18.dp)
+internal val CupertinoAlertDialogWidth = 270.dp
+internal val CupertinoAlertDialogMinHeight = 110.dp
+internal val CupertinoAlertDialogPadding = PaddingValues(18.dp)
 private val CupertinoAlertDialogTitleMessageSpacing = 4.dp
 private val CupertinoAlertDialogButtonHeight = 45.dp
 private val CupertinoAlertDialogButtonSpacing = 8.dp
@@ -901,8 +972,8 @@ private val CupertinoAlertDialogActionsHorizontalPadding = 10.dp
 private val CupertinoAlertDialogActionsBottomPadding = 10.dp
 private val CupertinoAlertDialogShadowElevation = 18.dp
 private val CupertinoAlertDialogBlurRadius = 24.dp
-private val CupertinoAlertDialogDarkContainerColor = Color(0xFF232323)
-private val CupertinoAlertDialogLightContainerColor = Color(0xFFEEEEEE)
+internal val CupertinoAlertDialogDarkContainerColor = Color(0xFF232323)
+internal val CupertinoAlertDialogLightContainerColor = Color(0xFFEEEEEE)
 private val CupertinoProgressDialogWidth = 220.dp
 private val CupertinoProgressDialogContentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
 private val CupertinoProgressDialogIndicatorSize = 24.dp
