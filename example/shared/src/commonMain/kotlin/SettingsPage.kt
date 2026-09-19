@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.dp
 import appnavigation.Route
 import component.SectionCaption
 import dev.chrisbanes.haze.rememberHazeState
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.ScreenScaffold
 import site.unclefish.yubeix.basic.ScreenTitleMode
 import site.unclefish.yubeix.basic.VerticalScrollBar
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.extra.SuperSwitch
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.theme.ThemeColorSpec
@@ -92,7 +92,7 @@ fun SettingsPage(
         },
     ) {
         item(key = "settingsUi") {
-            Card(
+            SuperGroup(
                 modifier = Modifier.padding(bottom = 12.dp),
             ) {
                 SuperSwitch(
@@ -233,9 +233,7 @@ fun SettingsPage(
             }
         }
         item(key = "settingsTransition") {
-            Card(
-                modifier = Modifier.padding(bottom = 12.dp),
-            ) {
+            SuperGroup {
                 SuperSwitch(
                     title = "Enable Corner Clip",
                     checked = appState.enableCornerClip,
@@ -257,49 +255,34 @@ fun SettingsPage(
                     onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
                 )
             }
-            // Row descriptions moved out of the rows, one caption per row in row order.
+            // One merged footer for the whole group, wordmoment SettingsCardWithBottomSummary style;
+            // the caption's own 4dp bottom plus 8dp keeps the 12dp group rhythm.
             SectionCaption(
-                text = "Clip the top scene with rounded corners during transitions",
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-            SectionCaption(
-                text = "Dim the scene behind during transitions",
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-            SectionCaption(
-                text = "Block touch input on the non-target scene",
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
-            SectionCaption(
-                text = "Pop animation direction follows the finger swipe edge",
-                modifier = Modifier.padding(bottom = 12.dp),
+                text = "During transitions, clip the top scene with rounded corners, dim the scene " +
+                    "behind, and block touch input on the non-target scene; the pop animation " +
+                    "direction follows the finger swipe edge.",
+                modifier = Modifier.padding(bottom = 8.dp),
             )
         }
         item(key = "settingsNavigation") {
-            Card(
-                modifier = Modifier.padding(bottom = 12.dp),
-            ) {
+            SuperGroup {
                 SuperArrow(
                     title = "Navigate Test",
                     onClick = { navigator.push(Route.NavTest(Random.nextLong().toString())) },
                 )
             }
-            // Row descriptions moved out of the rows, one caption per row in row order.
             SectionCaption(
                 text = "Navigate to a Navigate Test Page",
-                modifier = Modifier.padding(bottom = 12.dp),
+                modifier = Modifier.padding(bottom = 8.dp),
             )
         }
         item(key = "settingsAbout") {
-            Card(
-                modifier = Modifier,
-            ) {
+            SuperGroup {
                 SuperArrow(
                     title = "About",
                     onClick = { navigator.push(Route.About) },
                 )
             }
-            // Row description moved out of the row; the trailing spacer keeps the list padding.
             SectionCaption(text = "About this example App")
         }
         item { Spacer(modifier = Modifier.height(12.dp)) }

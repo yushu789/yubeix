@@ -32,6 +32,7 @@ import site.unclefish.yubeix.basic.TextField
 import site.unclefish.yubeix.extra.SuperArrow
 import site.unclefish.yubeix.extra.SuperBottomSheet
 import site.unclefish.yubeix.extra.SuperDropdown
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.extra.SuperSwitch
 import site.unclefish.yubeix.extra.WindowBottomSheet
 import site.unclefish.yubeix.extra.WindowBottomSheetCancelAction
@@ -139,7 +140,7 @@ private fun SuperBottomSheetDemo(
         ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
-                Card(
+                SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
                         color = YubeixTheme.colorScheme.secondaryContainer,
@@ -172,7 +173,7 @@ private fun SuperBottomSheetDemo(
                     label = "TextField",
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
-                Card(
+                SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
                         color = YubeixTheme.colorScheme.secondaryContainer,
@@ -242,7 +243,7 @@ private fun WindowBottomSheetDemo(
         ) {
             item {
                 SmallTitle(text = "Behavior Settings", insideMargin = PaddingValues(16.dp, 8.dp))
-                Card(
+                SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
                         color = YubeixTheme.colorScheme.secondaryContainer,
@@ -275,7 +276,7 @@ private fun WindowBottomSheetDemo(
                     label = "TextField",
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
-                Card(
+                SuperGroup(
                     modifier = Modifier.padding(bottom = 12.dp),
                     colors = CardDefaults.defaultColors(
                         color = YubeixTheme.colorScheme.secondaryContainer,

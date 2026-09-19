@@ -70,7 +70,7 @@ fun SuperSwitch(
     ),
     holdDownState: Boolean = false,
     enabled: Boolean = true,
-    toggleOnRowClick: Boolean = false,
+    toggleOnRowClick: Boolean = true,
     minHeight: Dp = SuperRowDefaults.resolvedMinHeight(
         hasSummary = !summary.isNullOrBlank(),
         hasBottomAction = bottomAction != null,

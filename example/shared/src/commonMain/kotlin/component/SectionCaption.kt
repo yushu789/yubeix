@@ -3,6 +3,7 @@
 
 package component
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,7 +13,8 @@ import site.unclefish.yubeix.theme.YubeixTheme
 
 /**
  * A caption rendered below a section card: yubeix keeps row descriptions out of the rows and
- * under the card instead, aligned with the card's row content.
+ * merges them into one footer paragraph under the card, styled after wordmoment's
+ * SettingsCardWithBottomSummary (footnote1 gray text, 16dp/4dp padding hugging the card).
  */
 @Composable
 internal fun SectionCaption(
@@ -21,7 +23,9 @@ internal fun SectionCaption(
 ) {
     Text(
         text = text,
-        modifier = modifier.padding(start = 16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         style = YubeixTheme.textStyles.footnote1,
         color = YubeixTheme.colorScheme.onSurfaceVariantSummary,
     )
