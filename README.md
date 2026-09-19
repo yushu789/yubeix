@@ -6,7 +6,7 @@ A Compose Multiplatform UI library, forked from [Miuix](https://github.com/compo
 
 [![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-7F52FF)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/compose-1.10.3-4285F4)](https://www.jetbrains.com/compose-multiplatform)
-[![License](https://img.shields.io/github/license/unclefish/yubeix)](LICENSE)
+[![License](https://img.shields.io/github/license/yushu789/yubeix)](LICENSE)
 
 ## Attribution
 

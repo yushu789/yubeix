@@ -42,3 +42,8 @@ docs/public/dokka
 docs/public/compose
 docs/public/icons
 **/generated/baselineProfiles/**
+
+# local verification artifacts (screenshots / screen recordings)
+.verify/
+hs_err_pid*.log
+replay_pid*.log
