@@ -729,7 +729,9 @@ object ScreenScaffoldDefaults {
  *
  * The collapse is position-driven: the hero title is tracked in window coordinates and the
  * collapsed centered title (plus the bar background) fades in once the hero title scrolls under
- * the status bar, with hysteresis from [collapseTriggerOffset].
+ * the status bar, with hysteresis from [collapseTriggerOffset]. With a custom [bodyContent] the
+ * hero title is not hosted by the scaffold, so the collapse is instead derived from the hoisted
+ * [listState]'s scroll position.
  *
  * Note: unlike the app this was extracted from, no scroll indicator is drawn over the content.
  *
@@ -851,11 +853,26 @@ fun ScreenScaffold(
         (topBarHeight + topBarContentGap).toPx()
     }
     var heroTitleBottomInWindowPx by remember { mutableFloatStateOf(Float.POSITIVE_INFINITY) }
+    // A custom body hosts the hero title itself, so the scaffold never measures its bottom edge
+    // and the reported position would stay at +infinity. When the mode shows a hero title, derive
+    // the hero's travel from the resolved list's scroll position instead: the hero item rests at
+    // [heroTitleRestingTopInWindowPx] and moves up by the first item's scroll offset, and a
+    // visible item past index 0 means the hero has scrolled away entirely.
+    val drivesCollapseFromListScroll = bodyContent != null && titleMode.showsHeroTitle
+    val heroTitleBottomForCollapsePx = if (drivesCollapseFromListScroll) {
+        if (resolvedListState.firstVisibleItemIndex == 0) {
+            heroTitleRestingTopInWindowPx - resolvedListState.firstVisibleItemScrollOffset
+        } else {
+            Float.NEGATIVE_INFINITY
+        }
+    } else {
+        heroTitleBottomInWindowPx
+    }
     val collapsedTitleTriggerPx = with(density) {
         topInset.toPx() + collapseTriggerOffset.toPx()
     }
     val collapsedTitleVisible = rememberCollapsedTitleVisible(
-        heroTitleBottomInWindowPx = heroTitleBottomInWindowPx,
+        heroTitleBottomInWindowPx = heroTitleBottomForCollapsePx,
         collapseThresholdPx = collapsedTitleTriggerPx,
         hysteresisPx = with(density) { collapseTriggerOffset.toPx() },
         forceVisible = titleMode.pinsCollapsedTitle || resolvedListState.firstVisibleItemIndex > 0,

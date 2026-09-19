@@ -389,7 +389,8 @@ fun lightColorScheme(
     surfaceContainerHighest: Color = Color(0xFFE8E8E8),
     onSurfaceContainerHighest: Color = Color.Black,
     outline: Color = Color(0xFFD9D9D9),
-    dividerLine: Color = Color(0xFFE0E0E0),
+    // Yubei divider: a faint hairline, per the wordmoment palette.
+    dividerLine: Color = Color(0x4AC6C6C8),
     windowDimming: Color = Color.Black.copy(alpha = 0.3F),
     sliderKeyPoint: Color = Color(0x4DA3B3CD),
     sliderKeyPointForeground: Color = Color(0xFF6EB5FF),
@@ -499,7 +500,7 @@ fun darkColorScheme(
     surfaceContainerHighest: Color = Color(0xFF2C2C2E),
     onSurfaceContainerHighest: Color = Color(0xFFE9E9E9),
     outline: Color = Color(0xFF404040),
-    dividerLine: Color = Color(0xFF393939),
+    dividerLine: Color = Color(0x9938383A),
     windowDimming: Color = Color.Black.copy(alpha = 0.6F),
     sliderKeyPoint: Color = Color(0x4D7A8AA6),
     sliderKeyPointForeground: Color = Color(0xFF5DAAFF),
