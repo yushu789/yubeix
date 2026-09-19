@@ -78,7 +78,7 @@ fun SettingsPage(
     ScreenScaffold(
         title = "Settings",
         onBack = null,
-        titleMode = ScreenTitleMode.ScrollAware,
+        titleMode = ScreenTitleMode.Hero,
         listState = lazyListState,
         hazeState = hazeState,
         itemSpacing = 0.dp,

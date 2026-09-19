@@ -91,7 +91,7 @@ fun DropdownPage(
     ScreenScaffold(
         title = "Dropdown",
         onBack = null,
-        titleMode = ScreenTitleMode.ScrollAware,
+        titleMode = ScreenTitleMode.Hero,
         listState = lazyListState,
         hazeState = hazeState,
         bottomContentPadding = 32.dp + bottomBarOverlayHeight,
