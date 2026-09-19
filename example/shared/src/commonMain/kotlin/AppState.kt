@@ -32,6 +32,9 @@ data class AppState(
     val enableDim: Boolean = true,
     val blockInputDuringTransition: Boolean = true,
     val popDirectionFollowsSwipeEdge: Boolean = false,
+    // Sidebar toggle transition: false = cross-fade hand-off (default), true = the old
+    // direct mode where the pane's width follows the sidebar edge frame by frame.
+    val sidebarFollowResize: Boolean = true,
 )
 
 val LocalAppState = compositionLocalOf<AppState> {

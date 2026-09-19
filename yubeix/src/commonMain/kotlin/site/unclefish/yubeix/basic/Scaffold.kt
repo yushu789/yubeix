@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -788,6 +789,14 @@ object ScreenScaffoldDefaults {
  *   scroll position.
  * @param content List items of the built-in lazy list, below the hero title.
  */
+/**
+ * Extra start inset applied to scene-leading chrome — currently the top bar's back button —
+ * because host-level chrome (for example a resident sidebar toggle pinned over the scene's
+ * leading corner) occupies that spot. Hosts provide it while the overlap exists; the default
+ * of zero leaves scene bars untouched.
+ */
+val LocalSceneLeadingInset = compositionLocalOf { 0.dp }
+
 @Composable
 fun ScreenScaffold(
     title: String,

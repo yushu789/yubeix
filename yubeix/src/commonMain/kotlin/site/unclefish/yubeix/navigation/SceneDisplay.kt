@@ -82,6 +82,10 @@ fun <T : NavKey> SceneDisplay(
             zIndex: Float,
         ) -> Modifier
     )? = null,
+    // Whether the top scene gets the rounded-corner bitmap clip during push/pop transitions.
+    // Hosts that keep chrome beside the scenes (e.g. a resident sidebar) want this off — the
+    // phone-style card clip reads wrong when the scene is a pane, not the whole window.
+    sceneCornerClipEnabled: Boolean = true,
 ) {
     val scenes = navigationPath.scenes
     if (scenes.isEmpty()) {
@@ -230,7 +234,7 @@ fun <T : NavKey> SceneDisplay(
                         .navigationSceneBitmapClip(
                             scene = scene,
                             cornerRadius = sceneCornerRadius,
-                            enabled = !useSharedSceneTransform,
+                            enabled = !useSharedSceneTransform && sceneCornerClipEnabled,
                         )
                 }
 

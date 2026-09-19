@@ -3,6 +3,7 @@
 
 package site.unclefish.yubeix.extra
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.unit.dp
 import site.unclefish.yubeix.theme.LocalContentColor
 import site.unclefish.yubeix.theme.YubeixTheme

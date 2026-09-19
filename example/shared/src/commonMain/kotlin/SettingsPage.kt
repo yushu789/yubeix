@@ -248,13 +248,20 @@ fun SettingsPage(
                     checked = appState.popDirectionFollowsSwipeEdge,
                     onCheckedChange = { updateAppState { state -> state.copy(popDirectionFollowsSwipeEdge = it) } },
                 )
+                SuperSwitch(
+                    title = "Sidebar Follow Resize",
+                    checked = appState.sidebarFollowResize,
+                    onCheckedChange = { updateAppState { state -> state.copy(sidebarFollowResize = it) } },
+                )
             }
             // One merged footer for the whole group, wordmoment SettingsCardWithBottomSummary style;
             // the caption's own 4dp bottom plus 8dp keeps the 12dp group rhythm.
             SectionCaption(
                 text = "During transitions, clip the top scene with rounded corners, dim the scene " +
                     "behind, and block touch input on the non-target scene; the pop animation " +
-                    "direction follows the finger swipe edge.",
+                    "direction follows the finger swipe edge. Sidebar Follow Resize swaps the " +
+                    "toggle's cross-fade hand-off for the direct mode, where the pane's width " +
+                    "tracks the sidebar edge frame by frame.",
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }

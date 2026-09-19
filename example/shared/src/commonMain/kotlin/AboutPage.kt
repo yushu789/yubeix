@@ -33,13 +33,13 @@ import androidx.compose.ui.unit.sp
 import appnavigation.Route
 import misc.VersionInfo
 import org.jetbrains.compose.resources.painterResource
-import site.unclefish.yubeix.basic.Card
 import site.unclefish.yubeix.basic.ScreenScaffold
 import site.unclefish.yubeix.basic.ScreenTitleMode
 import site.unclefish.yubeix.basic.Text
 import site.unclefish.yubeix.basic.VerticalScrollBar
 import site.unclefish.yubeix.basic.rememberScrollBarAdapter
 import site.unclefish.yubeix.extra.SuperArrow
+import site.unclefish.yubeix.extra.SuperGroup
 import site.unclefish.yubeix.interfaces.ExperimentalScrollBarApi
 import site.unclefish.yubeix.shared.generated.resources.Res
 import site.unclefish.yubeix.shared.generated.resources.ic_launcher
@@ -116,7 +116,7 @@ fun AboutPage(
                     textAlign = TextAlign.Center,
                 )
             }
-            Card(
+            SuperGroup(
                 modifier = Modifier,
             ) {
                 SuperArrow(
@@ -142,7 +142,7 @@ fun AboutPage(
                     onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
                 )
             }
-            Card(
+            SuperGroup(
                 modifier = Modifier
                     .padding(top = 12.dp),
             ) {

@@ -65,7 +65,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
-import site.unclefish.yubeix.anim.yubeixSpring
 import site.unclefish.yubeix.blur.isRenderEffectSupported
 import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
@@ -317,8 +316,7 @@ private fun CupertinoTabBarItem(
 /**
  * A [NavigationBarItem] that is suitable for [NavigationBar], styled after the iOS tab bar item:
  * the selected item is tinted with the theme accent while unselected ones sit at a resting alpha,
- * the label uses the iOS tab bar type scale, and a tap plays a tick of haptic feedback with a
- * subtle press-down scale.
+ * the label uses the iOS tab bar type scale, and a tap plays a tick of haptic feedback.
  *
  * @param selected Whether the item is selected.
  * @param onClick The callback when the item is clicked.
@@ -341,7 +339,6 @@ fun RowScope.NavigationBarItem(
     val hapticFeedback = LocalHapticFeedback.current
     val currentOnClick by rememberUpdatedState(onClick)
     val currentHapticFeedback by rememberUpdatedState(hapticFeedback)
-    var isPressed by remember { mutableStateOf(false) }
     val mode = LocalNavigationBarDisplayMode.current
 
     val tint = if (selected) {
@@ -349,40 +346,24 @@ fun RowScope.NavigationBarItem(
     } else {
         YubeixTheme.colorScheme.onSurface.copy(alpha = NavigationBarDefaults.INACTIVE_ALPHA)
     }
-    val pressScale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) NavigationBarDefaults.PRESSED_ITEM_SCALE else 1f,
-        animationSpec = yubeixSpring(damping = 0.6f, response = 0.25f),
-        label = "navigationBarItemSelectedScale",
-    )
 
     Column(
         modifier = modifier
             .fillMaxHeight()
             .weight(1f)
             .semantics { this.selected = selected }
-            .graphicsLayer {
-                scaleX = pressScale
-                scaleY = pressScale
-            }
-            .pointerInput(enabled, hapticFeedbackEnabled) {
-                detectTapGestures(
-                    onPress = {
-                        if (enabled) {
-                            isPressed = true
-                            tryAwaitRelease()
-                            isPressed = false
-                        }
-                    },
-                    onTap = {
-                        if (enabled) {
-                            if (hapticFeedbackEnabled) {
-                                currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
-                            }
-                            currentOnClick()
-                        }
-                    },
-                )
-            },
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                enabled = enabled,
+                role = Role.Tab,
+                onClick = {
+                    if (enabled && hapticFeedbackEnabled) {
+                        currentHapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    }
+                    currentOnClick()
+                },
+            ),
         horizontalAlignment = CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -714,9 +695,6 @@ object NavigationBarDefaults {
 
     /** The alpha of an unselected item's content color. */
     const val INACTIVE_ALPHA = 0.52f
-
-    /** The scale an item shrinks to while pressed. */
-    const val PRESSED_ITEM_SCALE = 0.92f
 
     /** The alpha value for the selected item when pressed. */
     val SelectedPressedAlpha = 0.5f

@@ -4,9 +4,13 @@
 package site.unclefish.yubeix.basic
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -31,38 +35,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.yubeixShape
 
 /**
- * A [NavigationRail] that is suitable for wide screens.
+ * A [NavigationRail] for wide screens, styled after the iPadOS sidebar: a wide surface column
+ * with an optional large title, whose entries are horizontal icon-and-label rows, the selected
+ * one highlighted with a filled rounded pill in the theme accent.
  *
  * @param modifier The modifier to be applied to the [NavigationRail].
+ * @param title The large title displayed at the top of the [NavigationRail], styled after the
+ *   iPadOS sidebar's large title (e.g. "Files"); pass null for no title.
  * @param header The header of the [NavigationRail], usually a [FloatingActionButton] or a logo.
  * @param color The color of the [NavigationRail].
+ * @param dividerColor The color of the divider line between the [NavigationRail] and the content;
+ *   defaults to the theme divider color.
  * @param showDivider Whether to show the divider line between the [NavigationRail] and the content.
  * @param defaultWindowInsetsPadding whether to apply default window insets padding to the [NavigationRail].
- * @param minWidth The minimum width of the [NavigationRail].
+ * @param minWidth The width of the [NavigationRail].
+ * @param mode The mode for displaying items in the [NavigationRail]. It can show icons, text or both.
  * @param content The content of the [NavigationRail], usually [NavigationRailItem]s.
  */
 @Composable
 fun NavigationRail(
     modifier: Modifier = Modifier,
+    title: String? = null,
     header: @Composable (ColumnScope.() -> Unit)? = null,
-    color: Color = YubeixTheme.colorScheme.surface,
+    color: Color = YubeixTheme.colorScheme.background,
+    dividerColor: Color? = null,
     showDivider: Boolean = true,
     defaultWindowInsetsPadding: Boolean = true,
     minWidth: Dp = NavigationRailDefaults.MinWidth,
@@ -89,26 +106,44 @@ fun NavigationRail(
                 .width(minWidth)
                 .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = NavigationRailDefaults.VerticalPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(
+                    horizontal = NavigationRailDefaults.ItemHorizontalPadding,
+                    vertical = NavigationRailDefaults.VerticalPadding,
+                ),
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {
             if (header != null) {
                 header()
                 Spacer(modifier = Modifier.height(NavigationRailDefaults.HeaderSpacing))
             }
+            if (title != null) {
+                Text(
+                    text = title,
+                    color = YubeixTheme.colorScheme.onSurface,
+                    fontSize = NavigationRailDefaults.TitleFontSize,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = NavigationRailDefaults.ItemContentHorizontalPadding),
+                    maxLines = 1,
+                )
+                Spacer(modifier = Modifier.height(NavigationRailDefaults.TitleSpacing))
+            }
             CompositionLocalProvider(LocalNavigationRailDisplayMode provides mode) {
                 content()
             }
         }
         if (showDivider) {
-            VerticalDivider()
+            VerticalDivider(color = dividerColor ?: DividerDefaults.DividerColor)
         }
     }
 }
 
 /**
- * A [NavigationRailItem] that is suitable for [NavigationRail].
+ * A [NavigationRailItem] that is suitable for [NavigationRail], styled after the iPadOS sidebar
+ * row: a leading icon tinted with the theme accent and a regular-weight label, or, when selected,
+ * a filled rounded pill in the accent with both icon and label in the on-accent color. The pill
+ * and the content colors crossfade in sync, and rows carry the composition's ripple indication
+ * while pressed.
  *
  * @param selected Whether the item is selected.
  * @param onClick The callback when the item is clicked.
@@ -126,97 +161,111 @@ fun NavigationRailItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    var isPressed by remember { mutableStateOf(false) }
+    val colorScheme = YubeixTheme.colorScheme
+    val itemShape = yubeixShape(NavigationRailDefaults.ItemCornerRadius)
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val hapticFeedback = LocalHapticFeedback.current
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentEnabled by rememberUpdatedState(enabled)
 
-    val onSurfaceContainerColor = YubeixTheme.colorScheme.onSurfaceContainer
-    val tint = when {
-        isPressed -> if (selected) {
-            onSurfaceContainerColor.copy(alpha = NavigationRailDefaults.SelectedPressedAlpha)
-        } else {
-            onSurfaceContainerColor.copy(alpha = NavigationRailDefaults.UnselectedPressedAlpha)
-        }
-
-        selected -> onSurfaceContainerColor
-
-        else -> onSurfaceContainerColor.copy(NavigationRailDefaults.UnselectedAlpha)
+    // One shared progress drives BOTH the pill and the content colors. The pill must be painted
+    // as primary.copy(alpha = progress), never lerped from Color.Transparent: Transparent is
+    // zero-alpha BLACK, and a channel-wise lerp from it yields a color whose effective opacity
+    // is roughly progress-squared — visually near-invisible for the first half while the label
+    // is already lightening, which reads as white text floating on the bare background. With a
+    // true-blue alpha fade and the label lerp on the same progress, the two are always in phase.
+    val selectionProgress by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(durationMillis = NavigationRailDefaults.SelectionAnimationDurationMillis),
+        label = "navigationRailSelectionProgress",
+    )
+    val backgroundColor = when {
+        selected -> colorScheme.primary.copy(alpha = selectionProgress)
+        pressed -> colorScheme.onSurface.copy(alpha = NavigationRailDefaults.UnselectedPressedBackgroundAlpha)
+        else -> colorScheme.primary.copy(alpha = selectionProgress)
     }
-    val fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-    val mode = LocalNavigationRailDisplayMode.current
+    val iconTint = lerp(colorScheme.primary, colorScheme.onPrimary, selectionProgress)
+    val labelColor = lerp(colorScheme.onSurface, colorScheme.onPrimary, selectionProgress)
 
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        if (enabled) {
-                            isPressed = true
-                            tryAwaitRelease()
-                            isPressed = false
-                        }
-                    },
-                    onTap = { if (enabled) onClick() },
-                )
-            }
-            .padding(vertical = NavigationRailDefaults.ItemVerticalPadding)
-            .animateContentSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+            .padding(vertical = NavigationRailDefaults.ItemSpacing)
+            .clip(itemShape)
+            .background(backgroundColor, itemShape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                enabled = enabled,
+                role = Role.Tab,
+                onClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    currentOnClick()
+                },
+            )
+            .semantics { this.selected = selected }
+            .animateContentSize()
+            .padding(
+                horizontal = NavigationRailDefaults.ItemContentHorizontalPadding,
+                vertical = NavigationRailDefaults.ItemContentVerticalPadding,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        val mode = LocalNavigationRailDisplayMode.current
         when (mode) {
             NavigationRailDisplayMode.IconAndText -> {
-                Image(
-                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
+                Icon(
                     imageVector = icon,
                     contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
+                    tint = iconTint,
+                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
                 )
-                Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
+                Spacer(modifier = Modifier.width(NavigationRailDefaults.IconTextSpacing))
                 Text(
                     text = label,
-                    color = tint,
-                    textAlign = TextAlign.Center,
+                    color = labelColor,
                     fontSize = NavigationRailDefaults.LabelFontSize,
-                    fontWeight = fontWeight,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
                 )
             }
 
             NavigationRailDisplayMode.IconWithSelectedLabel -> {
-                Image(
-                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
+                Icon(
                     imageVector = icon,
                     contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
+                    tint = iconTint,
+                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
                 )
                 if (selected) {
-                    Spacer(modifier = Modifier.height(NavigationRailDefaults.IconTextSpacing))
+                    Spacer(modifier = Modifier.width(NavigationRailDefaults.IconTextSpacing))
                     Text(
                         text = label,
-                        color = tint,
-                        textAlign = TextAlign.Center,
+                        color = labelColor,
                         fontSize = NavigationRailDefaults.LabelFontSize,
-                        fontWeight = fontWeight,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 1,
                     )
                 }
             }
 
             NavigationRailDisplayMode.TextOnly -> {
                 Text(
-                    modifier = Modifier.padding(vertical = NavigationRailDefaults.TextOnlyVerticalPadding),
                     text = label,
-                    color = tint,
-                    textAlign = TextAlign.Center,
-                    fontSize = NavigationRailDefaults.TextOnlyFontSize,
-                    fontWeight = fontWeight,
+                    color = labelColor,
+                    fontSize = NavigationRailDefaults.LabelFontSize,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
                 )
             }
 
-            else -> {
-                Image(
-                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
+            NavigationRailDisplayMode.IconOnly -> {
+                Icon(
                     imageVector = icon,
                     contentDescription = label,
-                    colorFilter = ColorFilter.tint(tint),
+                    tint = iconTint,
+                    modifier = Modifier.size(NavigationRailDefaults.IconSize),
                 )
             }
         }
@@ -225,41 +274,50 @@ fun NavigationRailItem(
 
 /** Contains default values used by [NavigationRail] and [NavigationRailItem]. */
 object NavigationRailDefaults {
-    /** The default minimum width of the [NavigationRail]. */
-    val MinWidth = 80.dp
+    /** The default width of the [NavigationRail], matching the iPadOS sidebar. */
+    val MinWidth = 250.dp
 
     /** The default vertical padding of the [NavigationRail] content. */
-    val VerticalPadding = 24.dp
+    val VerticalPadding = 8.dp
 
     /** The default spacing after the header. */
-    val HeaderSpacing = 24.dp
+    val HeaderSpacing = 12.dp
+
+    /** The font size of the large title, matching the iOS large title type scale. */
+    val TitleFontSize = 28.sp
+
+    /** The spacing between the large title and the items. */
+    val TitleSpacing = 16.dp
+
+    /** The horizontal inset of the items from the [NavigationRail] edges. */
+    val ItemHorizontalPadding = 10.dp
+
+    /** The horizontal padding inside an item's highlight pill. */
+    val ItemContentHorizontalPadding = 8.dp
+
+    /** The vertical padding inside an item's highlight pill. */
+    val ItemContentVerticalPadding = 7.dp
+
+    /** The vertical gap between items. */
+    val ItemSpacing = 2.dp
+
+    /** The corner radius of an item's highlight pill. */
+    val ItemCornerRadius = 8.dp
 
     /** The default icon size. */
-    val IconSize = 28.dp
+    val IconSize = 26.dp
 
     /** The default spacing between icon and text. */
-    val IconTextSpacing = 4.dp
-
-    /** The default vertical padding for each item. */
-    val ItemVerticalPadding = 12.dp
+    val IconTextSpacing = 10.dp
 
     /** The default label font size. */
-    val LabelFontSize = 12.sp
+    val LabelFontSize = 16.sp
 
-    /** The font size in [NavigationRailDisplayMode.TextOnly] mode. */
-    val TextOnlyFontSize = 14.sp
+    /** The alpha of the pressed unselected item's highlight. */
+    val UnselectedPressedBackgroundAlpha = 0.08f
 
-    /** The vertical padding in [NavigationRailDisplayMode.TextOnly] mode. */
-    val TextOnlyVerticalPadding = 4.dp
-
-    /** The alpha value for the selected item when pressed. */
-    val SelectedPressedAlpha = 0.5f
-
-    /** The alpha value for an unselected item when pressed. */
-    val UnselectedPressedAlpha = 0.6f
-
-    /** The alpha value for an unselected item. */
-    val UnselectedAlpha = 0.4f
+    /** The duration of the selection pill and content color transition, in milliseconds. */
+    const val SelectionAnimationDurationMillis = 150
 }
 
 /**

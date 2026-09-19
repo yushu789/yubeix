@@ -1,0 +1,130 @@
+Applications Graphics Acceleration Info:
+Uptime: 21913927 Realtime: 21913927
+
+** Graphics info for pid 29371 [site.unclefish.yubeix.example] **
+
+Stats since: 21911956678913ns
+Total frames rendered: 52
+Janky frames: 2 (3.85%)
+Janky frames (legacy): 46 (88.46%)
+50th percentile: 12ms
+90th percentile: 24ms
+95th percentile: 34ms
+99th percentile: 73ms
+Number Missed Vsync: 0
+Number High input latency: 79
+Number Slow UI thread: 2
+Number Slow bitmap uploads: 0
+Number Slow issue draw commands: 2
+Number Frame deadline missed: 2
+Number Frame deadline missed (legacy): 4
+HISTOGRAM: 5ms=0 6ms=1 7ms=0 8ms=2 9ms=3 10ms=18 11ms=2 12ms=4 13ms=4 14ms=1 15ms=6 16ms=1 17ms=0 18ms=0 19ms=2 20ms=1 21ms=0 22ms=0 23ms=1 24ms=1 25ms=1 26ms=1 27ms=0 28ms=0 29ms=0 30ms=0 31ms=0 32ms=0 34ms=1 36ms=0 38ms=0 40ms=0 42ms=0 44ms=0 46ms=0 48ms=0 53ms=0 57ms=1 61ms=0 65ms=0 69ms=0 73ms=1 77ms=0 81ms=0 85ms=0 89ms=0 93ms=0 97ms=0 101ms=0 105ms=0 109ms=0 113ms=0 117ms=0 121ms=0 125ms=0 129ms=0 133ms=0 150ms=0 200ms=0 250ms=0 300ms=0 350ms=0 400ms=0 450ms=0 500ms=0 550ms=0 600ms=0 650ms=0 700ms=0 750ms=0 800ms=0 850ms=0 900ms=0 950ms=0 1000ms=0 1050ms=0 1100ms=0 1150ms=0 1200ms=0 1250ms=0 1300ms=0 1350ms=0 1400ms=0 1450ms=0 1500ms=0 1550ms=0 1600ms=0 1650ms=0 1700ms=0 1750ms=0 1800ms=0 1850ms=0 1900ms=0 1950ms=0 2000ms=0 2050ms=0 2100ms=0 2150ms=0 2200ms=0 2250ms=0 2300ms=0 2350ms=0 2400ms=0 2450ms=0 2500ms=0 2550ms=0 2600ms=0 2650ms=0 2700ms=0 2750ms=0 2800ms=0 2850ms=0 2900ms=0 2950ms=0 3000ms=0 3050ms=0 3100ms=0 3150ms=0 3200ms=0 3250ms=0 3300ms=0 3350ms=0 3400ms=0 3450ms=0 3500ms=0 3550ms=0 3600ms=0 3650ms=0 3700ms=0 3750ms=0 3800ms=0 3850ms=0 3900ms=0 3950ms=0 4000ms=0 4050ms=0 4100ms=0 4150ms=0 4200ms=0 4250ms=0 4300ms=0 4350ms=0 4400ms=0 4450ms=0 4500ms=0 4550ms=0 4600ms=0 4650ms=0 4700ms=0 4750ms=0 4800ms=0 4850ms=0 4900ms=0 4950ms=0
+50th gpu percentile: 1ms
+90th gpu percentile: 1ms
+95th gpu percentile: 1ms
+99th gpu percentile: 1ms
+GPU HISTOGRAM: 1ms=52 2ms=0 3ms=0 4ms=0 5ms=0 6ms=0 7ms=0 8ms=0 9ms=0 10ms=0 11ms=0 12ms=0 13ms=0 14ms=0 15ms=0 16ms=0 17ms=0 18ms=0 19ms=0 20ms=0 21ms=0 22ms=0 23ms=0 24ms=0 25ms=0 4950ms=0
+
+Pipeline=Skia (OpenGL)
+Memory policy:
+  Max surface area: 2073600
+  Max resource usage: 99.53MB (x48)
+  Background retention: 50% (altUiHidden = true)
+  GPU Context timeout: 10
+Contexts: 1 (stopped = 0)
+CPU Caches:
+  Glyph Cache: 317.78 KB (1 entry)
+  Glyph Count: 57 
+Total CPU memory usage:
+  325405 bytes, 317.78 KB (0.00 bytes is purgeable)
+GPU Caches:
+  SW Path Mask:
+    Texture: 14.42 MB (42 entries)
+  Other:
+    Other: 115.75 KB (1 entry)
+    Buffer Object: 914.00 bytes (4 entries)
+    StencilAttachment: 3.26 MB (5 entries)
+  Image:
+    Texture: 1.98 MB (11 entries)
+  Scratch:
+    RenderTarget: 8.92 MB (20 entries)
+    Buffer Object: 78.03 KB (3 entries)
+    Texture: 53.70 MB (233 entries)
+Total GPU memory usage:
+  86485080 bytes, 82.48 MB (76.86 MB is purgeable)
+
+GraphicBufferAllocator buffers:
+            Handle |         Size |     W (Stride) x H | Layers |   Format |      Usage | Requestor
+    0x719a8c918680 |  8100.00 KiB | 1920 (1920) x 1080 |      1 |        1 | 0x     900 | VRI[MainActivity]#0(BLAST Consumer)0
+    0x719a8c91b4e0 |  8100.00 KiB | 1920 (1920) x 1080 |      1 |        1 | 0x     900 | VRI[MainActivity]#0(BLAST Consumer)0
+    0x719a8c91c820 |  8100.00 KiB | 1920 (1920) x 1080 |      1 |        1 | 0x     900 | VRI[MainActivity]#0(BLAST Consumer)0
+    0x719a8c91d0e0 |  8100.00 KiB | 1920 (1920) x 1080 |      1 |        1 | 0x     900 | VRI[MainActivity]#0(BLAST Consumer)0
+Total allocated by GraphicBufferAllocator (estimate): 32400.00 KB
+
+Profile data in ms:
+
+	site.unclefish.yubeix.example/site.unclefish.yubeix.example.MainActivity/android.view.ViewRootImpl@c0747f0 (visibility=0)
+	Draw	Prepare	Process	Execute
+	5.12	0.13	5.78	1.55
+	1.38	0.12	5.47	1.30
+	7.80	0.16	9.89	1.29
+	6.76	0.16	7.41	1.57
+	7.05	0.14	7.93	1.55
+	6.95	0.12	6.93	1.31
+	6.14	0.15	7.28	1.35
+	7.12	0.14	6.91	1.16
+	6.42	0.17	7.09	1.45
+	7.46	0.16	6.20	1.29
+	6.53	0.16	6.48	2.06
+	6.39	0.17	4.73	1.42
+	5.87	0.16	5.22	2.27
+	47.56	0.24	10.43	1.65
+	50.00	0.15	9.45	1.72
+	15.17	0.17	17.98	1.53
+	16.17	0.21	7.93	1.13
+	16.73	0.15	5.27	1.48
+	12.03	0.15	6.65	2.03
+	8.90	0.28	12.89	4.04
+	9.84	0.24	8.45	1.16
+	17.07	0.15	6.47	0.99
+	6.27	0.13	5.08	1.08
+	5.63	0.14	6.25	1.98
+	5.38	0.14	5.76	1.22
+	5.31	0.13	6.93	1.23
+	2.70	0.12	4.51	2.38
+	5.12	0.12	5.57	0.76
+	1.17	0.11	5.14	3.65
+	1.25	0.10	6.32	2.82
+	1.25	0.09	5.13	4.13
+	1.24	0.09	5.60	3.64
+	1.14	0.09	5.32	4.34
+	1.77	0.13	6.12	2.50
+	1.48	0.12	6.16	2.63
+	1.14	0.09	5.76	3.56
+	1.33	0.09	5.52	3.91
+	1.22	0.09	5.89	3.32
+	1.07	0.20	5.40	4.06
+	1.37	0.11	5.49	3.55
+	1.25	0.09	5.16	4.06
+	1.20	0.09	5.46	4.09
+	1.29	0.09	5.49	3.83
+	1.18	0.10	6.36	3.12
+	0.75	0.10	5.01	4.99
+	1.39	0.11	6.96	2.54
+	1.09	0.10	5.92	6.28
+	1.62	0.12	5.54	3.37
+	0.62	0.13	5.87	2.47
+	1.48	0.13	5.60	1.21
+	0.69	0.08	5.18	1.01
+	2.41	0.12	6.13	0.88
+
+View hierarchy:
+
+  site.unclefish.yubeix.example/site.unclefish.yubeix.example.MainActivity/android.view.ViewRootImpl@c0747f0
+  8 views, 13.28 kB of render nodes
+
+
+Total ViewRootImpl   : 1
+Total attached Views : 8
+Total RenderNode     : 13.28 kB (used) / 37.35 kB (capacity)
+

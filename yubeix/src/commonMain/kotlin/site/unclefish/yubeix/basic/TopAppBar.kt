@@ -1510,6 +1510,9 @@ fun LargeTopAppBar(
                         onBack = onBack,
                         modifier = Modifier
                             .align(Alignment.CenterStart)
+                            // Yield to host chrome (e.g. a pinned sidebar toggle) that occupies
+                            // the scene's leading corner while it overlaps this bar.
+                            .padding(start = LocalSceneLeadingInset.current)
                             .zIndex(1f),
                         tint = titleColor,
                     )
