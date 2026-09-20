@@ -35,6 +35,10 @@ data class AppState(
     // Sidebar toggle transition: false = cross-fade hand-off (default), true = the old
     // direct mode where the pane's width follows the sidebar edge frame by frame.
     val sidebarFollowResize: Boolean = true,
+    // Shared top-bar transition: true = the pair's chrome bars are drawn once, fixed at the
+    // top of the window during a transition (the iOS navigation-bar behavior); false = each
+    // scene's bar slides with its own page.
+    val sharedTopBarEnabled: Boolean = true,
 )
 
 val LocalAppState = compositionLocalOf<AppState> {

@@ -90,6 +90,16 @@ fun SettingsPage(
             )
         },
     ) {
+        item(key = "heroPushTest") {
+            SuperGroup(
+                modifier = Modifier.padding(bottom = 12.dp),
+            ) {
+                SuperArrow(
+                    title = "Hero Push Test",
+                    onClick = { navigator.push(Route.About) },
+                )
+            }
+        }
         item(key = "settingsUi") {
             SuperGroup(
                 modifier = Modifier.padding(bottom = 12.dp),
@@ -253,6 +263,11 @@ fun SettingsPage(
                     checked = appState.sidebarFollowResize,
                     onCheckedChange = { updateAppState { state -> state.copy(sidebarFollowResize = it) } },
                 )
+                SuperSwitch(
+                    title = "Enable Shared TopBar",
+                    checked = appState.sharedTopBarEnabled,
+                    onCheckedChange = { updateAppState { state -> state.copy(sharedTopBarEnabled = it) } },
+                )
             }
             // One merged footer for the whole group, wordmoment SettingsCardWithBottomSummary style;
             // the caption's own 4dp bottom plus 8dp keeps the 12dp group rhythm.
@@ -261,7 +276,9 @@ fun SettingsPage(
                     "behind, and block touch input on the non-target scene; the pop animation " +
                     "direction follows the finger swipe edge. Sidebar Follow Resize swaps the " +
                     "toggle's cross-fade hand-off for the direct mode, where the pane's width " +
-                    "tracks the sidebar edge frame by frame.",
+                    "tracks the sidebar edge frame by frame. Enable Shared TopBar keeps the pair's " +
+                    "chrome bars fixed at the top and cross-fades them during a transition instead " +
+                    "of sliding each bar with its own scene.",
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
