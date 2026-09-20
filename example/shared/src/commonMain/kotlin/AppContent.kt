@@ -217,6 +217,7 @@ fun AppContent(
                 railMode = appState.navigationRailMode,
                 showSidebar = appState.showNavigationBar,
                 followResize = appState.sidebarFollowResize,
+                sharedTopBarEnabled = appState.sharedTopBarEnabled,
                 navigationPath = navigationPath,
                 entryProvider = entryProvider,
             )
@@ -225,7 +226,7 @@ fun AppContent(
                 navigationPath = navigationPath,
                 entryProvider = entryProvider,
                 predictiveBackEnabled = true,
-                sharedTopBarEnabled = true,
+                sharedTopBarEnabled = appState.sharedTopBarEnabled,
             )
         }
     }
@@ -328,6 +329,7 @@ private fun WideScreenAppLayout(
     railMode: Int,
     showSidebar: Boolean,
     followResize: Boolean,
+    sharedTopBarEnabled: Boolean,
     navigationPath: NavigationPath<Route>,
     entryProvider: (Route) -> NavEntry<Route>,
 ) {
@@ -424,7 +426,7 @@ private fun WideScreenAppLayout(
                         navigationPath = navigationPath,
                         entryProvider = entryProvider,
                         predictiveBackEnabled = true,
-                        sharedTopBarEnabled = true,
+                        sharedTopBarEnabled = sharedTopBarEnabled,
                         sceneCornerClipEnabled = !showSidebar,
                     )
                 }

@@ -259,10 +259,26 @@ fun <T : NavKey> SceneDisplay(
                 // both scenes of the pair have (re)donated - drawing a partial pair would flash
                 // whichever bar arrived first.
                 if (sceneTopBarSlot != null) {
-                    val wasInOverlay = sceneTopBarSlot.inOverlay
                     sceneTopBarSlot.inOverlay = sceneTransitionActive
-                    if (sceneTransitionActive && !wasInOverlay) {
+                    val transition = scene.transition
+                    if (sceneTransitionActive &&
+                        transition !is SceneTransition.DragEnd &&
+                        sceneTopBarSlot.armedFor != transition
+                    ) {
+                        // Fresh transition instance: re-arm the donation handshake. The scaffold
+                        // keeps its inline copy until the overlay picks the new donation up.
+                        // Without the reset, a pickedUp=true left by the previous transition -
+                        // whose overlay dissolved without rewriting the flag, or which never got
+                        // a false window because this scene flowed straight from one transition
+                        // into the next (a back gesture starting while the previous pop's exit
+                        // is still playing) - would suppress the inline copy on this
+                        // transition's first pass: the bar drawn nowhere for a frame or two.
+                        sceneTopBarSlot.armedFor = transition
                         sceneTopBarSlot.awaitingDonation = true
+                        sceneTopBarSlot.overlayPickedUp = false
+                    }
+                    if (!sceneTransitionActive) {
+                        sceneTopBarSlot.overlayPickedUp = false
                     }
                 }
 

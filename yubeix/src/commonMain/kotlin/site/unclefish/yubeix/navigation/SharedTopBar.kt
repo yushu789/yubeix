@@ -67,6 +67,21 @@ internal class SharedTopBarSlot {
     var awaitingDonation by mutableStateOf(false)
 
     /**
+     * The transition instance this slot's handshake was armed for. A scene can flow from one
+     * transition straight into the next without its [inOverlay] ever flipping false - a back
+     * gesture starting while the previous pop's exit animation is still playing removes the
+     * exiting scene and turns this scene into the dragging front in a single step - so the
+     * flip cannot be the re-arm signal and a stale [overlayPickedUp]=true from the previous
+     * transition (whose overlay dissolved without rewriting the flag) would suppress this
+     * scene's inline copy before the new overlay has published anything: the bar drawn
+     * nowhere for a frame or two. The host compares transition instances instead: a fresh
+     * Drag/Enter/Exit re-arms the handshake. A DragEnd is a continuation of its Drag, not a
+     * new transition, and must not re-arm - the commit settle keeps drawing through the
+     * overlay.
+     */
+    var armedFor: SceneTransition? = null
+
+    /**
      * Whether the scene currently shows its hero (large) title instead of a collapsed chrome
      * bar. A scene with the hero title on screen has no visible bar to hand over, so the pair
      * must not share: both bars keep sliding with their scenes, exactly as if the shared
