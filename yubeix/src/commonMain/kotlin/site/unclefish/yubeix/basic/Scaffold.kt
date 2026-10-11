@@ -734,6 +734,15 @@ object ScreenScaffoldDefaults {
 val LocalSceneLeadingInset = compositionLocalOf { 0.dp }
 
 /**
+ * Extra top offset applied to a scene's chrome bar band: hosts that float their own row (a tab
+ * row, for instance) ABOVE the scene bar provide it while the overlap exists, so the bar's
+ * background, its content row, the collapse trigger and the content's top padding all shift
+ * down as one band and the host row stays clear of the bar's title. Zero leaves scene bars
+ * untouched.
+ */
+val LocalSceneTopBarOffset = compositionLocalOf { 0.dp }
+
+/**
  * A full-screen scaffold with the app chrome top bar built in: a [Scaffold] whose content hosts a
  * large-title hero (or custom body), with [LargeTopAppBar] layered on top, spec-driven
  * [actions] and a [WindowListPopup] overflow [menuItems] menu.
@@ -857,11 +866,13 @@ fun ScreenScaffold(
     val shouldProvideChromeHazeSource =
         isRenderEffectSupported() &&
             !reducedDynamicEffectsEnabled
-    val topInset = if (LocalSuppressStatusBarInset.current) {
+    val statusBarInset = if (LocalSuppressStatusBarInset.current) {
         0.dp
     } else {
         WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     }
+    // Hosts floating their own row above the bar shift the whole bar band down by it.
+    val topInset = statusBarInset + LocalSceneTopBarOffset.current
     val topBarHeight = topInset + topBarVisualHeight
     val effectiveContentTopPadding = contentTopPadding ?: (topBarHeight + topBarContentGap)
     var scaffoldTopInWindowPx by remember { mutableFloatStateOf(0f) }

@@ -40,12 +40,14 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,11 +58,17 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -70,7 +78,12 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import appnavigation.Navigator
 import appnavigation.Route
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CoroutineScope
@@ -86,7 +99,7 @@ import site.unclefish.yubeix.basic.FloatingNavigationBarItem
 import site.unclefish.yubeix.basic.FloatingToolbar
 import site.unclefish.yubeix.basic.Icon
 import site.unclefish.yubeix.basic.IconButton
-import site.unclefish.yubeix.basic.LocalSceneLeadingInset
+import site.unclefish.yubeix.basic.LocalSceneTopBarOffset
 import site.unclefish.yubeix.basic.NavigationBar
 import site.unclefish.yubeix.basic.NavigationBarDisplayMode
 import site.unclefish.yubeix.basic.NavigationBarItem
@@ -98,7 +111,12 @@ import site.unclefish.yubeix.basic.NavigationRailItem
 import site.unclefish.yubeix.basic.Scaffold
 import site.unclefish.yubeix.basic.SnackbarHost
 import site.unclefish.yubeix.basic.SnackbarHostState
+import site.unclefish.yubeix.basic.TabRow
+import site.unclefish.yubeix.basic.TabRowDefaults
+import site.unclefish.yubeix.basic.TabRowStyle
+import site.unclefish.yubeix.basic.TabRowWidthMode
 import site.unclefish.yubeix.basic.ToolbarPosition
+import site.unclefish.yubeix.blur.isRenderEffectSupported
 import site.unclefish.yubeix.component.NavigationPageTransition
 import site.unclefish.yubeix.icon.YubeixIcons
 import site.unclefish.yubeix.icon.extended.Create
@@ -114,7 +132,9 @@ import site.unclefish.yubeix.navigation.NavEntry
 import site.unclefish.yubeix.navigation.NavigationPath
 import site.unclefish.yubeix.navigation.SceneDisplay
 import site.unclefish.yubeix.navigation.entryProvider
+import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
+import site.unclefish.yubeix.theme.yubeixCapsuleShape
 import utils.FPSMonitor
 import utils.shouldShowSplitPane
 
@@ -129,8 +149,24 @@ private object UIConstants {
     val PAGE_TITLES = listOf("Home", "Icon", "Color", "Dropdown", "Settings")
 }
 
-/** The slot the pinned sidebar toggle reserves inside the sidebar header; matches the 40dp [IconButton]. */
+/** The slot the sidebar toggle occupies inside the sidebar header; matches the 40dp [IconButton]. */
 private val SidebarToggleSlotSize = 40.dp
+
+/** Blur radius of the collapsed-state frosted TabRow, matching the app's top-bar glass. */
+private val CollapsedNavBarBlurRadius = 18.dp
+
+/** Height of the tab track inside the floating capsule; thinner than the default 46dp track. */
+private val CollapsedNavTabTrackHeight = 36.dp
+
+/** Horizontal padding inside each tab of the floating capsule; tighter than the 18dp default. */
+private val CollapsedNavTabItemHorizontalPadding = 14.dp
+
+/**
+ * Extra top offset the collapsed tab bar yields from the scene chrome bars: the bar's own band
+ * (4dp top gap + the 48dp capsule, which carries the 40dp toggle) plus a 6dp gap above the
+ * shifted bar.
+ */
+private val CollapsedTabRowBandOffset = 58.dp
 
 // Marker string only: lets a build be proven fresh by grepping the APK's dex, since
 // Gradle's incremental compile can otherwise hand back a stale artifact.
@@ -393,6 +429,20 @@ private fun WideScreenAppLayout(
         }
     }
 
+    val updateAppState = LocalUpdateAppState.current
+    // The collapsed tab row frosts the content pane through this shared haze state: the pane is
+    // the source, the row is the effect.
+    val shellHazeState = rememberHazeState()
+    // While the sidebar is collapsed, its tab row floats ABOVE the scene chrome bars, so every
+    // scene's bar band shifts down by the row's height and the bars' titles stay clear of it.
+    // No-bounce spring, matching the reveal spring that drives the rail and the tab row, so the
+    // band and its chrome glide as one motion instead of a flat timed tween.
+    val collapsedTopBarOffset by animateDpAsState(
+        targetValue = if (showSidebar) 0.dp else CollapsedTabRowBandOffset,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = 400f),
+        label = "collapsedTopBarOffset",
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxSize()) {
             // The slot snaps between 0 and the rail width; the pane (weight) absorbs the
@@ -406,21 +456,13 @@ private fun WideScreenAppLayout(
                         alpha = paneAlpha.value
                         scaleX = paneScale.value
                         scaleY = paneScale.value
-                    },
+                    }
+                    .hazeSource(shellHazeState),
             ) {
                 // While the sidebar is resident the scenes are panes, not cards — skip the
                 // phone-style rounded-corner clip; collapsed, the card look comes right back.
-                // When collapsed with a secondary page pushed, its back button yields its
-                // corner to the pinned toggle via the leading inset (gliding, not teleporting).
-                val collapsedOnSecondaryPage =
-                    !showSidebar && navigator.current() !is Route.Main
-                val sceneLeadingInset by animateDpAsState(
-                    targetValue = if (collapsedOnSecondaryPage) 48.dp else 0.dp,
-                    animationSpec = tween(durationMillis = 200),
-                    label = "sceneLeadingInset",
-                )
                 CompositionLocalProvider(
-                    LocalSceneLeadingInset provides sceneLeadingInset,
+                    LocalSceneTopBarOffset provides collapsedTopBarOffset,
                 ) {
                     SceneDisplay(
                         navigationPath = navigationPath,
@@ -434,18 +476,21 @@ private fun WideScreenAppLayout(
         }
 
         // The rail overlays the slot and only slides by reveal progress — render-side
-        // translation, so animating it never touches layout.
+        // translation, so animating it never touches layout. The collapse toggle lives in the
+        // rail header, so it rides the same slide and leaves with the sidebar.
         NavigationRail(
             modifier = Modifier.graphicsLayer {
                 translationX = -sidebarWidth.toPx() * (1f - sidebarReveal.value)
             },
-            title = "Miuix",
+            title = "Yubeix",
             dividerColor = YubeixTheme.colorScheme.outline,
             mode = NavigationRailDisplayMode.entries[railMode],
-            // The toggle itself is NOT part of the sliding sidebar — a pinned copy is
-            // overlaid below so it never moves; this spacer just reserves its spot above
-            // the title.
-            header = { Spacer(modifier = Modifier.size(SidebarToggleSlotSize)) },
+            header = {
+                SidebarCollapseButton(
+                    onClick = { updateAppState { it.copy(showNavigationBar = false) } },
+                    modifier = Modifier.size(SidebarToggleSlotSize),
+                )
+            },
         ) {
             navigationItems.forEachIndexed { index, item ->
                 NavigationRailItem(
@@ -464,17 +509,129 @@ private fun WideScreenAppLayout(
             }
         }
 
-        // Like iPadOS, the sidebar toggle stays pinned at the same top-left spot in both
-        // states, outside the sidebar's slide animation so it never fades and never moves —
-        // pushed pages yield their back button instead.
-        val updateAppState = LocalUpdateAppState.current
-        SidebarCollapseButton(
-            onClick = { updateAppState { it.copy(showNavigationBar = !it.showNavigationBar) } },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .statusBarsPadding()
-                .padding(start = 8.dp, top = 4.dp),
+        // Collapsed state: the iPadOS 18 floating tab bar slides down from the top edge as the
+        // sidebar leaves — one frosted capsule, centered, with the sidebar toggle as its leading
+        // item — riding the same reveal progress as the rail so the moves stay glued. The scene
+        // chrome bars shift down beneath it (LocalSceneTopBarOffset), so the capsule is its own
+        // band: never part of the title bar, never over its title. It stays resident on every
+        // route, including pushed secondary pages.
+        CollapsedNavTabBar(
+            hazeState = shellHazeState,
+            selectedTabIndex = mainPagerState.selectedPage,
+            onExpand = { updateAppState { it.copy(showNavigationBar = true) } },
+            onTabSelected = { index ->
+                while (navigator.current() != Route.Main) {
+                    navigator.pop()
+                }
+                mainPagerState.animateToPage(index)
+            },
+            reveal = { sidebarReveal.value },
+            modifier = Modifier.align(Alignment.TopCenter),
         )
+    }
+}
+
+/**
+ * The tab bar shown while the wide-screen sidebar is collapsed, in the iPadOS 18 form: one
+ * floating frosted capsule at the top of the pane — the sidebar toggle as its leading item, the
+ * tabs beside it — centered over the content, with the scene chrome bars shifted down beneath it
+ * ([CollapsedTabRowBandOffset]) so the bar's title stays clear. It rides [reveal] (1 = sidebar
+ * expanded, 0 = collapsed): at rest the capsule sits pinned under the status bar, and as the
+ * sidebar slides back in it lifts off the top edge and fades out, mirroring the rail's own
+ * slide. The tabs mirror the rail's destinations and pop back to the top-level page before
+ * switching, iPadOS-style.
+ */
+@OptIn(ExperimentalHazeApi::class)
+@Composable
+private fun CollapsedNavTabBar(
+    hazeState: HazeState,
+    selectedTabIndex: Int,
+    onExpand: () -> Unit,
+    onTabSelected: (Int) -> Unit,
+    reveal: () -> Float,
+    modifier: Modifier = Modifier,
+) {
+    val color = YubeixTheme.colorScheme.surface
+    val reducedDynamicEffectsEnabled = LocalReducedDynamicEffectsEnabled.current
+    // Without RenderEffect support (e.g. Android below API 31) hazeEffect is a silent no-op and
+    // would leave the capsule transparent, so fall back to a translucent fill there.
+    val useHaze = isRenderEffectSupported() && !reducedDynamicEffectsEnabled
+    val glassStyle = remember(color) {
+        HazeStyle(
+            backgroundColor = color,
+            tints = emptyList(),
+            blurRadius = CollapsedNavBarBlurRadius,
+            noiseFactor = 0f,
+            fallbackTint = HazeTint(color.copy(alpha = 0.58f)),
+        )
+    }
+
+    // iPadOS 18 tabs are content-sized, but TabRow only knows how to fill (or scroll) whatever
+    // width it is given, so the labels are measured here with the same metrics the TabRow uses
+    // and the result is handed over as an exact width — the capsule ends up hugging the tabs.
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+    val baseLabelStyle = YubeixTheme.textStyles.body2
+    val tabsContentWidth = remember(UIConstants.PAGE_TITLES, density, baseLabelStyle) {
+        with(density) {
+            val labelPadding = CollapsedNavTabItemHorizontalPadding.roundToPx()
+            val tabsWidth = UIConstants.PAGE_TITLES.sumOf { title ->
+                // TabRow measures its labels at body2 with a Medium weight.
+                textMeasurer.measure(
+                    AnnotatedString(title),
+                    style = baseLabelStyle.copy(fontWeight = FontWeight.Medium),
+                ).size.width + labelPadding * 2
+            }
+            val spacing = TabRowDefaults.ItemSpacing.roundToPx() * UIConstants.PAGE_TITLES.lastIndex
+            // The Filled track insets the tabs by the contour padding on each side; the slack
+            // keeps the row just above the "doesn't fit" threshold so it never turns scrollable.
+            val contour = TabRowDefaults.FilledContourPadding.roundToPx() * 2
+            (tabsWidth + spacing + contour + 2.dp.roundToPx()).toDp()
+        }
+    }
+
+    var barHeightPx by remember { mutableFloatStateOf(0f) }
+    Row(
+        modifier = modifier
+            .statusBarsPadding()
+            .padding(top = 4.dp)
+            .onSizeChanged { barHeightPx = it.height.toFloat() }
+            .graphicsLayer {
+                val progress = reveal()
+                // Collapsed (0) → home and opaque; expanded (1) → pushed above the top edge and
+                // transparent, in lockstep with the rail's translationX.
+                translationY = -barHeightPx * progress
+                alpha = 1f - progress
+            }
+            .clip(yubeixCapsuleShape())
+            .then(
+                if (useHaze) {
+                    Modifier.hazeEffect(state = hazeState, style = glassStyle) {
+                        inputScale = HazeInputScale.Auto
+                    }
+                } else {
+                    Modifier.background(color.copy(alpha = 0.85f))
+                },
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        SidebarCollapseButton(
+            onClick = onExpand,
+            modifier = Modifier.size(SidebarToggleSlotSize),
+        )
+        Box(modifier = Modifier.width(tabsContentWidth)) {
+            TabRow(
+                tabs = UIConstants.PAGE_TITLES,
+                selectedTabIndex = selectedTabIndex,
+                onTabSelected = onTabSelected,
+                height = CollapsedNavTabTrackHeight,
+                itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
+                widthMode = TabRowWidthMode.ContentAdaptive,
+                style = TabRowStyle.Filled,
+            )
+        }
     }
 }
 

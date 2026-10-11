@@ -8,5 +8,8 @@
       "Bash(./gradlew spotlessApply)",
       "Bash(./gradlew :yubeix:compileKotlinDesktop)"
     ]
+  },
+  "env": {
+    "JAVA_TOOL_OPTIONS": "-Djdk.net.unixdomain.tmpdir=C:\\Temp"
   }
 }
