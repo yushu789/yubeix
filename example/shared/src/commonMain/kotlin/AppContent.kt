@@ -639,7 +639,12 @@ private fun CollapsedNavTabBar(
         ) {
             SidebarCollapseButton(
                 onClick = onExpand,
-                modifier = Modifier.size(CollapsedNavTabToggleSize),
+                modifier = Modifier
+                    // The tabs sit a contour inset inside the track; matching it here keeps the
+                    // icon's gaps symmetric — contour + the button's own 8dp margin on both
+                    // sides.
+                    .padding(start = TabRowDefaults.FilledContourPadding)
+                    .size(CollapsedNavTabToggleSize),
             )
             Box(modifier = Modifier.width(tabsContentWidth)) {
                 TabRow(
