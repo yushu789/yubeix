@@ -60,7 +60,9 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -161,6 +163,9 @@ private val CollapsedNavTabTrackHeight = 40.dp
 
 /** Horizontal padding inside each tab of the floating capsule; tighter than the 18dp default. */
 private val CollapsedNavTabItemHorizontalPadding = 14.dp
+
+/** Blur the tab bar carries at the far end of its enter/exit; ramps down to sharp at rest. */
+private val CollapsedNavTabExitBlurRadius = 12.dp
 
 /**
  * Extra top offset the collapsed tab bar yields from the scene chrome bars: the bar's own band
@@ -577,7 +582,8 @@ private fun CollapsedNavTabBar(
 
     // iPadOS 18 tabs are content-sized, but TabRow only knows how to fill (or scroll) whatever
     // width it is given, so the labels are measured here with the same metrics the TabRow uses
-    // and the result is handed over as an exact width — the capsule ends up hugging the tabs.
+    // and the result caps the TabRow's width — with room to spare the capsule hugs the labels,
+    // and on a narrow pane it shrinks along instead of spanning full width.
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
     val baseLabelStyle = YubeixTheme.textStyles.body2
@@ -600,67 +606,73 @@ private fun CollapsedNavTabBar(
     }
 
     var barHeightPx by remember { mutableFloatStateOf(0f) }
-    Box(
+    Row(
         modifier = modifier
             .statusBarsPadding()
             .padding(top = 4.dp)
             .onSizeChanged { barHeightPx = it.height.toFloat() }
             .graphicsLayer {
                 val progress = reveal()
-                // Collapsed (0) → home and opaque; expanded (1) → pushed above the top edge and
-                // transparent, in lockstep with the rail's translationX.
+                // Collapsed (0) → home, sharp and opaque; expanded (1) → pushed above the top
+                // edge, blurred and transparent, in lockstep with the rail's translationX. The
+                // blur ramp gives both directions a frosted materialise/dematerialise read.
                 translationY = -barHeightPx * progress
                 alpha = 1f - progress
-            },
-    ) {
-        // The frosted capsule: a full-round 48dp band whose leading cap arc (24dp radius) the
-        // toggle's circle exactly matches.
-        Box(
-            modifier = Modifier
-                .clip(yubeixCapsuleShape())
-                .then(
-                    if (useHaze) {
-                        Modifier.hazeEffect(state = hazeState, style = glassStyle) {
-                            inputScale = HazeInputScale.Auto
-                        }
-                    } else {
-                        Modifier.background(color.copy(alpha = 0.85f))
-                    },
-                )
-                .padding(4.dp),
-        ) {
-            // The track: a full-round bar carrying the tabs; its start padding clears the
-            // toggle's 48dp circle so the tap targets never overlap.
-            Row(
-                modifier = Modifier
-                    .clip(yubeixCapsuleShape())
-                    .background(YubeixTheme.colorScheme.surfaceContainerHigh)
-                    .padding(start = 48.dp),
-            ) {
-                Box(modifier = Modifier.width(tabsContentWidth)) {
-                    TabRow(
-                        tabs = UIConstants.PAGE_TITLES,
-                        selectedTabIndex = selectedTabIndex,
-                        onTabSelected = onTabSelected,
-                        height = CollapsedNavTabTrackHeight,
-                        itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
-                        // Transparent track: the surrounding bar is the track, only the selected
-                        // pill paints on it.
-                        colors = TabRowDefaults.tabRowColors(backgroundColor = Color.Transparent),
-                        widthMode = TabRowWidthMode.ContentAdaptive,
-                        style = TabRowStyle.Filled,
+                renderEffect = if (useHaze && progress > 0.01f) {
+                    val blurRadius = CollapsedNavTabExitBlurRadius.toPx() * progress
+                    BlurEffect(
+                        radiusX = blurRadius,
+                        radiusY = blurRadius,
+                        edgeTreatment = TileMode.Decal,
                     )
+                } else {
+                    null
                 }
             }
-        }
-        // The toggle's circle matches the capsule's cap: same 24dp radius, same centre, so a
-        // press ripples across exactly the capsule's rounded end.
-        SidebarCollapseButton(
-            onClick = onExpand,
+            .clip(yubeixCapsuleShape())
+            .then(
+                if (useHaze) {
+                    Modifier.hazeEffect(state = hazeState, style = glassStyle) {
+                        inputScale = HazeInputScale.Auto
+                    }
+                } else {
+                    Modifier.background(color.copy(alpha = 0.85f))
+                },
+            )
+            .padding(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // The toggle rides the track as its leading segment, sized to the track's own height:
+        // its 20dp circle then coincides with the track's rounded leading end — same radius,
+        // same centre — so a press ripples across exactly the track's end cap.
+        Row(
             modifier = Modifier
-                .align(Alignment.CenterStart)
-                .size(48.dp),
-        )
+                .clip(yubeixCapsuleShape())
+                .background(YubeixTheme.colorScheme.surfaceContainerHigh),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SidebarCollapseButton(
+                onClick = onExpand,
+                modifier = Modifier.size(CollapsedNavTabTrackHeight),
+            )
+            // Adaptive, never full-width: the cap is the tabs' measured content width, so with
+            // room to spare the capsule hugs the labels, and on a narrow pane it shrinks with
+            // the pane (the TabRow turns scrollable) instead of overflowing.
+            Box(modifier = Modifier.widthIn(max = tabsContentWidth)) {
+                TabRow(
+                    tabs = UIConstants.PAGE_TITLES,
+                    selectedTabIndex = selectedTabIndex,
+                    onTabSelected = onTabSelected,
+                    height = CollapsedNavTabTrackHeight,
+                    itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
+                    // Transparent track: the surrounding bar is the track, only the selected
+                    // pill paints on it.
+                    colors = TabRowDefaults.tabRowColors(backgroundColor = Color.Transparent),
+                    widthMode = TabRowWidthMode.ContentAdaptive,
+                    style = TabRowStyle.Filled,
+                )
+            }
+        }
     }
 }
 
