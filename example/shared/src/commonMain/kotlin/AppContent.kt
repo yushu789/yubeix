@@ -600,7 +600,7 @@ private fun CollapsedNavTabBar(
     }
 
     var barHeightPx by remember { mutableFloatStateOf(0f) }
-    Row(
+    Box(
         modifier = modifier
             .statusBarsPadding()
             .padding(top = 4.dp)
@@ -611,53 +611,56 @@ private fun CollapsedNavTabBar(
                 // transparent, in lockstep with the rail's translationX.
                 translationY = -barHeightPx * progress
                 alpha = 1f - progress
-            }
-            .clip(yubeixCapsuleShape())
-            .then(
-                if (useHaze) {
-                    Modifier.hazeEffect(state = hazeState, style = glassStyle) {
-                        inputScale = HazeInputScale.Auto
-                    }
-                } else {
-                    Modifier.background(color.copy(alpha = 0.85f))
-                },
-            )
-            .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            },
     ) {
-        // The toggle rides ON the track as its leading segment, so the whole control reads as
-        // one bar: the track's own background wraps it and the tabs alike.
-        Row(
+        // The frosted capsule: a full-round 48dp band whose leading cap arc (24dp radius) the
+        // toggle's circle exactly matches.
+        Box(
             modifier = Modifier
                 .clip(yubeixCapsuleShape())
-                .background(YubeixTheme.colorScheme.surfaceContainerHigh),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // The toggle sits concentric with the track's rounded leading end: the capsule
-            // track's corner arc (radius = half the 40dp height) is centred 20dp in from the
-            // edge, and the 30dp button's centre (15dp in from its own edge) lands exactly
-            // there, so the glyph, the ripple and the track arc share one centre.
-            SidebarCollapseButton(
-                onClick = onExpand,
-                modifier = Modifier
-                    .padding(start = 5.dp)
-                    .size(30.dp),
-            )
-            Box(modifier = Modifier.width(tabsContentWidth)) {
-                TabRow(
-                    tabs = UIConstants.PAGE_TITLES,
-                    selectedTabIndex = selectedTabIndex,
-                    onTabSelected = onTabSelected,
-                    height = CollapsedNavTabTrackHeight,
-                    itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
-                    // Transparent track: the surrounding bar is the track, only the selected
-                    // pill paints on it.
-                    colors = TabRowDefaults.tabRowColors(backgroundColor = Color.Transparent),
-                    widthMode = TabRowWidthMode.ContentAdaptive,
-                    style = TabRowStyle.Filled,
+                .then(
+                    if (useHaze) {
+                        Modifier.hazeEffect(state = hazeState, style = glassStyle) {
+                            inputScale = HazeInputScale.Auto
+                        }
+                    } else {
+                        Modifier.background(color.copy(alpha = 0.85f))
+                    },
                 )
+                .padding(4.dp),
+        ) {
+            // The track: a full-round bar carrying the tabs; its start padding clears the
+            // toggle's 48dp circle so the tap targets never overlap.
+            Row(
+                modifier = Modifier
+                    .clip(yubeixCapsuleShape())
+                    .background(YubeixTheme.colorScheme.surfaceContainerHigh)
+                    .padding(start = 48.dp),
+            ) {
+                Box(modifier = Modifier.width(tabsContentWidth)) {
+                    TabRow(
+                        tabs = UIConstants.PAGE_TITLES,
+                        selectedTabIndex = selectedTabIndex,
+                        onTabSelected = onTabSelected,
+                        height = CollapsedNavTabTrackHeight,
+                        itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
+                        // Transparent track: the surrounding bar is the track, only the selected
+                        // pill paints on it.
+                        colors = TabRowDefaults.tabRowColors(backgroundColor = Color.Transparent),
+                        widthMode = TabRowWidthMode.ContentAdaptive,
+                        style = TabRowStyle.Filled,
+                    )
+                }
             }
         }
+        // The toggle's circle matches the capsule's cap: same 24dp radius, same centre, so a
+        // press ripples across exactly the capsule's rounded end.
+        SidebarCollapseButton(
+            onClick = onExpand,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .size(48.dp),
+        )
     }
 }
 
