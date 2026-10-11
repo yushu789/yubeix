@@ -737,7 +737,13 @@ private fun YubeixTabRow(
             }
         }
 
+        // Keeps the selected tab centred — only when the row actually overflows: a row that fits
+        // its viewport cannot scroll, and a centre scroll against a sub-pixel rounding overflow
+        // would still nudge every label sideways by a pixel on selection.
         LaunchedEffect(selectedIndex, contentWidth, selectedTabTarget.widthPx) {
+            if (!config.isScrollable) {
+                return@LaunchedEffect
+            }
             val selectedTabWidth = with(density) { selectedTabTarget.widthPx.toDp() }
             val centerOffset = (contentWidth - selectedTabWidth) / 2
             val offsetPx = with(density) { -centerOffset.toPx() }.roundToInt()

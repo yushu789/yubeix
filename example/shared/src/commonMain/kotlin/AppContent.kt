@@ -599,9 +599,10 @@ private fun CollapsedNavTabBar(
             }
             val spacing = TabRowDefaults.ItemSpacing.roundToPx() * UIConstants.PAGE_TITLES.lastIndex
             // The Filled track insets the tabs by the contour padding on each side; the slack
-            // keeps the row just above the "doesn't fit" threshold so it never turns scrollable.
+            // keeps the row safely inside its viewport (font hinting can render a label a hair
+            // wider than measured) so it never turns scrollable nor drifts on selection.
             val contour = TabRowDefaults.FilledContourPadding.roundToPx() * 2
-            (tabsWidth + spacing + contour + 2.dp.roundToPx()).toDp()
+            (tabsWidth + spacing + contour + 6.dp.roundToPx()).toDp()
         }
     }
 
