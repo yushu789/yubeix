@@ -136,7 +136,6 @@ import site.unclefish.yubeix.navigation.entryProvider
 import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixCapsuleShape
-import site.unclefish.yubeix.theme.yubeixShape
 import utils.FPSMonitor
 import utils.shouldShowSplitPane
 
@@ -157,18 +156,18 @@ private val SidebarToggleSlotSize = 40.dp
 /** Blur radius of the collapsed-state frosted TabRow, matching the app's top-bar glass. */
 private val CollapsedNavBarBlurRadius = 18.dp
 
-/** Height of the tab track inside the floating capsule; thinner than the default 46dp track. */
-private val CollapsedNavTabTrackHeight = 36.dp
+/** Height of the tab track inside the floating capsule; a touch slimmer than the 46dp default. */
+private val CollapsedNavTabTrackHeight = 40.dp
 
 /** Horizontal padding inside each tab of the floating capsule; tighter than the 18dp default. */
 private val CollapsedNavTabItemHorizontalPadding = 14.dp
 
 /**
  * Extra top offset the collapsed tab bar yields from the scene chrome bars: the bar's own band
- * (4dp top gap + the 44dp capsule, whose 36dp track carries the toggle) plus a 6dp gap above the
+ * (4dp top gap + the 48dp capsule, whose 40dp track carries the toggle) plus a 6dp gap above the
  * shifted bar.
  */
-private val CollapsedTabRowBandOffset = 54.dp
+private val CollapsedTabRowBandOffset = 58.dp
 
 // Marker string only: lets a build be proven fresh by grepping the APK's dex, since
 // Gradle's incremental compile can otherwise hand back a stale artifact.
@@ -630,17 +629,18 @@ private fun CollapsedNavTabBar(
         // one bar: the track's own background wraps it and the tabs alike.
         Row(
             modifier = Modifier
-                .clip(yubeixShape(TabRowDefaults.TabRowCornerRadius))
+                .clip(yubeixCapsuleShape())
                 .background(YubeixTheme.colorScheme.surfaceContainerHigh),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // The toggle sits concentric with the track's rounded leading end: the 30dp
-            // button's centre (15dp in from its own edge) lands exactly on the track's 18dp
-            // corner arc centre, so the glyph, the ripple and the track arc share one centre.
+            // The toggle sits concentric with the track's rounded leading end: the capsule
+            // track's corner arc (radius = half the 40dp height) is centred 20dp in from the
+            // edge, and the 30dp button's centre (15dp in from its own edge) lands exactly
+            // there, so the glyph, the ripple and the track arc share one centre.
             SidebarCollapseButton(
                 onClick = onExpand,
                 modifier = Modifier
-                    .padding(start = 3.dp)
+                    .padding(start = 5.dp)
                     .size(30.dp),
             )
             Box(modifier = Modifier.width(tabsContentWidth)) {
