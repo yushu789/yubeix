@@ -60,6 +60,7 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -135,6 +136,7 @@ import site.unclefish.yubeix.navigation.entryProvider
 import site.unclefish.yubeix.theme.LocalReducedDynamicEffectsEnabled
 import site.unclefish.yubeix.theme.YubeixTheme
 import site.unclefish.yubeix.theme.yubeixCapsuleShape
+import site.unclefish.yubeix.theme.yubeixShape
 import utils.FPSMonitor
 import utils.shouldShowSplitPane
 
@@ -161,12 +163,15 @@ private val CollapsedNavTabTrackHeight = 36.dp
 /** Horizontal padding inside each tab of the floating capsule; tighter than the 18dp default. */
 private val CollapsedNavTabItemHorizontalPadding = 14.dp
 
+/** Size of the sidebar toggle riding the capsule's track; matches the track height. */
+private val CollapsedNavTabToggleSize = 36.dp
+
 /**
  * Extra top offset the collapsed tab bar yields from the scene chrome bars: the bar's own band
- * (4dp top gap + the 48dp capsule, which carries the 40dp toggle) plus a 6dp gap above the
+ * (4dp top gap + the 44dp capsule, whose 36dp track carries the toggle) plus a 6dp gap above the
  * shifted bar.
  */
-private val CollapsedTabRowBandOffset = 58.dp
+private val CollapsedTabRowBandOffset = 54.dp
 
 // Marker string only: lets a build be proven fresh by grepping the APK's dex, since
 // Gradle's incremental compile can otherwise hand back a stale artifact.
@@ -621,24 +626,35 @@ private fun CollapsedNavTabBar(
                     Modifier.background(color.copy(alpha = 0.85f))
                 },
             )
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        SidebarCollapseButton(
-            onClick = onExpand,
-            modifier = Modifier.size(SidebarToggleSlotSize),
-        )
-        Box(modifier = Modifier.width(tabsContentWidth)) {
-            TabRow(
-                tabs = UIConstants.PAGE_TITLES,
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = onTabSelected,
-                height = CollapsedNavTabTrackHeight,
-                itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
-                widthMode = TabRowWidthMode.ContentAdaptive,
-                style = TabRowStyle.Filled,
+        // The toggle rides ON the track as its leading segment, so the whole control reads as
+        // one bar: the track's own background wraps it and the tabs alike.
+        Row(
+            modifier = Modifier
+                .clip(yubeixShape(TabRowDefaults.TabRowCornerRadius))
+                .background(YubeixTheme.colorScheme.surfaceContainerHigh),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            SidebarCollapseButton(
+                onClick = onExpand,
+                modifier = Modifier.size(CollapsedNavTabToggleSize),
             )
+            Box(modifier = Modifier.width(tabsContentWidth)) {
+                TabRow(
+                    tabs = UIConstants.PAGE_TITLES,
+                    selectedTabIndex = selectedTabIndex,
+                    onTabSelected = onTabSelected,
+                    height = CollapsedNavTabTrackHeight,
+                    itemHorizontalPadding = CollapsedNavTabItemHorizontalPadding,
+                    // Transparent track: the surrounding bar is the track, only the selected
+                    // pill paints on it.
+                    colors = TabRowDefaults.tabRowColors(backgroundColor = Color.Transparent),
+                    widthMode = TabRowWidthMode.ContentAdaptive,
+                    style = TabRowStyle.Filled,
+                )
+            }
         }
     }
 }
