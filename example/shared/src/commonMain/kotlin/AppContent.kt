@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -162,9 +163,6 @@ private val CollapsedNavTabTrackHeight = 36.dp
 
 /** Horizontal padding inside each tab of the floating capsule; tighter than the 18dp default. */
 private val CollapsedNavTabItemHorizontalPadding = 14.dp
-
-/** Size of the sidebar toggle riding the capsule's track; matches the track height. */
-private val CollapsedNavTabToggleSize = 36.dp
 
 /**
  * Extra top offset the collapsed tab bar yields from the scene chrome bars: the bar's own band
@@ -637,15 +635,22 @@ private fun CollapsedNavTabBar(
                 .background(YubeixTheme.colorScheme.surfaceContainerHigh),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SidebarCollapseButton(
-                onClick = onExpand,
+            // The toggle sits in a circle concentric with the track's rounded leading end: the
+            // track's 18dp corner arc, this 30dp chip and the 24dp glyph share one centre
+            // (18dp in from the edge), so the left cap reads as three nested rings.
+            Box(
                 modifier = Modifier
-                    // The tabs sit a contour inset inside the track; matching it here keeps the
-                    // icon's gaps symmetric — contour + the button's own 8dp margin on both
-                    // sides.
-                    .padding(start = TabRowDefaults.FilledContourPadding)
-                    .size(CollapsedNavTabToggleSize),
-            )
+                    .padding(start = 3.dp, top = 3.dp, bottom = 3.dp)
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(YubeixTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center,
+            ) {
+                SidebarCollapseButton(
+                    onClick = onExpand,
+                    modifier = Modifier.size(30.dp),
+                )
+            }
             Box(modifier = Modifier.width(tabsContentWidth)) {
                 TabRow(
                     tabs = UIConstants.PAGE_TITLES,
