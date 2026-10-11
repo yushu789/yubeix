@@ -24,7 +24,13 @@ actual fun platform(): Platform = Platform.Android
 actual val hasFocusReassignBug: Boolean = Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1
 
 @Composable
-actual fun getRoundedCorner(): Dp = getSystemCornerRadius()
+actual fun getRoundedCorner(): Dp {
+    val reported = getSystemCornerRadius()
+    // A rounded screen can still report nothing (pre-S, no vendor dimen); keep the phone
+    // assumption there. Platforms that honestly have square surfaces report 0.dp and are
+    // passed through untouched - their hosts square off clips instead of rounding.
+    return if (reported.value > 0f) reported else 24.dp
+}
 
 // Represents a rounded corner of the display.
 @SuppressLint("NewApi")

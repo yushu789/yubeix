@@ -20,19 +20,12 @@ import com.kyant.shapes.UnevenRoundedRectangle
 import kotlinx.coroutines.delay
 
 /**
- * Get the corner radius of the device screen
+ * The corner radius of the current device's screen, as reported by the platform. Rounded-screen
+ * phones report their real radius; square-surfaced platforms (desktop, web) report 0.dp, so scene
+ * clips and sheet transforms square off instead of assuming a phone silhouette.
  */
 @Composable
-fun rememberDeviceCornerRadius(): Dp {
-    val systemCornerRadius = getRoundedCorner()
-    return remember(systemCornerRadius) {
-        if (systemCornerRadius.value > 0f) {
-            systemCornerRadius
-        } else {
-            24.dp
-        }
-    }
-}
+fun rememberDeviceCornerRadius(): Dp = getRoundedCorner()
 
 /**
  * Page container with dynamic corner radius

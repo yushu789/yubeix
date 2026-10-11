@@ -211,73 +211,79 @@ fun AppContent(
 
     val isWideScreen = shouldShowSplitPane()
 
-    CompositionLocalProvider(
-        LocalNavigator provides navigator,
-        LocalMainPagerState provides mainPagerState,
-        LocalIsWideScreen provides isWideScreen,
-    ) {
-        val entryProvider = remember {
-            entryProvider<Route> {
-                entry<Route.Main> {
-                    Home(
-                        padding = padding,
-                        navigationItems = navigationItems,
-                        mainPagerState = mainPagerState,
-                    )
+    // Root popup host. Dialogs and sheets registered with renderInRootScaffold=true render in
+    // THIS scaffold's YubeixPopupHost, which draws above everything the layouts below add after
+    // the scene pane - the floating tab bar and the rail. Without it the outermost host lived
+    // inside the pane, so a presented sheet's window dim slid underneath those bars.
+    Scaffold(contentWindowInsets = WindowInsets(0.dp)) { _ ->
+        CompositionLocalProvider(
+            LocalNavigator provides navigator,
+            LocalMainPagerState provides mainPagerState,
+            LocalIsWideScreen provides isWideScreen,
+        ) {
+            val entryProvider = remember {
+                entryProvider<Route> {
+                    entry<Route.Main> {
+                        Home(
+                            padding = padding,
+                            navigationItems = navigationItems,
+                            mainPagerState = mainPagerState,
+                        )
+                    }
+                    entry<Route.About> {
+                        AboutPage(padding = padding)
+                    }
+                    entry<Route.License> {
+                        LicensePage(padding = padding)
+                    }
+                    entry<Route.NavTest> { route ->
+                        val index = navigationPath.activeRoutes
+                            .filterIsInstance<Route.NavTest>()
+                            .indexOf(route) + 1
+                        NavTestPage(
+                            index = index,
+                            padding = padding,
+                        )
+                    }
                 }
-                entry<Route.About> {
-                    AboutPage(padding = padding)
-                }
-                entry<Route.License> {
-                    LicensePage(padding = padding)
-                }
-                entry<Route.NavTest> { route ->
-                    val index = navigationPath.activeRoutes
-                        .filterIsInstance<Route.NavTest>()
-                        .indexOf(route) + 1
-                    NavTestPage(
-                        index = index,
-                        padding = padding,
-                    )
-                }
+            }
+
+            if (isWideScreen) {
+                // iPadOS-style wide layout: the sidebar lives OUTSIDE the scene navigation, so pushed
+                // secondary pages only cover the area to its right while the sidebar stays resident.
+                WideScreenAppLayout(
+                    navigationItems = navigationItems,
+                    mainPagerState = mainPagerState,
+                    navigator = navigator,
+                    railMode = appState.navigationRailMode,
+                    showSidebar = appState.showNavigationBar,
+                    followResize = appState.sidebarFollowResize,
+                    sharedTopBarEnabled = appState.sharedTopBarEnabled,
+                    navigationPath = navigationPath,
+                    entryProvider = entryProvider,
+                )
+            } else {
+                SceneDisplay(
+                    navigationPath = navigationPath,
+                    entryProvider = entryProvider,
+                    predictiveBackEnabled = true,
+                    sharedTopBarEnabled = appState.sharedTopBarEnabled,
+                )
             }
         }
 
-        if (isWideScreen) {
-            // iPadOS-style wide layout: the sidebar lives OUTSIDE the scene navigation, so pushed
-            // secondary pages only cover the area to its right while the sidebar stays resident.
-            WideScreenAppLayout(
-                navigationItems = navigationItems,
-                mainPagerState = mainPagerState,
-                navigator = navigator,
-                railMode = appState.navigationRailMode,
-                showSidebar = appState.showNavigationBar,
-                followResize = appState.sidebarFollowResize,
-                sharedTopBarEnabled = appState.sharedTopBarEnabled,
-                navigationPath = navigationPath,
-                entryProvider = entryProvider,
-            )
-        } else {
-            SceneDisplay(
-                navigationPath = navigationPath,
-                entryProvider = entryProvider,
-                predictiveBackEnabled = true,
-                sharedTopBarEnabled = appState.sharedTopBarEnabled,
+        AnimatedVisibility(
+            visible = appState.showFPSMonitor,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+        ) {
+            FPSMonitor(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .captionBarPadding()
+                    .fillMaxWidth(),
             )
         }
-    }
-
-    AnimatedVisibility(
-        visible = appState.showFPSMonitor,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically(),
-    ) {
-        FPSMonitor(
-            modifier = Modifier
-                .statusBarsPadding()
-                .captionBarPadding()
-                .fillMaxWidth(),
-        )
     }
 }
 
@@ -369,6 +375,7 @@ private fun WideScreenAppLayout(
     navigationPath: NavigationPath<Route>,
     entryProvider: (Route) -> NavEntry<Route>,
 ) {
+    val appState = LocalAppState.current
     val sidebarWidth = NavigationRailDefaults.MinWidth
 
     // Toggle masking, same hand-off as the tab-switch transition (NavigationPageTransition)
@@ -461,6 +468,7 @@ private fun WideScreenAppLayout(
             ) {
                 // While the sidebar is resident the scenes are panes, not cards — skip the
                 // phone-style rounded-corner clip; collapsed, the card look comes right back.
+                // The settings switch gates the clip on top of that.
                 CompositionLocalProvider(
                     LocalSceneTopBarOffset provides collapsedTopBarOffset,
                 ) {
@@ -469,7 +477,7 @@ private fun WideScreenAppLayout(
                         entryProvider = entryProvider,
                         predictiveBackEnabled = true,
                         sharedTopBarEnabled = sharedTopBarEnabled,
-                        sceneCornerClipEnabled = !showSidebar,
+                        sceneCornerClipEnabled = !showSidebar && appState.enableCornerClip,
                     )
                 }
             }

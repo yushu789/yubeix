@@ -5,7 +5,6 @@ package site.unclefish.yubeix.basic
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
@@ -73,7 +72,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceIn
@@ -89,10 +87,15 @@ import site.unclefish.yubeix.theme.yubeixShape
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.roundToInt
-import kotlin.math.sqrt
 
 private const val TAB_ROW_INDICATOR_SPRING_VISIBILITY_THRESHOLD = 0.0001f
-private const val TAB_ROW_INDICATOR_STIFFNESS = 300f
+private const val TAB_ROW_INDICATOR_STIFFNESS = 225f
+
+// A touch under-damped. The indicator overshoots the target tab by about 2% of the hop and swings
+// back - a soft kiss of the landing, not a bounce - which reads as the pill snapping into place
+// instead of a tween stopping dead. Callers that want a different pace should not hand-roll one -
+// change it here.
+private const val TAB_ROW_INDICATOR_DAMPING = 0.78f
 private const val TAB_ROW_COMMIT_HANDOFF_TIMEOUT_MILLIS = 700L
 
 // A press that lands on the indicator has already declared its intent, so it only needs a fraction
@@ -109,27 +112,45 @@ private const val TAB_ROW_SHADOW_LAYER_COUNT = 5
 private val TAB_ROW_SHADOW_LAYER_ALPHAS = floatArrayOf(0.14f, 0.12f, 0.10f, 0.07f, 0.04f)
 private val TAB_ROW_LABEL_WEIGHT = FontWeight.Medium
 
-// Every tab row shares this curve so the indicator reads the same everywhere. Callers that want a
-// different pace should not hand-roll one - change it here.
+// Every tab row shares this curve so the indicator reads the same everywhere. Released from rest it
+// ramps up over the first ~60ms, which is what lets the stretch below grow into the flight the way
+// a gel pill does: deform peaks early in the travel, relaxes as the tab arrives.
 private val TabRowIndicatorAnimationSpec: AnimationSpec<Float> = spring(
-    dampingRatio = Spring.DampingRatioNoBouncy,
+    dampingRatio = TAB_ROW_INDICATOR_DAMPING,
     stiffness = TAB_ROW_INDICATOR_STIFFNESS,
     visibilityThreshold = TAB_ROW_INDICATOR_SPRING_VISIBILITY_THRESHOLD,
 )
 
-// A critically damped spring released from rest starts at zero velocity, which over the short hop
-// between two tabs reads as the indicator hesitating before it sets off. Launching it at exactly
-// omega x distance cancels the linear term of the critically damped solution and leaves a pure
-// exponential decay: fastest on the very first frame, then a long natural settle. Compose springs
-// use unit mass, so omega = sqrt(k).
-private val TabRowIndicatorInitialVelocityFactor = sqrt(TAB_ROW_INDICATOR_STIFFNESS)
+// Squash and stretch while the indicator travels, measured off a reference pill: it lengthens to
+// ~1.3x its resting width and thins proportionally, HOLDS most of that through the middle of the
+// flight, and gives it back over the last stretch of travel so the landing lands at exactly 1:1.
+// [TAB_ROW_INDICATOR_MAX_STRETCH] is the extra-width cap; the squash takes
+// [TAB_ROW_STRETCH_SQUASH_RATIO] of that off the height so the pill reads as jelly, not gum.
+private const val TAB_ROW_INDICATOR_MAX_STRETCH = 0.30f
+private const val TAB_ROW_STRETCH_SQUASH_RATIO = 0.35f
+
+// Speed at which the stretch saturates, in own-widths per second - deliberately BELOW a single
+// spring-driven hop's peak (~7 own-widths/s), so a normal step pins the cap through the first
+// two-thirds of the travel instead of peaking early and deflating mid-flight.
+private const val TAB_ROW_STRETCH_REF_SPEED = 6.5f
+
+/**
+ * How far the indicator is deformed right now, from its travel speed: 0f at rest, 1f at the stretch
+ * cap. Speed is normalized by the pill's own width so the same gel look holds at any tab size.
+ */
+private fun tabRowIndicatorStretchIntensity(velocityPxPerSecond: Float, widthPx: Float): Float {
+    if (widthPx <= 0f) return 0f
+    return (abs(velocityPxPerSecond) / (widthPx * TAB_ROW_STRETCH_REF_SPEED)).coerceIn(0f, 1f)
+}
 
 /**
  * A segmented [TabRow] with an iOS-style sliding indicator.
  *
  * The indicator animates between tabs on a shared spring, the tab labels recolour in step with the
  * travelling indicator, and - when every tab fits without scrolling - the indicator can be grabbed
- * and dragged to step through the tabs with haptic ticks.
+ * and dragged to step through the tabs with haptic ticks. In motion the indicator deforms like a
+ * gel pill: it stretches along its travel, thins by a fixed ratio of that, and settles back to
+ * exactly its resting shape as it lands.
  *
  * @param tabs The text to be displayed in the [TabRow].
  * @param selectedTabIndex The selected tab index of the [TabRow].
@@ -325,17 +346,13 @@ fun TextTabs(
         val capsuleShape = yubeixCapsuleShape()
         val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
 
-        // Click-driven indicator: each selection springs to its tab on the same critically damped
-        // curve the tab row uses, so the two components read identically in motion.
+        // Click-driven indicator: each selection springs to its tab on the same curve the tab row
+        // uses, so the two components read identically in motion.
         val indicatorPosition = remember { Animatable(selectedTabIndex.fastCoerceIn(0, tabs.lastIndex).toFloat()) }
         LaunchedEffect(selectedTabIndex, tabsCount) {
             indicatorPosition.animateTo(
                 targetValue = selectedTabIndex.fastCoerceIn(0, tabs.lastIndex).toFloat(),
-                animationSpec = spring(
-                    dampingRatio = 1f,
-                    stiffness = 1000f,
-                    visibilityThreshold = 0.001f,
-                ),
+                animationSpec = TabRowIndicatorAnimationSpec,
             )
         }
 
@@ -358,6 +375,17 @@ fun TextTabs(
                             } else {
                                 size.width - (indicatorPosition.value + 1f) * tabWidth
                             }
+                        // Same jelly stretch as the tab row's pill, keyed off the same spring.
+                        val stretch = if (indicatorPosition.isRunning) {
+                            tabRowIndicatorStretchIntensity(
+                                velocityPxPerSecond = indicatorPosition.velocity,
+                                widthPx = tabWidth,
+                            )
+                        } else {
+                            0f
+                        }
+                        scaleX = 1f + stretch * TAB_ROW_INDICATOR_MAX_STRETCH
+                        scaleY = 1f - stretch * TAB_ROW_INDICATOR_MAX_STRETCH * TAB_ROW_STRETCH_SQUASH_RATIO
                     }
                     .clip(capsuleShape)
                     .background(flatIndicatorColor),
@@ -379,11 +407,7 @@ fun TextTabs(
                             animationScope.launch {
                                 indicatorPosition.animateTo(
                                     targetValue = index.fastCoerceIn(0, tabs.lastIndex).toFloat(),
-                                    animationSpec = spring(
-                                        dampingRatio = 1f,
-                                        stiffness = 1000f,
-                                        visibilityThreshold = 0.001f,
-                                    ),
+                                    animationSpec = TabRowIndicatorAnimationSpec,
                                 )
                             }
                             currentOnTabSelected(index)
@@ -605,16 +629,12 @@ private fun YubeixTabRow(
                     indicatorOffset.animateTo(
                         targetValue = activeIndicatorTarget.offsetPx,
                         animationSpec = TabRowIndicatorAnimationSpec,
-                        initialVelocity = (activeIndicatorTarget.offsetPx - indicatorOffset.value) *
-                            TabRowIndicatorInitialVelocityFactor,
                     )
                 }
                 launch {
                     indicatorWidth.animateTo(
                         targetValue = activeIndicatorTarget.widthPx,
                         animationSpec = TabRowIndicatorAnimationSpec,
-                        initialVelocity = (activeIndicatorTarget.widthPx - indicatorWidth.value) *
-                            TabRowIndicatorInitialVelocityFactor,
                     )
                 }
             }
@@ -763,21 +783,31 @@ private fun YubeixTabRow(
                 TabRowStyle.Filled -> {
                     Box(
                         modifier = Modifier
-                            .offset {
-                                IntOffset((indicatorOffset.value - scrollOffset).roundToInt(), 0)
-                            }
                             .width(with(density) { indicatorWidth.value.toDp() })
                             .fillMaxHeight()
-                            .then(
-                                if (dragEnabled) {
-                                    Modifier.graphicsLayer {
-                                        scaleX = pressAnimation.scaleX
-                                        scaleY = pressAnimation.scaleY
-                                    }
+                            .graphicsLayer {
+                                // Position and deformation share one layer so the flight keeps the
+                                // layer observed frame by frame: velocity is not itself an
+                                // observable state, and with equal-width tabs the width animation
+                                // is silent - only the offset read refreshes the stretch.
+                                translationX = indicatorOffset.value - scrollOffset
+                                // The travelling pill deforms like jelly: it lengthens along the
+                                // direction of travel with the spring's speed and thins by a fixed
+                                // ratio of that, so the flight reads elastic and the landing lands
+                                // back at exactly 1:1. Press feedback multiplies on top.
+                                val stretch = if (indicatorOffset.isRunning) {
+                                    tabRowIndicatorStretchIntensity(
+                                        velocityPxPerSecond = indicatorOffset.velocity,
+                                        widthPx = indicatorWidth.value,
+                                    )
                                 } else {
-                                    Modifier
-                                },
-                            )
+                                    0f
+                                }
+                                scaleX = pressAnimation.scaleX *
+                                    (1f + stretch * TAB_ROW_INDICATOR_MAX_STRETCH)
+                                scaleY = pressAnimation.scaleY *
+                                    (1f - stretch * TAB_ROW_INDICATOR_MAX_STRETCH * TAB_ROW_STRETCH_SQUASH_RATIO)
+                            }
                             .then(
                                 if (selectedShadowBlurRadius > 0.dp) {
                                     Modifier.tabRowIndicatorShadow(
@@ -804,17 +834,24 @@ private fun YubeixTabRow(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .offset {
-                                IntOffset(
-                                    (
-                                        indicatorOffset.value - scrollOffset +
-                                            with(density) { indicatorHorizontalInset.toPx() }
-                                        ).roundToInt(),
-                                    0,
-                                )
-                            }
                             .width(flatIndicatorWidth)
                             .height(TabRowDefaults.FlatIndicatorHeight)
+                            .graphicsLayer {
+                                // Same shared layer as Filled: the offset read keeps the stretch
+                                // observed frame by frame even when tab widths never animate.
+                                translationX = indicatorOffset.value - scrollOffset +
+                                    indicatorHorizontalInset.toPx()
+                                val stretch = if (indicatorOffset.isRunning) {
+                                    tabRowIndicatorStretchIntensity(
+                                        velocityPxPerSecond = indicatorOffset.velocity,
+                                        widthPx = indicatorWidth.value,
+                                    )
+                                } else {
+                                    0f
+                                }
+                                scaleX = 1f + stretch * TAB_ROW_INDICATOR_MAX_STRETCH
+                                scaleY = 1f - stretch * TAB_ROW_INDICATOR_MAX_STRETCH * TAB_ROW_STRETCH_SQUASH_RATIO
+                            }
                             .clip(yubeixShape(TabRowDefaults.FlatIndicatorHeight / 2))
                             .background(colors.backgroundColor(selected = true)),
                     )
